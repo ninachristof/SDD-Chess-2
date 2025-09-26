@@ -30,8 +30,9 @@ class game:
 
     def selectsquare(self,i,j):
         print("selected square ", i , "," , j)
-        # if (self.board[i][j] == None):
-        #     pass
+        if(self.board[i][j] != None):
+            print(self.board[i][j].name)
+            
 
 
     def display(self):

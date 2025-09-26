@@ -37,13 +37,15 @@ class game:
         print("selected square ", i , "," , j)
         if (self.board[i][j] == None and self.currentSquare == None):
             pass
-        if (self.currentSquare == None):
+        elif (self.currentSquare == None):
             print("Selected a piece at ", i, ",", j)
             self.currentSquare = [i,j]
         else:
             print("Moving a piece from ",self.currentSquare[0] , "," , self.currentSquare[1] , " to ", i, "," , j)
             self.board[i][j] = self.board[self.currentSquare[0]][self.currentSquare[1]]
+            print(self.board[self.currentSquare[0]][self.currentSquare[1]])
             self.board[self.currentSquare[0]][self.currentSquare[1]] = None
+            print(self.board[self.currentSquare[0]][self.currentSquare[1]])
             self.currentSquare = None
             root.destroy()
             self.display()

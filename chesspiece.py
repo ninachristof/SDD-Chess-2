@@ -4,17 +4,19 @@ class chesspiece:
     y = 0
     image = None
     possiblemoves = None
+    color = None
 
 class pawn(chesspiece):
-    def __init__(self,x,y):
+    def __init__(self,x,y,color):
         self.name = "p"
         self.x = x
         self.y = y
         self.possiblemoves = [[0,1]]
         self.image = "blackpawn.png"
+        self.color = color
 
 class knight(chesspiece):
-    def __init__(self,x,y):
+    def __init__(self,x,y,color):
         self.name = "kn"
         self.x = x
         self.y = y
@@ -23,31 +25,36 @@ class knight(chesspiece):
             [-2,1],[-2,-1]
         ]
         self.image = "blackknight.png"
+        self.color = color
 
 class king(chesspiece):
-    def __init__(self,x,y):
+    def __init__(self,x,y,color):
         self.name = "k"
         self.x = x
         self.y = y
         self.possiblemoves = [[1,0]]
+        self.color = color
 
 class queen(chesspiece):
-    def __init__(self,x,y):
+    def __init__(self,x,y,color):
         self.name = "q"
         self.x = x
         self.y = y
         self.possiblemoves = [[1,0]]
+        self.color = color
 
 class rook(chesspiece):
-    def __init__(self,x,y):
+    def __init__(self,x,y,color):
         self.name = "r"
         self.x = x
         self.y = y
         self.possiblemoves = [[1,0]]
+        self.color = color
 
 class bishop(chesspiece):
-    def __init__(self,x,y):
+    def __init__(self,x,y,color):
         self.name = "b"
         self.x = x
         self.y = y
         self.possiblemoves = [[1,0]]
+        self.color = color

@@ -1,6 +1,7 @@
 from chesspiece import *
 import tkinter as tk
 
+
 import os #need this for the images if we want to use relative paths?
 
 #colors = ['#a52a2a','#ffffff']
@@ -45,7 +46,22 @@ class game:
         self.board[0][4] = king(0,2,"black")
         self.board[0][3] = queen(0,5,"black")
         
-
+    def rotateBoard(self):
+        print("Rotating board")
+        # Create a new baord to initialize values into 
+        newBoard = [[None for _ in range(8)] for _ in range(8)]
+        for x in range(8):
+            for y in range(8): 
+                # Find new x and y positions
+                newX = abs(x - 7)
+                newY = abs(y - 7)
+                #print(f"Old  x {x} new x {newX} old y {y} new y {newY}")
+                newBoard[newX][newY] = self.board[x][y]
+                
+        # Set board to new board
+        self.board = newBoard
+         
+                    
     def selectsquare(self,i,j,root):
         print("selected square ", i , "," , j)
         if (self.board[i][j] == None and self.currentSquare == None):
@@ -63,24 +79,27 @@ class game:
             pieceName = pieceObject.get_name()
             validMoves = pieceObject.get_possible_moves()
             pieceObject.set_first_move_true()
+            pieceColor = pieceObject.get_color()
             wantedMoveXY = [currentX - newX, currentY - newY]
-            print(f"Moving a {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
+            print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
             print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
             
             # Check if it is a valid move
             if wantedMoveXY in validMoves:
                 print("Valid Move")
                 pass
+                # Move the piece if it is valid
+                self.board[i][j] = self.board[currentX][currentY]
+                self.board[currentX][currentY] = None
+                self.currentSquare = None
+                root.destroy()
+                self.rotateBoard()
+                self.display()
+                
+                
             else: 
                 print("Invalid move")
                 return
-            
-            # Move the piece if it is valid
-            self.board[i][j] = self.board[currentX][currentY]
-            self.board[currentX][currentY] = None
-            self.currentSquare = None
-            root.destroy()
-            self.display()
 
 
     def display(self):
@@ -88,8 +107,9 @@ class game:
         root.geometry("800x800")
         frm = tk.Frame(root)
         frm.grid()
+        
 
-        print(self.board)
+        #print(self.board)
 
         # #Specify Grid
         # tk.Grid.rowconfigure(root,0,weight=1)

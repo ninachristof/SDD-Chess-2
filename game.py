@@ -1,5 +1,7 @@
 from chesspiece import *
 import tkinter as tk
+
+
 import os #need this for the images if we want to use relative paths?
 
 #colors = ['#a52a2a','#ffffff']
@@ -16,41 +18,89 @@ class game:
 
     def __init__(self):
         self.board = [ [None for j in range(8)] for i in range(8)]
+        # Initialize Pawns
         for i in range (8):
             self.board[1][i] = pawn(1,i,"black")
             self.board[6][i] = pawn(6,i,"white")
+        
+        # Initialize Knights
         self.board[7][1] = knight(7,1,"white")
         self.board[7][6] = knight(7,6,"white")
         self.board[0][1] = knight(0,1,"black")
         self.board[0][6] = knight(0,6,"black")
-
+        
+        # Initialize Rooks
         self.board[7][0] = rook(7,0,"white")
         self.board[7][7] = rook(7,7,"white")
         self.board[0][0] = rook(0,0,"black")
         self.board[0][7] = rook(0,7,"black")
 
+        # Initialize Bishops
         self.board[7][2] = bishop(7,2,"white")
         self.board[7][5] = bishop(7,5,"white")
         self.board[0][2] = bishop(0,2,"black")
         self.board[0][5] = bishop(0,5,"black")
-        turn = 0
-
+        
+        # Initialize Kings and Queens
+        self.board[7][4] = king(7,2,"white")
+        self.board[7][3] = queen(7,5,"white")
+        self.board[0][4] = king(0,2,"black")
+        self.board[0][3] = queen(0,5,"black")
+        
+    def rotateBoard(self):
+        print("Rotating board")
+        # Create a new baord to initialize values into 
+        newBoard = [[None for _ in range(8)] for _ in range(8)]
+        for x in range(8):
+            for y in range(8): 
+                # Find new x and y positions
+                newX = abs(x - 7)
+                newY = abs(y - 7)
+                #print(f"Old  x {x} new x {newX} old y {y} new y {newY}")
+                newBoard[newX][newY] = self.board[x][y]
+                
+        # Set board to new board
+        self.board = newBoard
+         
+                    
     def selectsquare(self,i,j,root):
         print("selected square ", i , "," , j)
         if (self.board[i][j] == None and self.currentSquare == None):
             pass
+        # Valid piece has been selected
         elif (self.currentSquare == None):
             print("Selected a piece at ", i, ",", j)
             self.currentSquare = [i,j]
+        # Valid piece has been selected to move
         else:
-            print("Moving a piece from ",self.currentSquare[0] , "," , self.currentSquare[1] , " to ", i, "," , j)
-            self.board[i][j] = self.board[self.currentSquare[0]][self.currentSquare[1]]
-            #print(self.board[self.currentSquare[0]][self.currentSquare[1]])
-            self.board[self.currentSquare[0]][self.currentSquare[1]] = None
-            #print(self.board[self.currentSquare[0]][self.currentSquare[1]])
-            self.currentSquare = None
-            root.destroy()
-            self.display()
+            # Get data about chess piece
+            currentX, currentY = self.currentSquare
+            newX, newY = i, j
+            pieceObject = self.board[currentX][currentY]
+            pieceName = pieceObject.get_name()
+            validMoves = pieceObject.get_possible_moves()
+            pieceObject.set_first_move_true()
+            pieceColor = pieceObject.get_color()
+            wantedMoveXY = [currentX - newX, currentY - newY]
+            print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
+            print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
+            
+            # Check if it is a valid move
+            if wantedMoveXY in validMoves:
+                print("Valid Move")
+                pass
+                # Move the piece if it is valid
+                self.board[i][j] = self.board[currentX][currentY]
+                self.board[currentX][currentY] = None
+                self.currentSquare = None
+                root.destroy()
+                self.rotateBoard()
+                self.display()
+                
+                
+            else: 
+                print("Invalid move")
+                return
 
 
     def display(self):
@@ -58,6 +108,7 @@ class game:
         root.geometry("800x800")
         frm = tk.Frame(root)
         frm.grid()
+        
 
         #print(self.board)
         # #Specify Grid
@@ -87,4 +138,4 @@ class game:
                 button.grid(row = i,column = j, sticky = "NSEW")
             buttons.append(newrow)
 
-        root.mainloop()
+        root.mainloop()     

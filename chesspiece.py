@@ -2,11 +2,9 @@ class chesspiece:
     name = None
     x = 0
     y = 0
-    image = None
     color = None
     firstMove = True
-    firstPossibleMoves = None
-    secondPossibleMoves = None
+    possibleMoves = None
     multipleMoves = False
     
     def get_name(self): 
@@ -15,21 +13,17 @@ class chesspiece:
     def get_color(self):
         return self.color
     
+    def get_firstMove(self):
+        return self.firstMove
+    
+    def updatePossibleMoves(self, newMoves):
+        self.possibleMoves = newMoves
+
     def get_possible_moves(self):
-        # Check for pawns if you can move one or two spaces
-        if(self.multipleMoves):
-            if(self.firstMove):
-                return self.firstPossibleMoves
-            else: 
-                return self.secondPossibleMoves
-        else:
-            return self.possiblemoves
+        return self.possibleMoves
         
-    def set_first_move_true(self):
+    def set_first_move(self):
         self.firstMove = False
-        return None
-        
-        
 
 class pawn(chesspiece):
     def __init__(self,x,y,color):
@@ -37,9 +31,6 @@ class pawn(chesspiece):
         self.name = "p"
         self.x = x
         self.y = y
-        self.firstPossibleMoves = [[1,0], [2,0]]
-        self.secondPossibleMoves = [[1,0]]
-        self.image = "blackpawn.png"
         self.color = color
         
 
@@ -48,10 +39,10 @@ class knight(chesspiece):
         self.name = "kn"
         self.x = x
         self.y = y
-        self.possiblemoves = [
-            [1,2],[1,-2],[2,1],[2,-1],[-1,2],[-1,-2],
-            [-2,1],[-2,-1]
-        ]
+        # self.possibleMoves = [
+        #     [1,2],[1,-2],[2,1],[2,-1],[-1,2],[-1,-2],
+        #     [-2,1],[-2,-1]
+        # ]
         self.image = "blackknight.png"
         self.color = color
 
@@ -60,7 +51,7 @@ class king(chesspiece):
         self.name = "k"
         self.x = x
         self.y = y
-        self.possiblemoves = [[1,0]]
+        # self.possibleMoves = [[1,0]]
         self.color = color
 
 class queen(chesspiece):
@@ -68,7 +59,7 @@ class queen(chesspiece):
         self.name = "q"
         self.x = x
         self.y = y
-        self.possiblemoves = [[1,0]]
+        # self.possibleMoves = [[1,0]]
         self.color = color
 
 class rook(chesspiece):
@@ -76,7 +67,7 @@ class rook(chesspiece):
         self.name = "r"
         self.x = x
         self.y = y
-        self.possiblemoves = [[1,0]]
+        # self.possibleMoves = [[1,0]]
         self.color = color
 
 class bishop(chesspiece):
@@ -84,5 +75,5 @@ class bishop(chesspiece):
         self.name = "b"
         self.x = x
         self.y = y
-        self.possiblemoves = [[1,0]]
+        # self.possibleMoves = [[1,0]]
         self.color = color

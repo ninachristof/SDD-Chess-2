@@ -14,6 +14,7 @@ class game:
     turn = None
     currentSquare = None
     newSquare = None
+    turn = None #0 for white, 1 for black
 
     def __init__(self):
         self.board = [ [None for j in range(8)] for i in range(8)]
@@ -110,7 +111,6 @@ class game:
         
 
         #print(self.board)
-
         # #Specify Grid
         # tk.Grid.rowconfigure(root,0,weight=1)
         # tk.Grid.columnconfigure(root,0,weight=1)
@@ -131,7 +131,7 @@ class game:
                     # photo = tk.PhotoImage(file = img_path)
                     # photo = photo.subsample(50,50) 
                     # button = tk.Button(root, image = photo)                        #need lambda to pass args for the command function
-                    button = tk.Button(root, text = self.board[i][j].name, command = lambda a = i, b = j:self.selectsquare(a,b,root),bg = colors[(i+j)%2],fg = self.board[i][j].color, font=("Arial", 16))
+                    button = tk.Button(root, text = self.board[i][j].name, command = lambda a = i, b = j, c = root:self.selectsquare(a,b,c),bg = colors[(i+j)%2],fg = self.board[i][j].color, font=("Arial", 16))
                 else:
                     button = tk.Button(root, text = "", command = lambda a = i, b = j:self.selectsquare(a,b,root),bg = colors[(i+j)%2])
                 newrow.append(button)

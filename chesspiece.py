@@ -13,7 +13,10 @@ class chesspiece:
     def get_color(self):
         return self.color
     
-    def get_firstMove(self):
+    def isWhite(self):
+        return self.color == "white"
+    
+    def hasMoved(self):
         return self.firstMove
     
     def updatePossibleMoves(self, newMoves):

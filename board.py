@@ -207,6 +207,75 @@ class board:
             possibleMoves.append((x - 2,y - 1))
 
         return possibleMoves
+    
+    def kingCheckCheck(self, x, y, color): # Checks for a king in the surrounding squares from the given location and returns True. 
+        # Move up 1 (x - 1)
+        if (x > 0 and self.chessArray[x - 1][y] != None and self.chessArray[x - 1][y].get_name() == "k" and self.chessArray[x - 1][y].get_color() != color):
+            return True
+        # Move up 1, right 1 (x - 1, y + 1)
+        if (x > 0 and y < 7 and self.chessArray[x - 1][y + 1] != None and self.chessArray[x - 1][y + 1].get_name() == "k" and self.chessArray[x - 1][y + 1].get_color() != color):
+            return True
+
+        # Move right 1 (y + 1)
+        if (y < 7 and self.chessArray[x][y + 1] != None and self.chessArray[x][y + 1].get_name() == "k" and self.chessArray[x][y + 1].get_color() != color):
+            return True
+        # Move down 1, right 1 (x + 1, y + 1)
+        if (x < 7 and y < 7 and self.chessArray[x + 1][y + 1] != None and self.chessArray[x + 1][y + 1].get_name() == "k" and self.chessArray[x + 1][y + 1].get_color() != color):
+            return True
+
+        # Move down 1 (x + 1)
+        if (x < 7 and self.chessArray[x + 1][y] != None and self.chessArray[x + 1][y].get_name() == "k" and self.chessArray[x + 1][y].get_color() != color):
+            return True
+        # Move down 1, left 1 (x + 1, y - 1)
+        if (x < 7 and y > 0 and self.chessArray[x + 1][y - 1] != None and self.chessArray[x + 1][y - 1].get_name() == "k" and self.chessArray[x + 1][y - 1].get_color() != color):
+            return True
+
+        # Move left 1 (y - 1)
+        if (y > 0 and self.chessArray[x][y - 1] != None and self.chessArray[x][y - 1].get_name() == "k" and self.chessArray[x][y - 1].get_color() != color):
+            return True
+        # Move up 1, left 1 (x - 1, y -  1)
+        if (x > 0 and y > 0 and self.chessArray[x - 1][y - 1] != None and self.chessArray[x - 1][y - 1].get_name() == "k" and self.chessArray[x - 1][y - 1].get_color() != color):
+            return True
+        return False
+    
+    def kingCheck(self, x, y, color):
+        possibleMoves = []
+        # Similar to the knight check, just check all eight squares. 
+
+        # Move up 1 (x - 1)
+        if (x > 0 and (self.chessArray[x - 1][y] == None or self.chessArray[x - 1][y].get_color() != color)):
+            possibleMoves.append((x - 1, y))
+        # Move up 1, right 1 (x - 1, y + 1)
+        if (x > 0 and y < 7 and (self.chessArray[x - 1][y + 1] == None or self.chessArray[x - 1][y + 1].get_color() != color)):
+            possibleMoves.append((x - 1, y + 1))
+
+        # Move right 1 (y + 1)
+        if (y < 7 and (self.chessArray[x][y + 1] == None or self.chessArray[x][y + 1].get_color() != color)):
+            possibleMoves.append((x, y + 1))
+        # Move down 1, right 1 (x + 1, y + 1)
+        if (x < 7 and y < 7 and (self.chessArray[x + 1][y + 1] == None or self.chessArray[x + 1][y + 1].get_color() != color)):
+            possibleMoves.append((x + 1, y + 1))
+
+        # Move down 1 (x + 1)
+        if (x < 7 and (self.chessArray[x + 1][y] == None or self.chessArray[x + 1][y].get_color() != color)):
+            possibleMoves.append((x + 1, y))
+        # Move down 1, left 1 (x + 1, y - 1)
+        if (x < 7 and y > 0 and (self.chessArray[x + 1][y - 1] == None or self.chessArray[x + 1][y - 1].get_color() != color)):
+            possibleMoves.append((x + 1,y - 1))
+
+        # Move left 1 (y - 1)
+        if (y > 0 and (self.chessArray[x][y - 1] == None or self.chessArray[x][y - 1].get_color() != color)):
+            possibleMoves.append((x, y - 1))
+        # Move up 1, left 1 (x - 1, y -  1)
+        if (x > 0 and y > 0 and (self.chessArray[x - 1][y - 1] == None or self.chessArray[x - 1][y - 1].get_color() != color)):
+            possibleMoves.append((x - 1,y - 1))
+        
+        for x1, y1 in possibleMoves[:]:
+            if (self.kingCheckCheck(x1, y1, color)):
+                # print("KING DECTECTED")
+                possibleMoves.remove((x1, y1))
+
+        return possibleMoves
 
     def whitePieceCheck(self):
         for x, y in self.whitePieces:
@@ -232,6 +301,8 @@ class board:
                 possibleMoves += self.bishopCheck(x, y, "white")
             elif (self.chessArray[x][y].get_name() == "kn"): 
                 possibleMoves = self.knightCheck(x, y, "white")
+            elif (self.chessArray[x][y].get_name() == "k"): 
+                possibleMoves = self.kingCheck(x, y, "white")
             print("WHITE {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
             print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
@@ -260,6 +331,8 @@ class board:
                 possibleMoves += self.bishopCheck(x, y, "black")
             elif (self.chessArray[x][y].get_name() == "kn"):
                 possibleMoves = self.knightCheck(x, y, "black")
+            elif (self.chessArray[x][y].get_name() == "k"): 
+                possibleMoves = self.kingCheck(x, y, "black")
             print("BLACK {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
             print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
@@ -318,9 +391,15 @@ def KnightState(b):
         b.addPiece(x, y, "kn", c)
         i += 1
 
+def KingState(b):
+    b.clear()
+    b.addPiece(0, 0, "k", "white")
+    b.addPiece(1, 2, "k", "black")
+    # b.addPiece()
+
 def main():
     newgame = board()
-    KnightState(newgame)
+    KingState(newgame)
     newgame.printBoardState()
     newgame.whitePieceCheck()
     newgame.blackPieceCheck()

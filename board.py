@@ -4,6 +4,8 @@ class board:
     chessArray = [[None for j in range(8)] for i in range(8)]
     whitePieces = []
     blackPieces = []
+    whiteKingCheck = False # Is the white king in check? Should be reset each turn. 
+    blackKingCheck = False # Is the black king in check? 
 
     def addPiece(self, x, y, piece, color):
         # The coordinates of this are a little messed up. 
@@ -103,6 +105,13 @@ class board:
             iter -= 1
         if (iter != -1 and self.chessArray[iter][y].get_color() != color):
             possibleMoves.append((iter, y))
+            if (self.chessArray[iter][y].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
 
         iter = y + 1
         # Check move right (y + 1)
@@ -111,6 +120,13 @@ class board:
             iter += 1
         if (iter != 8 and self.chessArray[x][iter].get_color() != color):
             possibleMoves.append((x, iter))
+            if (self.chessArray[x][iter].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
 
         iter = x + 1
         # Check move downwards (x + 1)
@@ -119,6 +135,13 @@ class board:
             iter += 1
         if (iter != 8 and self.chessArray[iter][y].get_color() != color):
             possibleMoves.append((iter, y))
+            if (self.chessArray[iter][y].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
         
         iter = y - 1
         # Check move left (y - 1)
@@ -127,6 +150,13 @@ class board:
             iter -= 1
         if (iter != -1 and self.chessArray[x][iter].get_color() != color):
             possibleMoves.append((x, iter))
+            if (self.chessArray[x][iter].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
 
         return possibleMoves
     
@@ -141,6 +171,13 @@ class board:
             iter2 += 1
         if (iter != -1 and iter2 != 8 and self.chessArray[iter][iter2].get_color() != color):
             possibleMoves.append((iter, iter2))
+            if (self.chessArray[iter][iter2].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
 
         iter = x + 1
         iter2 = y + 1
@@ -151,6 +188,13 @@ class board:
             iter2 += 1
         if (iter != 8 and iter2 != 8 and self.chessArray[iter][iter2].get_color() != color):
             possibleMoves.append((iter, iter2))
+            if (self.chessArray[iter][iter2].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
 
         iter = x + 1
         iter2 = y - 1
@@ -161,6 +205,13 @@ class board:
             iter2 -= 1
         if (iter != 8 and iter2 != -1 and self.chessArray[iter][iter2].get_color() != color):
             possibleMoves.append((iter, iter2))
+            if (self.chessArray[iter][iter2].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
 
         iter = x - 1
         iter2 = y - 1
@@ -171,6 +222,13 @@ class board:
             iter2 -= 1
         if (iter != -1 and iter2 != -1 and self.chessArray[iter][iter2].get_color() != color):
             possibleMoves.append((iter, iter2))
+            if (self.chessArray[iter][iter2].get_name() == "k"): # Already the opposite color...
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
 
         return possibleMoves
     
@@ -206,37 +264,15 @@ class board:
         if (x > 1 and y > 0 and (self.chessArray[x - 2][y - 1] == None or self.chessArray[x - 2][y - 1].get_color() != color)):
             possibleMoves.append((x - 2,y - 1))
 
+        for x1, y1 in possibleMoves:
+            if (self.chessArray[x1][y1] != None and self.chessArray[x1][y1].get_name() == "k"): # If it's not none, the piece must be the opposite color. 
+                if (color == "white"):
+                    self.blackKingCheck = True
+                elif (color == "black"):
+                    self.whiteKingCheck = True
+                else:
+                    print("???")
         return possibleMoves
-    
-    def kingCheckCheck(self, x, y, color): # Checks for a king in the surrounding squares from the given location and returns True. 
-        # Move up 1 (x - 1)
-        if (x > 0 and self.chessArray[x - 1][y] != None and self.chessArray[x - 1][y].get_name() == "k" and self.chessArray[x - 1][y].get_color() != color):
-            return True
-        # Move up 1, right 1 (x - 1, y + 1)
-        if (x > 0 and y < 7 and self.chessArray[x - 1][y + 1] != None and self.chessArray[x - 1][y + 1].get_name() == "k" and self.chessArray[x - 1][y + 1].get_color() != color):
-            return True
-
-        # Move right 1 (y + 1)
-        if (y < 7 and self.chessArray[x][y + 1] != None and self.chessArray[x][y + 1].get_name() == "k" and self.chessArray[x][y + 1].get_color() != color):
-            return True
-        # Move down 1, right 1 (x + 1, y + 1)
-        if (x < 7 and y < 7 and self.chessArray[x + 1][y + 1] != None and self.chessArray[x + 1][y + 1].get_name() == "k" and self.chessArray[x + 1][y + 1].get_color() != color):
-            return True
-
-        # Move down 1 (x + 1)
-        if (x < 7 and self.chessArray[x + 1][y] != None and self.chessArray[x + 1][y].get_name() == "k" and self.chessArray[x + 1][y].get_color() != color):
-            return True
-        # Move down 1, left 1 (x + 1, y - 1)
-        if (x < 7 and y > 0 and self.chessArray[x + 1][y - 1] != None and self.chessArray[x + 1][y - 1].get_name() == "k" and self.chessArray[x + 1][y - 1].get_color() != color):
-            return True
-
-        # Move left 1 (y - 1)
-        if (y > 0 and self.chessArray[x][y - 1] != None and self.chessArray[x][y - 1].get_name() == "k" and self.chessArray[x][y - 1].get_color() != color):
-            return True
-        # Move up 1, left 1 (x - 1, y -  1)
-        if (x > 0 and y > 0 and self.chessArray[x - 1][y - 1] != None and self.chessArray[x - 1][y - 1].get_name() == "k" and self.chessArray[x - 1][y - 1].get_color() != color):
-            return True
-        return False
     
     def kingCheck(self, x, y, color):
         possibleMoves = []
@@ -274,10 +310,40 @@ class board:
             if (self.kingCheckCheck(x1, y1, color)):
                 # print("KING DECTECTED")
                 possibleMoves.remove((x1, y1))
-
         return possibleMoves
+    
+    def kingCheckCheck(self, x, y, color): # Checks for a king in the surrounding squares from the given location and returns True. 
+        # Move up 1 (x - 1)
+        if (x > 0 and self.chessArray[x - 1][y] != None and self.chessArray[x - 1][y].get_name() == "k" and self.chessArray[x - 1][y].get_color() != color):
+            return True
+        # Move up 1, right 1 (x - 1, y + 1)
+        if (x > 0 and y < 7 and self.chessArray[x - 1][y + 1] != None and self.chessArray[x - 1][y + 1].get_name() == "k" and self.chessArray[x - 1][y + 1].get_color() != color):
+            return True
+
+        # Move right 1 (y + 1)
+        if (y < 7 and self.chessArray[x][y + 1] != None and self.chessArray[x][y + 1].get_name() == "k" and self.chessArray[x][y + 1].get_color() != color):
+            return True
+        # Move down 1, right 1 (x + 1, y + 1)
+        if (x < 7 and y < 7 and self.chessArray[x + 1][y + 1] != None and self.chessArray[x + 1][y + 1].get_name() == "k" and self.chessArray[x + 1][y + 1].get_color() != color):
+            return True
+
+        # Move down 1 (x + 1)
+        if (x < 7 and self.chessArray[x + 1][y] != None and self.chessArray[x + 1][y].get_name() == "k" and self.chessArray[x + 1][y].get_color() != color):
+            return True
+        # Move down 1, left 1 (x + 1, y - 1)
+        if (x < 7 and y > 0 and self.chessArray[x + 1][y - 1] != None and self.chessArray[x + 1][y - 1].get_name() == "k" and self.chessArray[x + 1][y - 1].get_color() != color):
+            return True
+
+        # Move left 1 (y - 1)
+        if (y > 0 and self.chessArray[x][y - 1] != None and self.chessArray[x][y - 1].get_name() == "k" and self.chessArray[x][y - 1].get_color() != color):
+            return True
+        # Move up 1, left 1 (x - 1, y -  1)
+        if (x > 0 and y > 0 and self.chessArray[x - 1][y - 1] != None and self.chessArray[x - 1][y - 1].get_name() == "k" and self.chessArray[x - 1][y - 1].get_color() != color):
+            return True
+        return False
 
     def whitePieceCheck(self):
+        self.blackKingCheck = False
         for x, y in self.whitePieces:
             possibleMoves = []
             if (self.chessArray[x][y].get_name() == "p"): # Pawn movement check.
@@ -288,10 +354,14 @@ class board:
                         possibleMoves.append((x - 2, y))
                 
                 # Capture Movement
-                if (x != 0 and y != 0 and self.chessArray[x - 1][y - 1] != None and (self.chessArray[x - 1][y - 1].get_color() == "black")):
+                if (x != 0 and y != 0 and (self.chessArray[x - 1][y - 1] != None and self.chessArray[x - 1][y - 1].get_color() == "black")):
                     possibleMoves.append((x - 1, y - 1))
-                if (x != 0 and y != 7 and self.chessArray[x - 1][y + 1] != None and (self.chessArray[x - 1][y + 1].get_color() == "black")):
+                    if (self.chessArray[x - 1][y - 1].get_name() == "k"):
+                        self.blackKingCheck = True
+                if (x != 0 and y != 7 and (self.chessArray[x - 1][y + 1] != None and self.chessArray[x - 1][y + 1].get_color() == "black")):
                     possibleMoves.append((x - 1, y + 1))
+                    if (self.chessArray[x - 1][y + 1].get_name() == "k"):
+                        self.blackKingCheck = True
             elif (self.chessArray[x][y].get_name() == "r"):
                 possibleMoves = self.rookCheck(x, y, "white")
             elif (self.chessArray[x][y].get_name() == "b"):
@@ -308,6 +378,7 @@ class board:
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
 
     def blackPieceCheck(self):
+        self.whiteKingCheck = False
         for x, y in self.blackPieces:
             possibleMoves = []
             if (self.chessArray[x][y].get_name() == "p"): # Pawn movement check.
@@ -320,8 +391,12 @@ class board:
                 # Capture Movement
                 if (x != 7 and y != 0 and self.chessArray[x + 1][y - 1] != None and (self.chessArray[x + 1][y - 1].get_color() == "white")):
                     possibleMoves.append((x + 1, y - 1))
+                    if (self.chessArray[x + 1][y - 1].get_name() == "k"):
+                        self.whiteKingCheck = True
                 if (x != 7 and y != 7 and self.chessArray[x + 1][y + 1] != None and (self.chessArray[x + 1][y + 1].get_color() == "white")):
                     possibleMoves.append((x + 1, y + 1))
+                    if (self.chessArray[x + 1][y + 1].get_name() == "k"):
+                        self.whiteKingCheck = True
             elif (self.chessArray[x][y].get_name() == "r"):
                 possibleMoves = self.rookCheck(x, y, "black")
             elif (self.chessArray[x][y].get_name() == "b"):
@@ -336,6 +411,9 @@ class board:
             print("BLACK {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
             print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
+    def checkCheck(self):
+        print(f"White in check? {self.whiteKingCheck}")
+        print(f"Black in check? {self.blackKingCheck}")
 
 # EN PASSANT CHECK: 
 #     Capturing en passant is permitted only on the turn *immediately* 
@@ -397,10 +475,22 @@ def KingState(b):
     b.addPiece(1, 2, "k", "black")
     # b.addPiece()
 
+def CheckState(b):
+    b.clear()
+    b.addPiece(0, 3, "k", "black")
+    b.addPiece(1, 5, "k", "white")
+    b.addPiece(7, 5, "r", "black")
+    b.addPiece(3, 0, "b", "white")
+    b.addPiece(2, 2, "kn", "white")
+    b.addPiece(2, 4, "p", "black")
+    b.addPiece(1, 4, "q", "black")
+    b.addPiece(0, 5, "q", "white")
+
 def main():
     newgame = board()
-    KingState(newgame)
+    CheckState(newgame)
     newgame.printBoardState()
     newgame.whitePieceCheck()
     newgame.blackPieceCheck()
+    newgame.checkCheck()
 main()

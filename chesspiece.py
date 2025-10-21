@@ -43,7 +43,6 @@ class knight(chesspiece):
         #     [1,2],[1,-2],[2,1],[2,-1],[-1,2],[-1,-2],
         #     [-2,1],[-2,-1]
         # ]
-        self.image = "blackknight.png"
         self.color = color
 
 class king(chesspiece):

@@ -132,7 +132,6 @@ class game:
                 
                 root.destroy()
                 #self.rotateBoard()
-
                 self.board.whitePieceCheck()
                 self.board.blackPieceCheck()
                 self.currentSquare = None

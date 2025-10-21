@@ -16,8 +16,12 @@ class chesspiece:
     def hasMoved(self):
         return self.firstMove
     
+    # Takes in a list of lists of possible New moves, split into subgroups. 
+    # Unfolds that list of lists. 
     def updatePossibleMoves(self, newMoves):
-        self.possibleMoves = newMoves
+        self.possibleMoves = []
+        for subList in newMoves:
+            self.possibleMoves.extend(subList)
 
     def get_possible_moves(self):
         return self.possibleMoves

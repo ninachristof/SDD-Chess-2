@@ -380,7 +380,7 @@ class board:
         return False
 
     # Iterates through each white piece location and updates the pieces with the new available moves. 
-    def whitePieceCheck(self):
+    def whitePieceUpdate(self):
         for x, y in self.whitePieces:
             possibleMoves = []
             if (self.chessArray[x][y].get_name() == "p"): # Pawn movement check. Since pawns can move only one way, they don't have a function. 
@@ -402,7 +402,7 @@ class board:
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece. 
 
     # Same as whitePieceCheck, but for the black pieces. 
-    def blackPieceCheck(self):
+    def blackPieceUpdate(self):
         for x, y in self.blackPieces:
             possibleMoves = []
             if (self.chessArray[x][y].get_name() == "p"): # Pawn movement check.
@@ -465,6 +465,7 @@ class board:
             print(a, b)
             if (self.chessArray[a][b] != None and self.chessArray[a][b].get_name() == "kn"):
                 capturingPieces.append((a, b))
+                involvedSquares.append((a, b))
 
         return (capturingPieces, involvedSquares)
 # EN PASSANT CHECK: 
@@ -529,7 +530,7 @@ def KingState(b):
 
 def CheckState(b):
     b.clear()
-    b.addPiece(0, 3, "k", "black")
+    b.addPiece(0, 3, "k", "black") # PossibleMoves = None
     b.addPiece(1, 5, "k", "white")
     b.addPiece(7, 5, "r", "black")
     b.addPiece(3, 0, "b", "white")
@@ -542,8 +543,8 @@ def main():
     newgame = board()
     CheckState(newgame)
     newgame.printBoardState()
-    newgame.whitePieceCheck()
-    newgame.blackPieceCheck()
+    newgame.whitePieceUpdate()
+    newgame.blackPieceUpdate()
     print(newgame.lineOfSight(newgame.blackKingXY[0], newgame.blackKingXY[1], "black"))
 
 main()

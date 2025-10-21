@@ -74,8 +74,14 @@ class board:
         else:
             self.blackPieces.append((x, y))
 
+    def copy_board(self):
+        board2 = board()
+        for x, y in self.whitePieces():
+            board2.addPiece(x, y, self.chessArray[x][y].get_name(), "white")
+        for x, y in self.blackPieces():
+            board2.addPiece(x, y, self.chessArray[x][y].get_name(), "black")
 
-    def __init__(self): # Initial board setup. 
+    def startState(self): # Initial board setup. 
         # Initialize Pawns
         for i in range(8):
             self.addPiece(1, i, "p", "black")
@@ -546,5 +552,9 @@ def main():
     newgame.whitePieceUpdate()
     newgame.blackPieceUpdate()
     print(newgame.lineOfSight(newgame.blackKingXY[0], newgame.blackKingXY[1], "black"))
+
+    # game2 = board(newgame)
+    # newgame.printBoardState()
+
 
 main()

@@ -23,32 +23,32 @@ class game:
         #     self.board[1][i] = pawn(1,i,"black")
         #     self.board[6][i] = pawn(6,i,"white")
         
-        # #Initialize Knights
-        # self.board[7][1] = knight(7,1,"white")
-        # self.board[7][6] = knight(7,6,"white")
-        # self.board[0][1] = knight(0,1,"black")
-        # self.board[0][6] = knight(0,6,"black")
-        
-        # # Initialize Rooks
-        # self.board[7][0] = rook(7,0,"white")
-        # self.board[7][7] = rook(7,7,"white")
-        # self.board[0][0] = rook(0,0,"black")
-        # self.board[0][7] = rook(0,7,"black")
+        ##Initialize Knights
+        #self.board[7][1] = knight(7,1,"white")
+        #self.board[7][6] = knight(7,6,"white")
+        #self.board[0][1] = knight(0,1,"black")
+        #self.board[0][6] = knight(0,6,"black")
+        #
+        ## Initialize Rooks
+        #self.board[7][0] = rook(7,0,"white")
+        #self.board[7][7] = rook(7,7,"white")
+        #self.board[0][0] = rook(0,0,"black")
+        #self.board[0][7] = rook(0,7,"black")
 
-        # # Initialize Bishops
-        # self.board[7][2] = bishop(7,2,"white")
-        # self.board[7][5] = bishop(7,5,"white")
-        # self.board[0][2] = bishop(0,2,"black")
-        # self.board[0][5] = bishop(0,5,"black")
-        
-        # # Initialize Kings and Queens
-        # self.board[7][4] = king(7,2,"white")
-        # self.board[7][3] = queen(7,5,"white")
-        # self.board[0][4] = king(0,2,"black")
-        # self.board[0][3] = queen(0,5,"black")
+        ## Initialize Bishops
+        #self.board[7][2] = bishop(7,2,"white")
+        #self.board[7][5] = bishop(7,5,"white")
+        #self.board[0][2] = bishop(0,2,"black")
+        #self.board[0][5] = bishop(0,5,"black")
+        #
+        ## Initialize Kings and Queens
+        #self.board[7][4] = king(7,2,"white")
+        #self.board[7][3] = queen(7,5,"white")
+        #self.board[0][4] = king(0,2,"black")
+        #self.board[0][3] = queen(0,5,"black")
         self.board = board.board()
-        self.board.whitePieceCheck()
-        self.board.blackPieceCheck()
+        #self.board.whitePieceCheck()
+        #self.board.blackPieceCheck()
 
         # for i in range(8):
         #     for j in range(8):

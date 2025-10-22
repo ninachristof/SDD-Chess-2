@@ -2,41 +2,71 @@ import socket
 import sys
 from struct import *
 
-PKT_SIZE = 16
-PKT_HDR = "C2PKT"
+ERROR = 1
+PKT_HDR = b"C2PKT"
+PKT_HDR_SIZE = 12 #len(PKT_HDR) + 7 #idk why 
 #can have different packet types to define different actions easily
 #also probably a sent and response packet
+def recv_instruction(conn):
+    data = conn.recv(PKT_HDR_SIZE)
+    if not data:
+        print("empty packet")
+        return ERROR
+    recvd_hdr, instruction_size = unpack("5si",data)
+    if(recvd_hdr != PKT_HDR or len(data) != PKT_HDR_SIZE):
+        print("header error")
+        return ERROR
+    print(f"HOST: Received {data}")
+    data = conn.recv(instruction_size)
+    if not data:
+        print("empty packet")
+        return ERROR
+    print(f"HOST: Received {data}")
+    return 0
+
+def send_instruction(sock,str_instruction):
+        instruction = bytes(str_instruction, "utf-8")
+        #test_pkt = pack("5ci",PKT_HDR,len(instruction))
+        hdr = pack("5si", PKT_HDR, len(instruction))
+        #sock.sendall(b"help me")
+        sock.sendall(hdr)
+        sock.sendall(instruction)
+
 def host_game(host,port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind((host, port))
-        sock.listen()
+        sock.listen(5)
         conn, addr = sock.accept()
-        with conn:
-            # do a few retries for packet maybe add a timeout
-            #make sure it recieved all data, add header and maybe footer
-            print(f"HOST: Connected to {addr}")
-            while True:
-                data = conn.recv(len(PKT_HDR))
-                print(f"CLIENT: Received {data}")
-                if not data:
-                    break
-                conn.sendall(data)
+        conn.setblocking(True)
+        conn.settimeout(None)
+        #with conn:
+        # do a few retries for packet maybe add a timeout
+        #make sure it recieved all data, add header and maybe footer
+        #TODO: how ot handle disconnections/ bad wifi?
+        #TODO: how are the timers going to be synced up? 
+        #todo: if error on receiving end, send a request to resend mesage
+        print(f"HOST: Connected to {addr}")
+        while True:
+            if(ERROR == recv_instruction(conn)):
+                break
+                
+                #response = b"fucki"
+                #conn.sendall(response)
 
 def connect_to_game(host, port):
     # have a loop of connection retries
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host,port))
-        #instruction = "a6,b1"
-        #test_pkt = pack("5ci",PKT_HDR,len(instruction))
-        sock.sendall(b"help me")
-        data = sock.recv(PKT_SIZE)
-
-    print(f"CLIENT: Received {data}")
+        str_instruction = "YUGUANG YUGUANG YUGAUNG"
+        #send_instruction(sock,str_instruction)
+        #send_instruction(sock,str_instruction)
+        #send_instruction(sock,str_instruction)
+        #send_instruction(sock,str_instruction)
+    #print(f"CLIENT: Received {data}")
 def main():
     print("p2p.py <host/connect> <ip> <port>")
     ip = "0.0.0.0"
     port = 5432
-    print((sys.argv))
     if(len(sys.argv) == 4):
         conn_type = sys.argv[1].strip()
         ip = sys.argv[2].strip()

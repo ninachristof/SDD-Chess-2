@@ -1,8 +1,23 @@
 import game
+import sys
 
 def main():
-    print("Hello World")
     newgame = game.game()
     newgame.display()
 
-main()
+def main_2():
+    ip = "0.0.0.0" #defualt
+    port = 5432#default
+    if(len(sys.argv) == 4):
+        conn_type = sys.argv[1].strip()
+        ip = sys.argv[2].strip()
+        port = int(sys.argv[3])
+        newgame = game.game(ip,port,conn_type)
+        newgame.display()
+    else:
+        print("WRONG NUMBER OF ARGUMENTS")
+        print("usage: p2p.py <host/connect> <ip> <port>")
+        print("ex: p2p.py host 0.0.0.0  2020")
+    print("done")
+#main()
+main_2()

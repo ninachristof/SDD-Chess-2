@@ -12,8 +12,6 @@ PKT_HDR_SIZE = 12 #len(PKT_HDR) + 7 #idk why
 #reconnecting needs to update board correctly so the whole board will need to be sent in that case as well as the turn
 
 #return arguments for valid instruction, else return None
-def parse_instruction(instruction):
-    pass
 def recv_instruction(conn):
     data = conn.recv(PKT_HDR_SIZE)
     if not data:
@@ -30,18 +28,39 @@ def recv_instruction(conn):
         return ERROR
     print(f"HOST: Received {data}")
     #instruction should be validated before sending. this should only parse
-    x1,y1,x0,y0,color = parse_instruction(instruction)
-    if(validate_instruction):
-        movePiece(x1,y,x0,y0,color):
-    return 0
+    x1,y1,x0,y0,color = unpack("iiii5s", instruction)
+    return (x1,y1,x0,y0,color)
 
-def send_instruction(sock,str_instruction):
-        instruction = bytes(str_instruction, "utf-8")
+def send_instruction(sock,instruction):
         #test_pkt = pack("5ci",PKT_HDR,len(instruction))
         hdr = pack("5si", PKT_HDR, len(instruction))
         #sock.sendall(b"help me")
         sock.sendall(hdr)
         sock.sendall(instruction)
+
+#host is host ip probably 0.0.0.0 so that it listens to inconming traffic
+def host_game_2(host,port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind((host, port))
+    sock.listen(5)
+    conn, addr = sock.accept()
+    conn.setblocking(True)
+    conn.settimeout(None)
+    return sock, conn
+    #with conn:
+    # do a few retries for packet maybe add a timeout
+    #make sure it recieved all data, add header and maybe footer
+    #TODO: how ot handle disconnections/ bad wifi?
+    #TODO: how are the timers going to be synced up? 
+    #todo: if error on receiving end, send a request to resend mesage
+    #TODO: timestamp
+    #    print(f"HOST: Connected to {addr}")
+    #    while True:
+    #        if(ERROR == recv_instruction(conn)):
+    #            break
+    #        
+            #response = b"fucki"
+            #conn.sendall(response)
 
 def host_game(host,port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -64,6 +83,16 @@ def host_game(host,port):
                 
                 #response = b"fucki"
                 #conn.sendall(response)
+
+def connect_to_game_2(host, port):
+    #TODO: have a loop of connection retries
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((host,port))
+    return sock
+   
+    #for i in range(10):
+    #    str_instruction = f"{i}"
+    #    send_instruction(sock,str_instruction)
 
 def connect_to_game(host, port):
     #TODO: have a loop of connection retries
@@ -91,4 +120,5 @@ def main():
         host_game(ip, port)
 
 
-main()
+if __name__ == "__main__":
+    main()

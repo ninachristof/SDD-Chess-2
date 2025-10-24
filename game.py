@@ -2,6 +2,8 @@ from chesspiece import *
 import tkinter as tk
 #import ttkbootstrap as tk
 import board
+import struct
+from p2p import *
 
 import os #need this for the images if we want to use relative paths?
 
@@ -11,13 +13,24 @@ colors = ['#FFDAB9','#008000']
 def printout():
     print("hello world")
 class game:
+    my_color = None
     board = None
     turn = None
     currentSquare = None
     newSquare = None
     turn = "white"
+    sock = None
+    conn = None
 
-    def __init__(self):
+    def close_all(self):
+        if(self.sock != None):
+            self.sock.close()
+            print("closed socket")
+        if(self.conn != None):
+            self.sock.close()
+            print("closed connection")
+
+    def __init__(self,ip = None , port = None, player = None):
         #self.board = [ [None for j in range(8)] for i in range(8)]
         #Initialize Pawns
         # for i in range (8):
@@ -49,6 +62,20 @@ class game:
         #self.board[0][3] = queen(0,5,"black")
         self.board = board.board()
         self.board.startState()
+
+        ##-- SOCKET
+        if(player == "host"):
+            self.my_color = "white"
+            self.sock, self.conn = host_game_2(ip,port)
+            #self.close_all()
+            #TODO: need to find a way to CLEANLY close the port otherwise it stays open sometimes
+        if(player == "connect"):
+            self.my_color = "black"
+            self.sock = connect_to_game_2(ip,port)
+        print(self.sock, self.conn)
+            #self.close_all()
+        ##-- SOCKET
+
         #self.board.whitePieceCheck()
         #self.board.blackPieceCheck()
 
@@ -58,7 +85,6 @@ class game:
         #             continue
         #         elif (self.board[i][j].get_name() == 'p'):
         #             self.board.pawnCheck(i,j,'w')
-
 
         
     def rotateBoard(self):
@@ -76,8 +102,12 @@ class game:
         # Set board to new board
         self.board = newBoard
          
-                    
     def selectsquare(self,i,j,root):
+        ##-- SOCKET
+        print(self.sock, self.conn)
+        if(self.turn != self.my_color):
+            return
+        ##-- SOCKET
         print("selected square ", i , "," , j)
 
         if (self.currentSquare == None):
@@ -102,6 +132,7 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
+            #obv pieces can still just jump over other pieces
             validMoves = [move[:] for move in pieceObject.get_possible_moves()] # a deep copy on 2d array cuz python 
             if(self.board.getSquare(self.currentSquare[0], self.currentSquare[1]).get_color() == "white"):
                 for move in validMoves:
@@ -123,12 +154,18 @@ class game:
                 return
             if wantedMoveXY in validMoves:
                 print("Valid Move")
-                pass
                 # Move the piece if it is valid
                 # self.board[i][j] = self.board[currentX][currentY]
                 # self.board[currentX][currentY] = None
                 # self.currentSquare = None
 
+                ##-- SOCKET
+                #TODO:needs to be validated first
+                b_turn = bytes(self.turn, "utf-8")
+                instruction = pack("iiii5s",i,j,currentX,currentY,b_turn)
+                print(self.sock, self.conn)
+                send_instruction(self.sock, instruction)
+                ##-- SOCKET
                 self.board.movePiece(i,j,currentX,currentY,self.turn)
 
                 # self.board.chessArray[i][j] = self.board.getSquare(currentX,currentY)
@@ -151,6 +188,19 @@ class game:
             else: 
                 print("Invalid move")
                 return
+        ##--- SOCKET
+        if(self.turn != self.my_color):
+            if(self.my_color == "white"):
+                i,j,currentX,currentY,self.turn = recv_instruction(self.conn)
+
+            else:
+                i,j,currentX,currentY,self.turn = recv_instruction(self.sock)
+            if (self.turn == "white"):
+                self.turn = "black"
+            else:
+                self.turn = "white"
+            
+        ##-- SOCKET
 
 
     def display(self):

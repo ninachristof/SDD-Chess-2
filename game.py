@@ -1,5 +1,6 @@
 from chesspiece import *
 import tkinter as tk
+#import ttkbootstrap as tk
 import board
 
 import os #need this for the images if we want to use relative paths?
@@ -47,6 +48,7 @@ class game:
         #self.board[0][4] = king(0,2,"black")
         #self.board[0][3] = queen(0,5,"black")
         self.board = board.board()
+        self.board.startState()
         #self.board.whitePieceCheck()
         #self.board.blackPieceCheck()
 
@@ -101,9 +103,17 @@ class game:
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
             validMoves = pieceObject.get_possible_moves()
+            if(self.board.getSquare(self.currentSquare[0], self.currentSquare[1]).get_color() == "white"):
+                for move in validMoves:
+                    move[0] = self.currentSquare[0] - move[0]
+                    move[1] = self.currentSquare[1] - move [1]
+            else:
+                for move in validMoves:
+                    move[0] = self.currentSquare[0] + move[0]
+                    move[1] = self.currentSquare[1] + move[1]
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
-            wantedMoveXY = (newX,newY)
+            wantedMoveXY = [newX,newY]
             print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
             print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
             
@@ -133,8 +143,8 @@ class game:
                 root.destroy()
                 #self.rotateBoard()
 
-                self.board.whitePieceCheck()
-                self.board.blackPieceCheck()
+                #self.board.whitePieceCheck()
+                #self.board.blackPieceCheck()
                 self.currentSquare = None
                 self.display()
                 

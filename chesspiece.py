@@ -32,6 +32,8 @@ class chesspiece:
 class pawn(chesspiece):
     def __init__(self,x,y,color):
         self.multipleMoves = True
+        #needs initial [2,0] move
+        self.possibleMoves = [[1,0]]
         self.name = "p"
         self.x = x
         self.y = y
@@ -43,10 +45,10 @@ class knight(chesspiece):
         self.name = "kn"
         self.x = x
         self.y = y
-        # self.possibleMoves = [
-        #     [1,2],[1,-2],[2,1],[2,-1],[-1,2],[-1,-2],
-        #     [-2,1],[-2,-1]
-        # ]
+        self.possibleMoves = [
+             [1,2],[1,-2],[2,1],[2,-1],[-1,2],[-1,-2],
+             [-2,1],[-2,-1]
+        ]
         self.image = "blackknight.png"
         self.color = color
 
@@ -55,7 +57,7 @@ class king(chesspiece):
         self.name = "k"
         self.x = x
         self.y = y
-        # self.possibleMoves = [[1,0]]
+        self.possibleMoves = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
         self.color = color
 
 class queen(chesspiece):
@@ -63,7 +65,17 @@ class queen(chesspiece):
         self.name = "q"
         self.x = x
         self.y = y
-        # self.possibleMoves = [[1,0]]
+        self.possibleMoves = []
+        for i in range(1, 8):
+            self.possibleMoves.append([0,i])
+            self.possibleMoves.append([0,-i])
+            self.possibleMoves.append([i,0])
+            self.possibleMoves.append([-i,0])
+        for i in range(1, 8):
+            self.possibleMoves.append([i,i])
+            self.possibleMoves.append([-i,i])
+            self.possibleMoves.append([i,-i])
+            self.possibleMoves.append([-i,-i])
         self.color = color
 
 class rook(chesspiece):
@@ -71,7 +83,12 @@ class rook(chesspiece):
         self.name = "r"
         self.x = x
         self.y = y
-        # self.possibleMoves = [[1,0]]
+        self.possibleMoves = []
+        for i in range(1, 8):
+            self.possibleMoves.append([0,i])
+            self.possibleMoves.append([0,-i])
+            self.possibleMoves.append([i,0])
+            self.possibleMoves.append([-i,0])
         self.color = color
 
 class bishop(chesspiece):
@@ -79,5 +96,10 @@ class bishop(chesspiece):
         self.name = "b"
         self.x = x
         self.y = y
-        # self.possibleMoves = [[1,0]]
+        self.possibleMoves = []
+        for i in range(1, 8):
+            self.possibleMoves.append([i,i])
+            self.possibleMoves.append([-i,i])
+            self.possibleMoves.append([i,-i])
+            self.possibleMoves.append([-i,-i])
         self.color = color

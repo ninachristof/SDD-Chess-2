@@ -27,6 +27,8 @@ class board:
                 self.whitePieces.remove((newx,newy))
             self.blackPieces.append((newx,newy))
         self.chessArray[newx][newy] = self.chessArray[oldx][oldy]
+        self.chessArray[newx][newy].x = newx
+        self.chessArray[newx][newy].y = newy
         self.chessArray[oldx][oldy] = None
 
     def addPiece(self, x, y, piece, color):
@@ -581,5 +583,5 @@ def main():
     # game2 = board(newgame)
     # newgame.printBoardState()
 
-
-main()
+if __name__ == "__main__":
+    main()

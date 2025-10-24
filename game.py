@@ -106,6 +106,11 @@ class game:
         ##-- SOCKET
         print(self.sock, self.conn)
         if(self.turn != self.my_color):
+            if(self.my_color == "white"):
+                i,j,currentX,currentY,self.turn = recv_instruction_2(self.conn)
+
+            else:
+                i,j,currentX,currentY,self.turn = recv_instruction_2(self.sock)
             return
         ##-- SOCKET
         print("selected square ", i , "," , j)
@@ -164,7 +169,10 @@ class game:
                 b_turn = bytes(self.turn, "utf-8")
                 instruction = pack("iiii5s",i,j,currentX,currentY,b_turn)
                 print(self.sock, self.conn)
-                send_instruction(self.sock, instruction)
+                if(self.my_color == "white"):
+                    send_instruction_2(self.conn, instruction)
+                else:
+                    send_instruction_2(self.sock, instruction)
                 ##-- SOCKET
                 self.board.movePiece(i,j,currentX,currentY,self.turn)
 
@@ -191,14 +199,18 @@ class game:
         ##--- SOCKET
         if(self.turn != self.my_color):
             if(self.my_color == "white"):
-                i,j,currentX,currentY,self.turn = recv_instruction(self.conn)
+                i,j,currentX,currentY,self.turn = recv_instruction_2(self.conn)
 
             else:
-                i,j,currentX,currentY,self.turn = recv_instruction(self.sock)
-            if (self.turn == "white"):
-                self.turn = "black"
+                i,j,currentX,currentY,self.turn = recv_instruction_2(self.sock)
+            if(self.turn != 1): 
+                print("CHANGER TURNS")
+                if (self.turn == "white"):
+                    self.turn = "black"
+                else:
+                    self.turn = "white"
             else:
-                self.turn = "white"
+                print("error")
             
         ##-- SOCKET
 

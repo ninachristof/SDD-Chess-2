@@ -102,7 +102,7 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
-            validMoves = pieceObject.get_possible_moves()
+            validMoves = [move[:] for move in pieceObject.get_possible_moves()] # a deep copy on 2d array cuz python 
             if(self.board.getSquare(self.currentSquare[0], self.currentSquare[1]).get_color() == "white"):
                 for move in validMoves:
                     move[0] = self.currentSquare[0] - move[0]

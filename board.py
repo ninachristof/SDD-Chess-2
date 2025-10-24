@@ -13,8 +13,8 @@ class board:
     
 
     def movePiece(self,newx,newy,oldx,oldy,color):
-        print(self.whitePieces)
-        print(self.blackPieces)
+        print("white pieces",self.whitePieces)
+        print("black pieces",self.blackPieces)
         print(oldx, " ", oldy , " ",newx, " ", newy, " ",color)
         if (color == "white"):
             self.whitePieces.remove((oldx,oldy))
@@ -27,8 +27,6 @@ class board:
                 self.whitePieces.remove((newx,newy))
             self.blackPieces.append((newx,newy))
         self.chessArray[newx][newy] = self.chessArray[oldx][oldy]
-        self.chessArray[newx][newy].x = newx
-        self.chessArray[newx][newy].y = newy
         self.chessArray[oldx][oldy] = None
 
     def addPiece(self, x, y, piece, color):

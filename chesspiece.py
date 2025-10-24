@@ -24,14 +24,14 @@ class chesspiece:
             self.possibleMoves.extend(subList)
 
     def get_possible_moves(self):
-        return self.possibleMoves
+        return self.possibleMoves.copy()
         
     def set_first_move(self):
         self.firstMove = False
 
 class pawn(chesspiece):
     def __init__(self,x,y,color):
-        self.multipleMoves = True
+        #self.multipleMoves = True
         #needs initial [2,0] move
         self.possibleMoves = [[1,0]]
         self.name = "p"

@@ -13,8 +13,8 @@ class board:
     
 
     def movePiece(self,newx,newy,oldx,oldy,color):
-        print(self.whitePieces)
-        print(self.blackPieces)
+        print("white pieces",self.whitePieces)
+        print("black pieces",self.blackPieces)
         print(oldx, " ", oldy , " ",newx, " ", newy, " ",color)
         if (color == "white"):
             self.whitePieces.remove((oldx,oldy))
@@ -581,5 +581,5 @@ def main():
     # game2 = board(newgame)
     # newgame.printBoardState()
 
-
-main()
+if __name__ == "__main__":
+    main()

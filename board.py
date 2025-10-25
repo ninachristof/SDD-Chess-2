@@ -76,11 +76,16 @@ class board:
 
     def copy_board(self):
         board2 = board()
-        for x, y in self.whitePieces():
+        for x, y in self.whitePieces:
             board2.addPiece(x, y, self.chessArray[x][y].get_name(), "white")
-        for x, y in self.blackPieces():
+        for x, y in self.blackPieces:
             board2.addPiece(x, y, self.chessArray[x][y].get_name(), "black")
         return board2
+
+    # Replaces the square at x, y with None
+    def __clearSquare(self, x, y):
+        if (x >= 0 and x <= 7 and y >= 0 and y <= 7):
+            self.chessArray[x][y] = None
 
     def startState(self): # Initial board setup. 
         # Initialize Pawns
@@ -143,7 +148,7 @@ class board:
             # Forwards movement
             if (x != 0 and self.chessArray[x - 1][y] == None):
                 forwardMoves.append((x - 1, y))
-                if (x != 1 and (self.chessArray[x][y].hasMoved()) and self.chessArray[x - 2][y] == None):
+                if (x != 1 and self.chessArray[x][y] != None and self.chessArray[x][y].hasMoved() and self.chessArray[x - 2][y] == None):
                     forwardMoves.append((x - 2, y))
             
             # Capture Movement
@@ -155,7 +160,7 @@ class board:
             # Forwards movement
             if (x != 7 and self.chessArray[x + 1][y] == None):
                 forwardMoves.append((x + 1, y))
-                if (x != 6 and (self.chessArray[x][y].hasMoved()) and self.chessArray[x + 2][y] == None):
+                if (x != 6 and self.chessArray[x][y] != None and (self.chessArray[x][y].hasMoved()) and self.chessArray[x + 2][y] == None):
                     forwardMoves.append((x + 2, y))
             
             # Capture Movement
@@ -440,6 +445,7 @@ class board:
     
     # Can the square at (x, y) be captured by the opposing color pieces?
     # Returns True if so and False if not. 
+    # Use this to check for check with the stored kingXY values. 
     def captureCheck(self, x, y, color):
         oppPieces = None
         if (color == "white"):
@@ -453,24 +459,52 @@ class board:
                 return True
         return False
     
-    # Assumptions: There is a {color} king at (x, y). 
-    # If the king is in check, the checkmate check checks if the king is in checkmate. 
-    def checkCheck(self): 
-        if (self.captureCheck(self.whiteKingXY[0], self.whiteKingXY[1], "white")):
-            print("WHITE KING IN CHECK")
-        if (self.captureCheck(self.blackKingXY[0], self.blackKingXY[1], "black")):
-            print("BLACK KING IN CHECK")
+    # Assumptions: There is a {color} king at the stored XY location. This king is in check. 
+    # Checks if the king is in checkmate. 
+    def checkmateCheck(self, color): 
+        if (color == "white"):
+            x, y = self.whiteKingXY
+        elif (color == "black"):
+            x, y = self.blackKingXY
+        else:
+            print("invalid color")
+            return False
+        print(x, y)
+        capturingPieces, involvedSquares = self.lineOfSight(x, y, color)
+
+        # How many pieces can capture the king?
+        if (len(capturingPieces) < 1): # No piece can capture the king. 
+            return False # Not checkmate. 
+        elif (len(capturingPieces) > 1): # Multiple pieces can capture the king.
+            return True # Checkmate.
+        
+        # There is only one capturing piece and the involvedPieces list is all the squares in between. 
+        # Test all possible moves for check. 
+        noKing = self.copy_board()
+        noKing.__clearSquare(x, y) # Remove the king so it does not block it's own line of sight. 
+        for x1, y1 in self.chessArray[x][y].get_possible_moves():
+            res = noKing.lineOfSight(x1, y1, color)
+            if (len(res[0]) == 0): # If the king can move somewhere, it is not in checkmate.
+                return False
+        
+        if (color == "white"):
+            allPieces = self.whitePieces
+        else:
+            allPieces = self.blackPieces
+        allPieces.remove((x, y)) # Do not include the king!
+
+        for coords in involvedSquares: # For each involved square in the 
+            for x2, y2 in allPieces:
+                if (coords in self.chessArray[x2][y2].get_possible_moves()):
+                    return False
+        print(capturingPieces, involvedSquares)
+        return True
 
     # From the the current square, what can capture that square?
     # Iterates through each possible location and returns a tuple. 
     # (List of pieces that can capture the square, List of all squares involved in the line of sight)
     def lineOfSight(self, x, y, color): 
-        print("LINEOFSIGHT:")
-        if (color == "white"):
-            oppColor = "black"
-        else:
-            oppColor = "white"
-
+        # print("LINEOFSIGHT:")
         capturingPieces = []
         involvedSquares = []
 
@@ -493,11 +527,17 @@ class board:
             if (len(a) == 0):
                 continue
             piece = self.getSquare(a[-1][0], a[-1][1])
-            if (piece != None and piece.get_color() != color):
-                if (piece.get_name() == "b" or piece.get_name() == "q"):
+            if (piece != None and piece.get_color() != color and (piece.get_name() == "b" or piece.get_name() == "q")):
                     capturingPieces.append(a[-1])
                     involvedSquares.extend(a)
 
+        for b in self.pawnCheck(x, y, color)[1]: 
+            # Only the capture movements!
+            # b is an (x, y) tuple. 
+            piece = self.getSquare(b[0], b[1]) 
+            if (piece != None and piece.get_color() != color and piece.get_name() == "p"):
+                capturingPieces.append(b)
+                involvedSquares.append(b)
         return (capturingPieces, involvedSquares)
 # EN PASSANT CHECK: 
 #     Capturing en passant is permitted only on the turn *immediately* 
@@ -566,17 +606,31 @@ def CheckState(b):
     b.addPiece(7, 5, "r", "black")
     b.addPiece(3, 0, "b", "white")
     b.addPiece(2, 2, "kn", "white")
+    b.addPiece(0, 6, "p", "black")
+    b.addPiece(0, 4, "p", "black")
     b.addPiece(2, 4, "p", "black")
     b.addPiece(1, 4, "q", "black")
     b.addPiece(0, 5, "q", "white")
 
+def CheckMateState(b):
+    b.clear()
+    b.addPiece(3, 3, "k", "black")
+    b.addPiece(3, 0, "r", "white")
+    b.addPiece(2, 6, "r", "white")
+    b.addPiece(5, 1, "p", "white")
+    b.addPiece(5, 5, "kn", "white")
+    b.addPiece(7, 1, "b", "white")
+
+    b.addPiece(0, 1, "r", "black")
+
 def main():
     newgame = board()
-    CheckState(newgame)
+    CheckMateState(newgame)
     newgame.printBoardState()
     newgame.whitePieceUpdate()
     newgame.blackPieceUpdate()
-    print(newgame.lineOfSight(1, 5, "white"))
+    print(newgame.checkmateCheck("black"))
+    # print(newgame.lineOfSight(1, 5, "white"))
 
     # game2 = board(newgame)
     # newgame.printBoardState()

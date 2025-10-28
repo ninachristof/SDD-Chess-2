@@ -47,8 +47,9 @@ class game:
         # self.board[0][4] = king(0,2,"black")
         # self.board[0][3] = queen(0,5,"black")
         self.board = board.board()
-        self.board.whitePieceCheck()
-        self.board.blackPieceCheck()
+        self.board.startState()
+        self.board.whitePieceUpdate()
+        self.board.blackPieceUpdate()
 
         # for i in range(8):
         #     for j in range(8):
@@ -133,8 +134,8 @@ class game:
                 root.destroy()
                 #self.rotateBoard()
 
-                self.board.whitePieceCheck()
-                self.board.blackPieceCheck()
+                self.board.whitePieceUpdate()
+                self.board.blackPieceUpdate()
                 self.currentSquare = None
                 self.display()
                 

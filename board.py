@@ -623,17 +623,17 @@ def CheckMateState(b):
     b.addPiece(7, 1, "b", "white")
     b.addPiece(0, 1, "r", "black")
 
-def main():
-    newgame = board()
-    CheckMateState(newgame)
-    newgame.printBoardState()
-    newgame.whitePieceUpdate()
-    newgame.blackPieceUpdate()
-    print(newgame.checkmateCheck("black"))
+# def main():
+    # newgame = board()
+    # CheckMateState(newgame)
+    # newgame.printBoardState()
+    # newgame.whitePieceUpdate()
+    # newgame.blackPieceUpdate()
+    # print(newgame.checkmateCheck("black"))
     # print(newgame.lineOfSight(1, 5, "white"))
 
     # game2 = board(newgame)
     # newgame.printBoardState()
 
 
-main()
+# main()

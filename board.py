@@ -459,9 +459,10 @@ class board:
                 return True
         return False
     
-    # Assumptions: There is a {color} king at the stored XY location. This king is in check. 
+    # Assumptions: There is a {color} king at the stored XY location. 
     # Checks if the king is in checkmate. 
     def checkmateCheck(self, color): 
+        # Sets the x and y variable to the stored kingXY coordinates. 
         if (color == "white"):
             x, y = self.whiteKingXY
         elif (color == "black"):
@@ -620,7 +621,6 @@ def CheckMateState(b):
     b.addPiece(5, 1, "p", "white")
     b.addPiece(5, 5, "kn", "white")
     b.addPiece(7, 1, "b", "white")
-
     b.addPiece(0, 1, "r", "black")
 
 def main():

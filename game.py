@@ -97,8 +97,6 @@ class game:
 
                 self.board.whitePieceUpdateLegal()
                 self.board.blackPieceUpdateLegal()
-                #self.board.whitePieceCheck()
-                #self.board.blackPieceCheck()
                 self.currentSquare = None
                 self.display()
                 

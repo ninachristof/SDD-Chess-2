@@ -307,9 +307,9 @@ class board:
                 for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
                     #print(move)
                     if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
-                        print("White King in check")
+                        #print("White King in check")
                         return True
-            print("White King not in check")
+            #print("White King not in check")
             return False
 
         
@@ -325,9 +325,9 @@ class board:
                 for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
                     #print(move)
                     if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
-                        print("Black King in check")
+                        #print("Black King in check")
                         return True
-            print("Black King not in check")
+            #print("Black King not in check")
             return False
         #print("The king is at ", kinglocation)
 
@@ -401,7 +401,7 @@ class board:
             #print("WHITE {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
             #print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
-        self.isKinginCheck("white")
+        #self.isKinginCheck("white")
 
     # Same as whitePieceCheck, but for the black pieces. 
     def blackPieceUpdate(self):
@@ -411,7 +411,7 @@ class board:
             #print("BLACK {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
             #print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
-        self.isKinginCheck("black")
+        #self.isKinginCheck("black")
 
     def getLegalMoves(self,x,y):
         possibleMoves = self.getPossibleMoves(x,y)
@@ -426,17 +426,23 @@ class board:
     
     # Iterates through each white piece location and updates the pieces with the new available moves. 
     def whitePieceUpdateLegal(self):
+        if (self.isKinginCheck("white")):
+            print("White king in check")
         for x, y in self.whitePieces:
+            print("white ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
-        self.isKinginCheck("white")
+        #self.isKinginCheck("white")
 
     # Same as whitePieceCheck, but for the black pieces. 
     def blackPieceUpdateLegal(self):
+        if (self.isKinginCheck("black")):
+            print("Black king in check")
         for x, y in self.blackPieces:
+            print("black ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
-        self.isKinginCheck("black")
+        #self.isKinginCheck("black")
 
     
 
@@ -459,6 +465,10 @@ class board:
         self.chessArray[oldx][oldy] = None
         self.whitePieceUpdate()
         self.blackPieceUpdate()
+        # if (self.isKinginCheck("white")):
+        #     print("White king in check")
+        # if (self.isKinginCheck("black")):
+        #     print("Black king in check")
 
 # EN PASSANT CHECK: 
 #     Capturing en passant is permitted only on the turn *immediately* 

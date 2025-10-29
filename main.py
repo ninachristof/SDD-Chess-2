@@ -19,6 +19,7 @@ def main_2():
         print("WRONG NUMBER OF ARGUMENTS")
         print("usage: p2p.py <host/connect> <ip> <port>")
         print("ex: p2p.py host 0.0.0.0  2020")
-    newgame.close_all()
+    if(None != newgame):
+        newgame.close_all()
 #main()
 main_2()

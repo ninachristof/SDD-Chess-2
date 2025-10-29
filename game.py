@@ -10,8 +10,6 @@ import os #need this for the images if we want to use relative paths?
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
 
-def printout():
-    print("hello world")
 class game:
     my_color = None
     board = None
@@ -22,13 +20,6 @@ class game:
     sock = None
     conn = None
 
-    def close_all(self):
-        if(self.sock != None):
-            self.sock.close()
-            print("closed socket")
-        if(self.conn != None):
-            self.sock.close()
-            print("closed connection")
 
     def __init__(self,ip = None , port = None, player = None):
         #self.board = [ [None for j in range(8)] for i in range(8)]
@@ -86,6 +77,14 @@ class game:
         #         elif (self.board[i][j].get_name() == 'p'):
         #             self.board.pawnCheck(i,j,'w')
 
+    def close_all(self):
+        if(self.sock != None):
+            self.sock.close()
+            print("closed socket")
+        if(self.conn != None):
+            self.sock.close()
+            print("closed connection")
+
         
     def rotateBoard(self):
         print("Rotating board")
@@ -104,7 +103,7 @@ class game:
          
     def selectsquare(self,i,j,root):
         ##-- SOCKET
-        print(self.sock, self.conn)
+        #print(self.sock, self.conn)
         if(self.turn != self.my_color):
             if(self.my_color == "white"):
                 i,j,currentX,currentY,self.turn = recv_instruction_2(self.conn)

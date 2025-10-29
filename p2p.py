@@ -22,12 +22,13 @@ def recv_instruction_2(conn):
     if(recvd_hdr != PKT_HDR or len(data) != PKT_HDR_SIZE):
         print("header error")
         return ERROR
-    print(f"HOST: Received {data}")
+    print(f"Received header {data}")
+    print(f"size {instruction_size}")
     instruction = conn.recv(instruction_size)
     if not instruction:
         print("empty packet")
         return ERROR
-    print(f"HOST: Received {data}")
+    print(f"Received  instruction {data}")
     #instruction should be validated before sending. this should only parse
     x1,y1,x0,y0,color = unpack("iiii5s", instruction)
     return (x1,y1,x0,y0,color)
@@ -52,10 +53,14 @@ def recv_instruction(conn):
     return 0
 
 def send_instruction_2(sock,instruction):
+        print(f"sending {instruction}")
         #test_pkt = pack("5ci",PKT_HDR,len(instruction))
         hdr = pack("5si", PKT_HDR, len(instruction))
         #sock.sendall(b"help me")
-        sock.sendall(hdr)
+        bytes_sent = sock.send(hdr)
+        if(bytes_sent != len(hdr)):
+            sock.send(hdr[bytes_sent:])
+            
         sock.sendall(instruction)
 
 def send_instruction(sock,str_instruction):

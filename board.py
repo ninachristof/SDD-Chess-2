@@ -418,10 +418,12 @@ class board:
         legalMoves = []
         color = self.chessArray[x][y].get_color()
         for move in possibleMoves:
-            self.movePiece(move[0],move[1],x,y,color)
-            if (not self.isKinginCheck(color)):
+            if (self.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)
-            self.movePiece(x,y,move[0],move[1],color)
+            # self.movePiece(move[0],move[1],x,y,color)
+            # if (not self.isKinginCheck(color)):
+            #     legalMoves.append(move)
+            # self.movePiece(x,y,move[0],move[1],color)
         return legalMoves
     
     # Iterates through each white piece location and updates the pieces with the new available moves. 
@@ -444,9 +446,32 @@ class board:
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
         #self.isKinginCheck("black")
 
-    
+    def moveprediction(self,newx,newy,oldx,oldy,color):
+        #Stores the deleted square if necessary
+        temp = self.chessArray[newx][newy]
 
-    
+        #checks if this move is valid; i.e. the king is not in check after this move
+        validMove = False
+        self.movePiece(newx,newy,oldx,oldy,color)
+        if (not self.isKinginCheck(color)):
+            validMove = True
+
+        #Undoes any of the effects of the move
+        self.movePiece(oldx,oldy,newx,newy,color)
+        if (temp == None):
+            return validMove
+        
+        #Resurrects the dead piece if the square we moved to wasn't none
+        color = temp.get_color()
+        if (color == "white"):
+            self.whitePieces.append((newx,newy))
+            self.chessArray[newx][newy] = temp
+        if (color == "black"):
+            self.blackPieces.append((newx,newy))
+            self.chessArray[newx][newy] = temp
+        return validMove
+        
+
     def movePiece(self,newx,newy,oldx,oldy,color):
         #print(self.whitePieces)
         #print(self.blackPieces)

@@ -428,22 +428,28 @@ class board:
     
     # Iterates through each white piece location and updates the pieces with the new available moves. 
     def whitePieceUpdateLegal(self):
+        countMoves = 0
         if (self.isKinginCheck("white")):
             print("White king in check")
         for x, y in self.whitePieces:
             print("white ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
+            countMoves += len(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
+        return countMoves
         #self.isKinginCheck("white")
 
     # Same as whitePieceCheck, but for the black pieces. 
     def blackPieceUpdateLegal(self):
+        countMoves = 0
         if (self.isKinginCheck("black")):
             print("Black king in check")
         for x, y in self.blackPieces:
             print("black ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
+            countMoves += len(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
+        return countMoves
         #self.isKinginCheck("black")
 
     def moveprediction(self,newx,newy,oldx,oldy,color):

@@ -95,8 +95,18 @@ class game:
                 root.destroy()
                 #self.rotateBoard()
 
-                self.board.whitePieceUpdateLegal()
-                self.board.blackPieceUpdateLegal()
+                whiteMoves = self.board.whitePieceUpdateLegal()
+                blackMoves = self.board.blackPieceUpdateLegal()
+                if (whiteMoves == 0):
+                    if (self.board.isKinginCheck("white")):
+                        print("Checkmate! Black Wins")
+                    else:
+                        print("Stalemate! White has no valid moves")
+                if (blackMoves == 0):
+                    if (self.board.isKinginCheck("black")):
+                        print("Checkmate! White Wins")
+                    else:
+                        print("Stalemate! Black has no valid moves")
                 self.currentSquare = None
                 self.display()
                 

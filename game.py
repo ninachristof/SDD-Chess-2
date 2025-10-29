@@ -17,45 +17,7 @@ class game:
     turn = "white"
 
     def __init__(self):
-        #self.board = [ [None for j in range(8)] for i in range(8)]
-        #Initialize Pawns
-        # for i in range (8):
-        #     self.board[1][i] = pawn(1,i,"black")
-        #     self.board[6][i] = pawn(6,i,"white")
-        
-        # #Initialize Knights
-        # self.board[7][1] = knight(7,1,"white")
-        # self.board[7][6] = knight(7,6,"white")
-        # self.board[0][1] = knight(0,1,"black")
-        # self.board[0][6] = knight(0,6,"black")
-        
-        # # Initialize Rooks
-        # self.board[7][0] = rook(7,0,"white")
-        # self.board[7][7] = rook(7,7,"white")
-        # self.board[0][0] = rook(0,0,"black")
-        # self.board[0][7] = rook(0,7,"black")
-
-        # # Initialize Bishops
-        # self.board[7][2] = bishop(7,2,"white")
-        # self.board[7][5] = bishop(7,5,"white")
-        # self.board[0][2] = bishop(0,2,"black")
-        # self.board[0][5] = bishop(0,5,"black")
-        
-        # # Initialize Kings and Queens
-        # self.board[7][4] = king(7,2,"white")
-        # self.board[7][3] = queen(7,5,"white")
-        # self.board[0][4] = king(0,2,"black")
-        # self.board[0][3] = queen(0,5,"black")
         self.board = board.board()
-
-        # for i in range(8):
-        #     for j in range(8):
-        #         if (self.board[i][j] == None):
-        #             continue
-        #         elif (self.board[i][j].get_name() == 'p'):
-        #             self.board.pawnCheck(i,j,'w')
-
-
         
     def rotateBoard(self):
         print("Rotating board")
@@ -81,8 +43,9 @@ class game:
                 print("Invalid square")
                 return
             else: #The square you selected must be one of your pieces
-                print("Selected a piece at ", i , "," , j)
+                print("Selected one of your pieces at ", i , "," , j)
                 self.currentSquare = (i,j)
+                print("The possible moves for this piece are ", self.board.getPossibleMoves(i,j))
                 return
         
         #At this point, you have already selected a piece
@@ -90,6 +53,7 @@ class game:
         elif (not(self.board.getSquare(i,j) == None) and self.board.getSquare(i,j).get_color() == self.turn):
             print("Selected a piece at ", i , "," , j)
             self.currentSquare = (i,j)
+            print("The possible moves for this piece are ", self.board.getPossibleMoves(i,j))
             return
         
         #Otherwise, you are attempting to make a move; see if this move is possible, and do it if so
@@ -131,8 +95,8 @@ class game:
                 root.destroy()
                 #self.rotateBoard()
 
-                self.board.filterIllegal('white')
-                self.board.filterIllegal('black')
+                self.board.whitePieceUpdate()
+                self.board.blackPieceUpdate()
                 #self.board.whitePieceCheck()
                 #self.board.blackPieceCheck()
                 self.currentSquare = None
@@ -165,15 +129,14 @@ class game:
             for j in range(8):
                 button = None
                 if (self.board.getSquare(i,j) != None):
-                    #Attempt at PNGs, they don't work too well D:
-                    # base_path = os.path.dirname(__file__)
-                    # img_path = os.path.join(base_path,self.board[i][j].image)
-                    # photo = tk.PhotoImage(file = img_path)
-                    # photo = photo.subsample(50,50) 
-                    # button = tk.Button(root, image = photo)                        #need lambda to pass args for the command function
-                    button = tk.Button(root, text = self.board.getSquare(i,j).get_name(), command = lambda a = i, b = j, c = root:self.selectsquare(a,b,c),bg = colors[(i+j)%2],fg = self.board.getSquare(i,j).get_color(), font=("Arial", 16))
+                    #need lambda to pass args for the command function
+                    button = tk.Button(root, text = self.board.getSquare(i,j).get_name(),
+                                        command = lambda a = i, b = j, c = root:self.selectsquare(a,b,c),
+                                        bg = colors[(i+j)%2],fg = self.board.getSquare(i,j).get_color(),
+                                        font=("Arial", 16))
                 else:
-                    button = tk.Button(root, text = "", command = lambda a = i, b = j:self.selectsquare(a,b,root),bg = colors[(i+j)%2])
+                    button = tk.Button(root, text = "", command = lambda a = i, 
+                                       b = j:self.selectsquare(a,b,root),bg = colors[(i+j)%2])
                 newrow.append(button)
                 button.grid(row = i,column = j, sticky = "NSEW")
             buttons.append(newrow)

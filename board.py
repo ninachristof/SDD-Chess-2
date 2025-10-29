@@ -301,11 +301,11 @@ class board:
                 if self.chessArray[piece[0]][piece[1]].get_name() == 'k':
                         kinglocation = piece[0],piece[1]
             for piece in self.blackPieces:
-                print(self.chessArray[piece[0]][piece[1]].get_color(), " ",
-                      self.chessArray[piece[0]][piece[1]].get_name(), " at ",
-                      piece[0], ",", piece[1])
+                #print(self.chessArray[piece[0]][piece[1]].get_color(), " ",
+                      #self.chessArray[piece[0]][piece[1]].get_name(), " at ",
+                      #piece[0], ",", piece[1])
                 for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
-                    print(move)
+                    #print(move)
                     if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
                         print("White King in check")
                         return True
@@ -319,11 +319,11 @@ class board:
                 if self.chessArray[piece[0]][piece[1]].get_name() == 'k':
                         kinglocation = piece[0],piece[1]
             for piece in self.whitePieces:
-                print(self.chessArray[piece[0]][piece[1]].get_color(), " ",
-                      self.chessArray[piece[0]][piece[1]].get_name(), " at ",
-                      piece[0], ",", piece[1])
+                # print(self.chessArray[piece[0]][piece[1]].get_color(), " ",
+                #       self.chessArray[piece[0]][piece[1]].get_name(), " at ",
+                #       piece[0], ",", piece[1])
                 for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
-                    print(move)
+                    #print(move)
                     if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
                         print("Black King in check")
                         return True
@@ -393,10 +393,6 @@ class board:
             possibleMoves = self.getKingMoves(x, y, color)
         return possibleMoves
     
-
-    def filterLegalMoves(self,moves):
-        pass
-    
     # Iterates through each white piece location and updates the pieces with the new available moves. 
     def whitePieceUpdate(self):
         for x, y in self.whitePieces:
@@ -417,11 +413,38 @@ class board:
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
         self.isKinginCheck("black")
 
+    def getLegalMoves(self,x,y):
+        possibleMoves = self.getPossibleMoves(x,y)
+        legalMoves = []
+        color = self.chessArray[x][y].get_color()
+        for move in possibleMoves:
+            self.movePiece(move[0],move[1],x,y,color)
+            if (not self.isKinginCheck(color)):
+                legalMoves.append(move)
+            self.movePiece(x,y,move[0],move[1],color)
+        return legalMoves
+    
+    # Iterates through each white piece location and updates the pieces with the new available moves. 
+    def whitePieceUpdateLegal(self):
+        for x, y in self.whitePieces:
+            possibleMoves = self.getLegalMoves(x,y)
+            self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
+        self.isKinginCheck("white")
+
+    # Same as whitePieceCheck, but for the black pieces. 
+    def blackPieceUpdateLegal(self):
+        for x, y in self.blackPieces:
+            possibleMoves = self.getLegalMoves(x,y)
+            self.chessArray[x][y].updatePossibleMoves(possibleMoves)
+        self.isKinginCheck("black")
+
+    
+
     
     def movePiece(self,newx,newy,oldx,oldy,color):
         #print(self.whitePieces)
         #print(self.blackPieces)
-        print(oldx, " ", oldy , " ",newx, " ", newy, " ",color)
+        #print(oldx, " ", oldy , " ",newx, " ", newy, " ",color)
         if (color == "white"):
             self.whitePieces.remove((oldx,oldy))
             if ((newx,newy) in self.blackPieces):

@@ -45,7 +45,7 @@ class game:
             else: #The square you selected must be one of your pieces
                 print("Selected one of your pieces at ", i , "," , j)
                 self.currentSquare = (i,j)
-                print("The possible moves for this piece are ", self.board.getPossibleMoves(i,j))
+                print("The possible moves for this piece are ", self.board.getLegalMoves(i,j))
                 return
         
         #At this point, you have already selected a piece
@@ -53,7 +53,7 @@ class game:
         elif (not(self.board.getSquare(i,j) == None) and self.board.getSquare(i,j).get_color() == self.turn):
             print("Selected a piece at ", i , "," , j)
             self.currentSquare = (i,j)
-            print("The possible moves for this piece are ", self.board.getPossibleMoves(i,j))
+            print("The possible moves for this piece are ", self.board.getLegalMoves(i,j))
             return
         
         #Otherwise, you are attempting to make a move; see if this move is possible, and do it if so
@@ -95,8 +95,8 @@ class game:
                 root.destroy()
                 #self.rotateBoard()
 
-                self.board.whitePieceUpdate()
-                self.board.blackPieceUpdate()
+                self.board.whitePieceUpdateLegal()
+                self.board.blackPieceUpdateLegal()
                 #self.board.whitePieceCheck()
                 #self.board.blackPieceCheck()
                 self.currentSquare = None

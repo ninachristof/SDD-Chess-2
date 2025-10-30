@@ -1,90 +1,82 @@
 from chesspiece import *
+import threading
 import tkinter as tk
-#import ttkbootstrap as tk
 import board
 import struct
 from p2p import *
+import global_vars
 
 import os #need this for the images if we want to use relative paths?
+
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
 
+def printout():
+    print("hello world")
 class game:
-    my_color = None
+    root = None
     board = None
     turn = None
     currentSquare = None
     newSquare = None
     turn = "white"
-    sock = None
-    conn = None
+    mycolor = "white"
+    conn_thread = None
+    new_p2p = None
 
 
-    def __init__(self,ip = None , port = None, player = None):
-        #self.board = [ [None for j in range(8)] for i in range(8)]
-        #Initialize Pawns
-        # for i in range (8):
-        #     self.board[1][i] = pawn(1,i,"black")
-        #     self.board[6][i] = pawn(6,i,"white")
-        
-        ##Initialize Knights
-        #self.board[7][1] = knight(7,1,"white")
-        #self.board[7][6] = knight(7,6,"white")
-        #self.board[0][1] = knight(0,1,"black")
-        #self.board[0][6] = knight(0,6,"black")
-        #
-        ## Initialize Rooks
-        #self.board[7][0] = rook(7,0,"white")
-        #self.board[7][7] = rook(7,7,"white")
-        #self.board[0][0] = rook(0,0,"black")
-        #self.board[0][7] = rook(0,7,"black")
+    def run_socket(self,conn_type, ip, port):
+        self.new_p2p = p2p(conn_type, ip, port)
+        self.new_p2p.init_p2p()
+        wait_for_my_move = True
+        if(conn_type == "connect"):
+            wait_for_my_move = False
 
-        ## Initialize Bishops
-        #self.board[7][2] = bishop(7,2,"white")
-        #self.board[7][5] = bishop(7,5,"white")
-        #self.board[0][2] = bishop(0,2,"black")
-        #self.board[0][5] = bishop(0,5,"black")
-        #
-        ## Initialize Kings and Queens
-        #self.board[7][4] = king(7,2,"white")
-        #self.board[7][3] = queen(7,5,"white")
-        #self.board[0][4] = king(0,2,"black")
-        #self.board[0][3] = queen(0,5,"black")
+        while(1):
+            if(wait_for_my_move):
+                global_vars.send_event.wait()
+                
+                print("done waiting")
+                self.new_p2p.send_instruction_2()
+                global_vars.send_event.clear()
+                wait_for_my_move = False
+            else:
+                instruction = self.new_p2p.recv_instruction_2() 
+                print(f"RECEIVED INSTRUCTION BY {self.mycolor} : {instruction}")
+                if(instruction == 1):
+                    print("INSTRUCTION ERROR")
+                    continue
+                #TODO: takeout color
+                self.board.movePiece(instruction[0], instruction[1],instruction[2],instruction[3],(instruction[4]).decode("utf-8"))
+                #add lock to this or is this probably fine?
+                if (self.turn == "white"):
+                    self.turn = "black"
+                else:
+                    self.turn = "white"
+                
+                #self.root.destroy()
+                #self.rotateBoard()
+
+                self.board.whitePieceUpdate()
+                self.board.blackPieceUpdate()
+                self.currentSquare = None
+                #self.display()
+                wait_for_my_move = True
+
+    def __init__(self, conn_type, ip, port):
         self.board = board.board()
         self.board.startState()
-
-        ##-- SOCKET
-        if(player == "host"):
-            self.my_color = "white"
-            self.sock, self.conn = host_game_2(ip,port)
-            #self.close_all()
-            #TODO: need to find a way to CLEANLY close the port otherwise it stays open sometimes
-        if(player == "connect"):
-            self.my_color = "black"
-            self.sock = connect_to_game_2(ip,port)
-        print(self.sock, self.conn)
-            #self.close_all()
-        ##-- SOCKET
-
-        #self.board.whitePieceCheck()
-        #self.board.blackPieceCheck()
-
-        # for i in range(8):
-        #     for j in range(8):
-        #         if (self.board[i][j] == None):
-        #             continue
-        #         elif (self.board[i][j].get_name() == 'p'):
-        #             self.board.pawnCheck(i,j,'w')
-
-    def close_all(self):
-        if(self.sock != None):
-            self.sock.close()
-            print("closed socket")
-        if(self.conn != None):
-            self.sock.close()
-            print("closed connection")
-
+        self.board.whitePieceUpdate()
+        self.board.blackPieceUpdate()
+        if(conn_type == "connect"):
+            self.mycolor = "black"
+        self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
+        self.conn_thread.start()
+        #TODO:somwhere to join or force join this thread
+        
+    def get_conn_thread(self):
+        return self.conn_thread
         
     def rotateBoard(self):
         print("Rotating board")
@@ -101,17 +93,13 @@ class game:
         # Set board to new board
         self.board = newBoard
          
-    def selectsquare(self,i,j,root):
-        ##-- SOCKET
-        #print(self.sock, self.conn)
-        if(self.turn != self.my_color):
-            if(self.my_color == "white"):
-                i,j,currentX,currentY,self.turn = recv_instruction_2(self.conn)
-
-            else:
-                i,j,currentX,currentY,self.turn = recv_instruction_2(self.sock)
+                    
+    def selectsquare(self,i,j):
+        print("SELECT SQUARE")
+        print(self.board.whitePieces)
+        print(self.board.blackPieces)
+        if(self.turn != self.mycolor):
             return
-        ##-- SOCKET
         print("selected square ", i , "," , j)
 
         if (self.currentSquare == None):
@@ -136,19 +124,10 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
-            #obv pieces can still just jump over other pieces
-            validMoves = [move[:] for move in pieceObject.get_possible_moves()] # a deep copy on 2d array cuz python 
-            if(self.board.getSquare(self.currentSquare[0], self.currentSquare[1]).get_color() == "white"):
-                for move in validMoves:
-                    move[0] = self.currentSquare[0] - move[0]
-                    move[1] = self.currentSquare[1] - move [1]
-            else:
-                for move in validMoves:
-                    move[0] = self.currentSquare[0] + move[0]
-                    move[1] = self.currentSquare[1] + move[1]
+            validMoves = pieceObject.get_possible_moves()
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
-            wantedMoveXY = [newX,newY]
+            wantedMoveXY = (newX,newY)
             print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
             print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
             
@@ -158,21 +137,15 @@ class game:
                 return
             if wantedMoveXY in validMoves:
                 print("Valid Move")
+                pass
                 # Move the piece if it is valid
                 # self.board[i][j] = self.board[currentX][currentY]
                 # self.board[currentX][currentY] = None
                 # self.currentSquare = None
 
-                ##-- SOCKET
-                #TODO:needs to be validated first
-                b_turn = bytes(self.turn, "utf-8")
-                instruction = pack("iiii5s",i,j,currentX,currentY,b_turn)
-                print(self.sock, self.conn)
-                if(self.my_color == "white"):
-                    send_instruction_2(self.conn, instruction)
-                else:
-                    send_instruction_2(self.sock, instruction)
-                ##-- SOCKET
+                global_vars.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.mycolor,"utf-8"))
+
+                global_vars.send_event.set()
                 self.board.movePiece(i,j,currentX,currentY,self.turn)
 
                 # self.board.chessArray[i][j] = self.board.getSquare(currentX,currentY)
@@ -184,51 +157,35 @@ class game:
                 else:
                     self.turn = "white"
                 
-                root.destroy()
+                self.root.destroy()
                 #self.rotateBoard()
 
-                #self.board.whitePieceCheck()
-                #self.board.blackPieceCheck()
+                self.board.whitePieceUpdate()
+                self.board.blackPieceUpdate()
                 self.currentSquare = None
                 self.display()
                 
             else: 
                 print("Invalid move")
                 return
-        ##--- SOCKET
-        if(self.turn != self.my_color):
-            if(self.my_color == "white"):
-                i,j,currentX,currentY,self.turn = recv_instruction_2(self.conn)
-
-            else:
-                i,j,currentX,currentY,self.turn = recv_instruction_2(self.sock)
-            if(self.turn != 1): 
-                print("CHANGER TURNS")
-                if (self.turn == "white"):
-                    self.turn = "black"
-                else:
-                    self.turn = "white"
-            else:
-                print("error")
-            
-        ##-- SOCKET
 
 
     def display(self):
-        root = tk.Tk()
-        root.geometry("800x800")
-        frm = tk.Frame(root)
+        self.root = tk.Tk()
+        self.root.geometry("800x800")
+        self.root.title(self.mycolor)
+        frm = tk.Frame(self.root)
         frm.grid()
         
 
         #print(self.board)
         # #Specify Grid
-        # tk.Grid.rowconfigure(root,0,weight=1)
-        # tk.Grid.columnconfigure(root,0,weight=1)
+        # tk.Grid.rowconfigure(self.root,0,weight=1)
+        # tk.Grid.columnconfigure(self.root,0,weight=1)
 
         for i in range(10):
-            tk.Grid.columnconfigure(root,i,weight=1)
-            tk.Grid.rowconfigure(root,i,weight=1)
+            tk.Grid.columnconfigure(self.root,i,weight=1)
+            tk.Grid.rowconfigure(self.root,i,weight=1)
 
         buttons = []
         for i in range(8):
@@ -241,12 +198,12 @@ class game:
                     # img_path = os.path.join(base_path,self.board[i][j].image)
                     # photo = tk.PhotoImage(file = img_path)
                     # photo = photo.subsample(50,50) 
-                    # button = tk.Button(root, image = photo)                        #need lambda to pass args for the command function
-                    button = tk.Button(root, text = self.board.getSquare(i,j).get_name(), command = lambda a = i, b = j, c = root:self.selectsquare(a,b,c),bg = colors[(i+j)%2],fg = self.board.getSquare(i,j).get_color(), font=("Arial", 16))
+                    # button = tk.Button(self.root, image = photo)                        #need lambda to pass args for the command function
+                    button = tk.Button(self.root, text = self.board.getSquare(i,j).get_name(), command = lambda a = i, b = j:self.selectsquare(a,b),bg = colors[(i+j)%2],fg = self.board.getSquare(i,j).get_color(), font=("Arial", 16))
                 else:
-                    button = tk.Button(root, text = "", command = lambda a = i, b = j:self.selectsquare(a,b,root),bg = colors[(i+j)%2])
+                    button = tk.Button(self.root, text = "", command = lambda a = i, b = j:self.selectsquare(a,b),bg = colors[(i+j)%2])
                 newrow.append(button)
                 button.grid(row = i,column = j, sticky = "NSEW")
             buttons.append(newrow)
 
-        root.mainloop()     
+        self.root.mainloop()     

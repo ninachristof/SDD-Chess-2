@@ -72,6 +72,7 @@ class p2p:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind((self.ip, self.port))
         self.sock.listen(5)
+        print(self.sock)
         self.conn, addr = self.sock.accept()
         self.conn.setblocking(True)
         self.conn.settimeout(None)

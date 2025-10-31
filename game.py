@@ -24,7 +24,6 @@ class game:
     currentSquare = None
     newSquare = None
     turn = "white"
-    mycolor = "white"
     conn_thread = None
     new_p2p = None
     screen = None
@@ -51,44 +50,35 @@ class game:
             else:
                 #wait for instruction
                 instruction = self.new_p2p.recv_instruction_2() 
+                print(f"{instruction[0]}, {7 -  instruction[0]}")
+                print(f"{instruction[2]}, {7 -  instruction[2]}")
                 if(instruction == 1):
                     print("INSTRUCTION ERROR")
                     break
-                self.execute_instruction(instruction[0], instruction[1],instruction[2],instruction[3])
+                self.execute_instruction(7 - instruction[0],instruction[1],7 - instruction[2],instruction[3])
                 wait_for_my_move = True
         self.new_p2p.close_all()
 
+
     def __init__(self, conn_type, ip, port):
         self.board = board.board()
-        self.board.startState()
+        if(conn_type == "connect"):
+            self.board.mycolor = "black"
+        else:
+            self.board.mycolor = "white"
+        self.board.startState(self.board.mycolor)
         self.board.whitePieceUpdate()
         self.board.blackPieceUpdate()
-        if(conn_type == "connect"):
-            self.mycolor = "black"
         self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
         self.conn_thread.start()
         pygame.init()
         self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
-        pygame.display.set_caption(f"Chess {self.mycolor}")
+        pygame.display.set_caption(f"Chess {self.board.mycolor}")
         #TODO:somwhere to join or force join this thread
         
     def get_conn_thread(self):
         return self.conn_thread
         
-    def rotateBoard(self):
-        print("Rotating board")
-        # Create a new baord to initialize values into 
-        newBoard = [[None for _ in range(8)] for _ in range(8)]
-        for x in range(8):
-            for y in range(8): 
-                # Find new x and y positions
-                newX = abs(x - 7)
-                newY = abs(y - 7)
-                #print(f"Old  x {x} new x {newX} old y {y} new y {newY}")
-                newBoard[newX][newY] = self.board[x][y]
-                
-        # Set board to new board
-        self.board = newBoard
          
                     
     def execute_instruction(self,i,j,currentX,currentY):
@@ -107,7 +97,7 @@ class game:
         print("SELECT SQUARE")
         print(self.board.whitePieces)
         print(self.board.blackPieces)
-        if(self.turn != self.mycolor):
+        if(self.turn != self.board.mycolor):
             return
         print("selected square ", i , "," , j)
 
@@ -146,7 +136,7 @@ class game:
                 return
             if wantedMoveXY in validMoves:
                 print("Valid Move")
-                self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.mycolor,"utf-8"))
+                self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.board.mycolor,"utf-8"))
 
                 global_vars.send_event.set()
                 self.execute_instruction(i,j,currentX,currentY)

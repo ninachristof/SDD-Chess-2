@@ -20,6 +20,8 @@ class p2p:
     conn = None
     ip = None
     port = None
+    waiting = False
+
     def __init__(self, conn_type, ip, port):
         self.conn_type = conn_type
         self.ip = ip
@@ -32,9 +34,12 @@ class p2p:
             self.conn.close()
         if(self.sock != None):
             self.sock.close()
+
     def recv_instruction_2(self):
         print("host:", self.conn)
+        self.waiting = True
         data = self.conn.recv(PKT_HDR_SIZE)
+        self.waiting = False
         if not data:
             print("empty packet")
             return ERROR
@@ -44,26 +49,23 @@ class p2p:
             return ERROR
         print(f"Received header {data}")
         print(f"size {instruction_size}")
+        self.waiting = True
         instruction = self.conn.recv(instruction_size)
+        self.waiting = False
         if not instruction:
             print("empty packet")
             return ERROR
         print(f"Received  instruction {data}")
         #instruction should be validated before sending. this should only parse
         x1,y1,x0,y0,color = unpack("iiii5s", instruction)
-        return (x1,y1,x0,y0,color)
+        return (x1,y1,x0,y0,color)#TODO: prob get rid of color since both parties keep track individually
 
-    def send_instruction_2(self):
-        #TODO: not make the current instruction global
-            print(f"sending {global_vars.current_instruction}")
-            #test_pkt = pack("5ci",PKT_HDR,len(instruction))
-            hdr = pack("5si", PKT_HDR, len(global_vars.current_instruction))
-            #sock.sendall(b"help me")
+    def send_instruction_2(self, current_instruction):
+            print(f"sending {current_instruction}")
+            hdr = pack("5si", PKT_HDR, len(current_instruction))
             bytes_sent = self.conn.sendall(hdr)
-            #if(bytes_sent != len(hdr)):
-            #    self.sock.send(hdr[bytes_sent:])
                 
-            self.conn.sendall(global_vars.current_instruction)
+            self.conn.sendall(current_instruction)
 
     #host is host ip probably 0.0.0.0 so that it listens to inconming traffic
     def host_game_2(self):
@@ -74,20 +76,10 @@ class p2p:
         self.conn.setblocking(True)
         self.conn.settimeout(None)
         print("HOST ACCEPTED")
-        #with conn:
-        # do a few retries for packet maybe add a timeout
-        #make sure it recieved all data, add header and maybe footer
         #TODO: how ot handle disconnections/ bad wifi?
         #TODO: how are the timers going to be synced up? 
         #todo: if error on receiving end, send a request to resend mesage
         #TODO: timestamp
-        #    print(f"HOST: Connected to {addr}")
-        #    while True:
-        #        if(ERROR == recv_instruction(conn)):
-        #            break
-        #        
-                #response = b"fucki"
-                #conn.sendall(response)
     def connect_to_game_2(self):
         #TODO: have a loop of connection retries
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

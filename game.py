@@ -28,7 +28,10 @@ class game:
     conn_thread = None
     new_p2p = None
     screen = None
+    current_instruction = ""
+    running = True
 
+#running this function on a separte thread
     def run_socket(self,conn_type, ip, port):
         self.new_p2p = p2p(conn_type, ip, port)
         self.new_p2p.init_p2p()
@@ -36,37 +39,22 @@ class game:
         if(conn_type == "connect"):
             wait_for_my_move = False
 
-        for i in range(5):
-            print(f"LOOP {i}")
+        while(self.running):
+            #send instruction
             if(wait_for_my_move):
                 global_vars.send_event.wait()
-                
-                print("done waiting")
-                self.new_p2p.send_instruction_2()
+                if(not self.running):
+                    break
+                self.new_p2p.send_instruction_2(self.current_instruction)
                 global_vars.send_event.clear()
                 wait_for_my_move = False
             else:
+                #wait for instruction
                 instruction = self.new_p2p.recv_instruction_2() 
-                print(f"RECEIVED INSTRUCTION BY {self.mycolor} : {instruction}")
                 if(instruction == 1):
                     print("INSTRUCTION ERROR")
-                    continue
-                #TODO: takeout color
-                self.board.movePiece(instruction[0], instruction[1],instruction[2],instruction[3],(instruction[4]).decode("utf-8"))
-                #add lock to this or is this probably fine?
-                if (self.turn == "white"):
-                    self.turn = "black"
-                else:
-                    self.turn = "white"
-                
-                #self.root.destroy()
-                #self.rotateBoard()
-
-                self.board.whitePieceUpdate()
-                self.board.blackPieceUpdate()
-                self.currentSquare = None
-                #self.display()
-                #self.root.update_idletasks()
+                    break
+                self.execute_instruction(instruction[0], instruction[1],instruction[2],instruction[3])
                 wait_for_my_move = True
         self.new_p2p.close_all()
 
@@ -103,6 +91,18 @@ class game:
         self.board = newBoard
          
                     
+    def execute_instruction(self,i,j,currentX,currentY):
+        self.board.movePiece(i,j,currentX,currentY,self.turn)
+
+        if (self.turn == "white"):
+            self.turn = "black"
+        else:
+            self.turn = "white"
+        
+        self.board.whitePieceUpdate()
+        self.board.blackPieceUpdate()
+        self.currentSquare = None
+
     def selectsquare(self,i,j):
         print("SELECT SQUARE")
         print(self.board.whitePieces)
@@ -146,40 +146,29 @@ class game:
                 return
             if wantedMoveXY in validMoves:
                 print("Valid Move")
-                pass
-                # Move the piece if it is valid
-                # self.board[i][j] = self.board[currentX][currentY]
-                # self.board[currentX][currentY] = None
-                # self.currentSquare = None
-
-                global_vars.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.mycolor,"utf-8"))
+                self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.mycolor,"utf-8"))
 
                 global_vars.send_event.set()
-                self.board.movePiece(i,j,currentX,currentY,self.turn)
-
-                # self.board.chessArray[i][j] = self.board.getSquare(currentX,currentY)
-                # self.board.chessArray[currentX][currentY] = None
-                # self.currentSquare = None
-
-                if (self.turn == "white"):
-                    self.turn = "black"
-                else:
-                    self.turn = "white"
-                
-                #self.root.destroy()
-                #self.rotateBoard()
-
-                self.board.whitePieceUpdate()
-                self.board.blackPieceUpdate()
-                self.currentSquare = None
-                #self.display()
+                self.execute_instruction(i,j,currentX,currentY)
                 
             else: 
                 print("Invalid move")
                 return
 
     def draw_valid(self):
-        pass
+        if(self.currentSquare != None):
+            currentX, currentY = self.currentSquare
+            pieceObject = self.board.getSquare(currentX,currentY)
+            validMoves = pieceObject.get_possible_moves()
+            gray = (180,180,180)
+            green = (55,96,12)
+            for move in validMoves:
+                adj_mov = ((8 * move[0]) + move[1])
+                if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
+                    pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                else:
+                    pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+
     def draw_captured(self):
         pass
     def draw_pieces(self):
@@ -208,16 +197,16 @@ class game:
             pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
             status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
                            'Black: Select a Piece to Move!', 'Black: Select a Destination!']
+            self.draw_valid()
             for i in range(9):
                 pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
                 pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
 
     def main_loop(self):
-        running = True
-        while running:
+        while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False#TODO: THIS SHIT NOT WORKING
+                    self.running = False#TODO: THIS SHIT NOT WORKING
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
             self.screen.fill((105,146,62))
@@ -225,14 +214,7 @@ class game:
             self.draw_pieces()
             pygame.display.flip()
             #self.draw_captured()
-            ##valid_moves = check_valid_moves()
-            ##draw_valid
-            #for event in pygame.event.get():
-            #    if event.type == pygame.QUIT:
-            #        #abort
-            #        pass
-            #    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            #        self.selectsquare(event.pos[0] // 100, event.pos[1] // 100)
 
         pygame.display.quit()
         pygame.quit()
+        global_vars.send_event.set()

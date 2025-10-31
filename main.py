@@ -30,6 +30,7 @@ def main():
     conn_thread = newgame.get_conn_thread()
 
     newgame.main_loop()
+    print("------- FINISHED MAIN LOOP -------")
     if(newgame.new_p2p):
         newgame.new_p2p.close_all()
         conn_thread.join()

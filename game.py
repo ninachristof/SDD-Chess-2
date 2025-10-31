@@ -124,7 +124,7 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
-            validMoves = pieceObject.get_possible_moves()
+            validMoves = self.board.getLegalMoves(currentX,currentY)
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)
@@ -165,9 +165,9 @@ class game:
                         pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 if (self.board.mycolor == "black"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     else:
-                        pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
 
     def draw_captured(self):
         pass
@@ -188,12 +188,12 @@ class game:
                 x = self.board.whitePieces[i][0]
                 y = self.board.whitePieces[i][1]
                 piece = self.board.chessArray[x][y]
-                self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                self.screen.blit(piece.sprite, ((7-y) * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
             for i in range(len(self.board.blackPieces)):
                 x = self.board.blackPieces[i][0]
                 y = self.board.blackPieces[i][1]
                 piece = self.board.chessArray[x][y]
-                self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , (7-x)  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
+                self.screen.blit(piece.sprite, ((7-y) *(HEIGHT * 0.1) , (7-x)  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
 
 
     def draw_board(self):
@@ -201,16 +201,10 @@ class game:
                 column = i % 4
                 row = i // 4
                 color = (255,255,255)
-                if (self.board.mycolor == "white"):
-                    if row % 2 == 0:
-                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                    else:
-                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                if (self.board.mycolor == "black"):
-                    if row % 2 == 1:
-                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                    else:
-                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                if row % 2 == 0:
+                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                else:
+                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
                 pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
                 pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
@@ -230,7 +224,7 @@ class game:
                     if (self.board.mycolor == "white"):
                         self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
                     else:
-                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()

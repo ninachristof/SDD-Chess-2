@@ -55,7 +55,7 @@ class game:
                 if(instruction == 1):
                     print("INSTRUCTION ERROR")
                     break
-                self.execute_instruction(7 - instruction[0],instruction[1],7 - instruction[2],instruction[3])
+                self.execute_instruction(7 - instruction[0],7- instruction[1],7 - instruction[2],7 - instruction[3])
                 wait_for_my_move = True
         self.new_p2p.close_all()
 

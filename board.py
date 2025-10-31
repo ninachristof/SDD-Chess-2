@@ -58,6 +58,65 @@ class board:
         else:
             self.blackPieces.append((x, y))
 
+    def startState(self, color): # Initial board setup. 
+        # Initialize Pawns
+        #if(color == "white"):
+        for i in range(8):
+            self.addPiece(1, i, "p", "black")
+            self.addPiece(6, i, "p", "white")
+
+        # Initialize Knights
+        self.addPiece(7, 1, "kn", "white")
+        self.addPiece(7, 6, "kn", "white")
+        self.addPiece(0, 1, "kn", "black")
+        self.addPiece(0, 6, "kn", "black")
+        
+        # Initialize Rooks
+        self.addPiece(7, 0, "r", "white")
+        self.addPiece(7, 7, "r", "white")
+        self.addPiece(0, 0, "r", "black")
+        self.addPiece(0, 7, "r", "black")
+
+        # Initialize Bishops
+        self.addPiece(7, 2, "b", "white")
+        self.addPiece(7, 5, "b", "white")
+        self.addPiece(0, 2, "b", "black")
+        self.addPiece(0, 5, "b", "black")
+        
+        # Initialize Kings and Queens
+        self.addPiece(7, 4, "k", "white")
+        self.addPiece(7, 3, "q", "white")
+        self.addPiece(0, 4, "k", "black")
+        self.addPiece(0, 3, "q", "black")
+        # if(color == "black"):
+        #     for i in range(8):
+        #         self.addPiece(1, i, "p", "white")
+        #         self.addPiece(6, i, "p", "black")
+
+        #     # Initialize Knights
+        #     self.addPiece(7, 1, "kn", "black")
+        #     self.addPiece(7, 6, "kn", "black")
+        #     self.addPiece(0, 1, "kn", "white")
+        #     self.addPiece(0, 6, "kn", "white")
+            
+        #     # Initialize Rooks
+        #     self.addPiece(7, 0, "r", "black")
+        #     self.addPiece(7, 7, "r", "black")
+        #     self.addPiece(0, 0, "r", "white")
+        #     self.addPiece(0, 7, "r", "white")
+
+        #     # Initialize Bishops
+        #     self.addPiece(7, 2, "b", "black")
+        #     self.addPiece(7, 5, "b", "black")
+        #     self.addPiece(0, 2, "b", "white")
+        #     self.addPiece(0, 5, "b", "white")
+            
+        #     # Initialize Kings and Queens
+        #     self.addPiece(7, 4, "k", "black")
+        #     self.addPiece(7, 3, "q", "black")
+        #     self.addPiece(0, 4, "k", "white")
+        #     self.addPiece(0, 3, "q", "white")
+
     # Reset board and remove all pieces. 
     def clear(self):
         self.chessArray = [[None for j in range(8)] for i in range(8)]

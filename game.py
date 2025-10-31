@@ -50,12 +50,12 @@ class game:
             else:
                 #wait for instruction
                 instruction = self.new_p2p.recv_instruction_2() 
-                print(f"{instruction[0]}, {7 -  instruction[0]}")
-                print(f"{instruction[2]}, {7 -  instruction[2]}")
+                print(f"{instruction[0]}, {instruction[0]}")
+                print(f"{instruction[2]}, {instruction[2]}")
                 if(instruction == 1):
                     print("INSTRUCTION ERROR")
                     break
-                self.execute_instruction(7 - instruction[0],instruction[1],7 - instruction[2],instruction[3])
+                self.execute_instruction(instruction[0],instruction[1],instruction[2],instruction[3])
                 wait_for_my_move = True
         self.new_p2p.close_all()
 
@@ -67,8 +67,8 @@ class game:
         else:
             self.board.mycolor = "white"
         self.board.startState(self.board.mycolor)
-        self.board.whitePieceUpdate()
-        self.board.blackPieceUpdate()
+        self.board.whitePieceUpdateLegal()
+        self.board.blackPieceUpdateLegal()
         self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
         self.conn_thread.start()
         pygame.init()
@@ -82,6 +82,7 @@ class game:
          
                     
     def execute_instruction(self,i,j,currentX,currentY):
+        print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
         self.board.movePiece(i,j,currentX,currentY,self.turn)
 
         if (self.turn == "white"):
@@ -89,8 +90,8 @@ class game:
         else:
             self.turn = "white"
         
-        self.board.whitePieceUpdate()
-        self.board.blackPieceUpdate()
+        self.board.whitePieceUpdateLegal()
+        self.board.blackPieceUpdateLegal()
         self.currentSquare = None
 
     def selectsquare(self,i,j):
@@ -149,7 +150,7 @@ class game:
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
-            validMoves = pieceObject.get_possible_moves()
+            validMoves = self.board.getLegalMoves(currentX,currentY)
             gray = (180,180,180)
             green = (55,96,12)
             print("Valid moves are ")
@@ -157,43 +158,68 @@ class game:
             for move in validMoves:
                 print("Move is ", move)
                 adj_mov = ((8 * move[0]) + move[1])
-                if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                    pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                else:
-                    pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                if (self.board.mycolor == "white"):
+                    if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
+                        pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    else:
+                        pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                if (self.board.mycolor == "black"):
+                    if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
+                        pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    else:
+                        pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
 
     def draw_captured(self):
         pass
     def draw_pieces(self):
-        for i in range(len(self.board.whitePieces)):
-            x = self.board.whitePieces[i][0]
-            y = self.board.whitePieces[i][1]
-            piece = self.board.chessArray[x][y]
-            self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
-        for i in range(len(self.board.blackPieces)):
-            x = self.board.blackPieces[i][0]
-            y = self.board.blackPieces[i][1]
-            piece = self.board.chessArray[x][y]
-            self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
+        if (self.board.mycolor == "white"):
+            for i in range(len(self.board.whitePieces)):
+                x = self.board.whitePieces[i][0]
+                y = self.board.whitePieces[i][1]
+                piece = self.board.chessArray[x][y]
+                self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+            for i in range(len(self.board.blackPieces)):
+                x = self.board.blackPieces[i][0]
+                y = self.board.blackPieces[i][1]
+                piece = self.board.chessArray[x][y]
+                self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
+        else:
+            for i in range(len(self.board.whitePieces)):
+                x = self.board.whitePieces[i][0]
+                y = self.board.whitePieces[i][1]
+                piece = self.board.chessArray[x][y]
+                self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+            for i in range(len(self.board.blackPieces)):
+                x = self.board.blackPieces[i][0]
+                y = self.board.blackPieces[i][1]
+                piece = self.board.chessArray[x][y]
+                self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , (7-x)  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
+
 
     def draw_board(self):
-        for i in range(32):
-            column = i % 4
-            row = i // 4
-            color = (255,255,255)
-            if row % 2 == 0:
-                pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-            else:
-                pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-            pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
-            pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
-            pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
-            status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
-                           'Black: Select a Piece to Move!', 'Black: Select a Destination!']
-            self.draw_valid()
-            for i in range(9):
-                pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
-                pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
+            for i in range(32):
+                column = i % 4
+                row = i // 4
+                color = (255,255,255)
+                if (self.board.mycolor == "white"):
+                    if row % 2 == 0:
+                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    else:
+                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                if (self.board.mycolor == "black"):
+                    if row % 2 == 1:
+                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    else:
+                        pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
+                pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
+                pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
+                status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
+                            'Black: Select a Piece to Move!', 'Black: Select a Destination!']
+                self.draw_valid()
+                for i in range(9):
+                    pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
+                    pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
 
     def main_loop(self):
         while self.running:
@@ -201,7 +227,10 @@ class game:
                 if event.type == pygame.QUIT:
                     self.running = False#TODO: THIS SHIT NOT WORKING
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+                    if (self.board.mycolor == "white"):
+                        self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+                    else:
+                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()

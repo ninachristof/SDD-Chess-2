@@ -1,21 +1,24 @@
 from chesspiece import *
 import threading
-import tkinter as tk
 import board
 import struct
 from p2p import *
 import global_vars
+import pygame
 
 import os #need this for the images if we want to use relative paths?
 
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
+WIDTH = 800
+HEIGHT = 800
+
 
 def printout():
     print("hello world")
 class game:
-    root = None
+    #root = None
     board = None
     turn = None
     currentSquare = None
@@ -24,7 +27,7 @@ class game:
     mycolor = "white"
     conn_thread = None
     new_p2p = None
-
+    screen = None
 
     def run_socket(self,conn_type, ip, port):
         self.new_p2p = p2p(conn_type, ip, port)
@@ -33,7 +36,8 @@ class game:
         if(conn_type == "connect"):
             wait_for_my_move = False
 
-        while(1):
+        for i in range(5):
+            print(f"LOOP {i}")
             if(wait_for_my_move):
                 global_vars.send_event.wait()
                 
@@ -62,7 +66,9 @@ class game:
                 self.board.blackPieceUpdate()
                 self.currentSquare = None
                 #self.display()
+                #self.root.update_idletasks()
                 wait_for_my_move = True
+        self.new_p2p.close_all()
 
     def __init__(self, conn_type, ip, port):
         self.board = board.board()
@@ -73,6 +79,9 @@ class game:
             self.mycolor = "black"
         self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
         self.conn_thread.start()
+        pygame.init()
+        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
+        pygame.display.set_caption(f"Chess {self.mycolor}")
         #TODO:somwhere to join or force join this thread
         
     def get_conn_thread(self):
@@ -157,53 +166,73 @@ class game:
                 else:
                     self.turn = "white"
                 
-                self.root.destroy()
+                #self.root.destroy()
                 #self.rotateBoard()
 
                 self.board.whitePieceUpdate()
                 self.board.blackPieceUpdate()
                 self.currentSquare = None
-                self.display()
+                #self.display()
                 
             else: 
                 print("Invalid move")
                 return
 
+    def draw_valid(self):
+        pass
+    def draw_captured(self):
+        pass
+    def draw_pieces(self):
+        for i in range(len(self.board.whitePieces)):
+            x = self.board.whitePieces[i][0]
+            y = self.board.whitePieces[i][1]
+            piece = self.board.chessArray[x][y]
+            self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+        for i in range(len(self.board.blackPieces)):
+            x = self.board.blackPieces[i][0]
+            y = self.board.blackPieces[i][1]
+            piece = self.board.chessArray[x][y]
+            self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
 
-    def display(self):
-        self.root = tk.Tk()
-        self.root.geometry("800x800")
-        self.root.title(self.mycolor)
-        frm = tk.Frame(self.root)
-        frm.grid()
-        
+    def draw_board(self):
+        for i in range(32):
+            column = i % 4
+            row = i // 4
+            color = (255,255,255)
+            if row % 2 == 0:
+                pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            else:
+                pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
+            pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
+            pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
+            status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
+                           'Black: Select a Piece to Move!', 'Black: Select a Destination!']
+            for i in range(9):
+                pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
+                pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
 
-        #print(self.board)
-        # #Specify Grid
-        # tk.Grid.rowconfigure(self.root,0,weight=1)
-        # tk.Grid.columnconfigure(self.root,0,weight=1)
+    def main_loop(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False#TODO: THIS SHIT NOT WORKING
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+            self.screen.fill((105,146,62))
+            self.draw_board()
+            self.draw_pieces()
+            pygame.display.flip()
+            #self.draw_captured()
+            ##valid_moves = check_valid_moves()
+            ##draw_valid
+            #for event in pygame.event.get():
+            #    if event.type == pygame.QUIT:
+            #        #abort
+            #        pass
+            #    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            #        self.selectsquare(event.pos[0] // 100, event.pos[1] // 100)
 
-        for i in range(10):
-            tk.Grid.columnconfigure(self.root,i,weight=1)
-            tk.Grid.rowconfigure(self.root,i,weight=1)
-
-        buttons = []
-        for i in range(8):
-            newrow = []
-            for j in range(8):
-                button = None
-                if (self.board.getSquare(i,j) != None):
-                    #Attempt at PNGs, they don't work too well D:
-                    # base_path = os.path.dirname(__file__)
-                    # img_path = os.path.join(base_path,self.board[i][j].image)
-                    # photo = tk.PhotoImage(file = img_path)
-                    # photo = photo.subsample(50,50) 
-                    # button = tk.Button(self.root, image = photo)                        #need lambda to pass args for the command function
-                    button = tk.Button(self.root, text = self.board.getSquare(i,j).get_name(), command = lambda a = i, b = j:self.selectsquare(a,b),bg = colors[(i+j)%2],fg = self.board.getSquare(i,j).get_color(), font=("Arial", 16))
-                else:
-                    button = tk.Button(self.root, text = "", command = lambda a = i, b = j:self.selectsquare(a,b),bg = colors[(i+j)%2])
-                newrow.append(button)
-                button.grid(row = i,column = j, sticky = "NSEW")
-            buttons.append(newrow)
-
-        self.root.mainloop()     
+        pygame.display.quit()
+        pygame.quit()

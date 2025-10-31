@@ -421,8 +421,8 @@ class board:
             elif (self.chessArray[x][y].get_name() == "k"): # King
                 possibleMoves = self.kingCheck(x, y, "white")
                 self.whiteKingXY = (x, y)
-            print("WHITE {} AT ({}, {}). It can move to ".format(self.getSquare(x, y).get_name(), x, y), end="")
-            print(possibleMoves)
+            #print("WHITE {} AT ({}, {}). It can move to ".format(self.getSquare(x, y).get_name(), x, y), end="")
+            #print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece. 
 
     # Same as whitePieceCheck, but for the black pieces. 
@@ -443,8 +443,8 @@ class board:
             elif (self.chessArray[x][y].get_name() == "k"): 
                 possibleMoves = self.kingCheck(x, y, "black")
                 self.blackKingXY = (x, y)
-            print("BLACK {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
-            print(possibleMoves)
+            #print("BLACK {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
+            #print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
     
     # Can the square at (x, y) be captured by the opposing color pieces?

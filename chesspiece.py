@@ -1,3 +1,5 @@
+import pygame
+
 class chesspiece:
     name = None
     x = 0
@@ -6,6 +8,7 @@ class chesspiece:
     firstMove = True
     possibleMoves = None
     multipleMoves = False
+    sprite = None
     
     def get_name(self): 
         return self.name
@@ -15,6 +18,8 @@ class chesspiece:
     
     def hasMoved(self):
         return self.firstMove
+    def get_spite(self):
+        return self.sprite
     
     # Takes in a list of lists of possible New moves, split into subgroups. 
     # Unfolds that list of lists. 
@@ -38,6 +43,10 @@ class pawn(chesspiece):
         self.x = x
         self.y = y
         self.color = color
+        if(color == "white"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_plt60.png"), (80,80))
+        elif(color == "black"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_pdt60.png"), (80,80))
         
 
 class knight(chesspiece):
@@ -49,8 +58,11 @@ class knight(chesspiece):
              [1,2],[1,-2],[2,1],[2,-1],[-1,2],[-1,-2],
              [-2,1],[-2,-1]
         ]
-        self.image = "blackknight.png"
         self.color = color
+        if(color == "white"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_nlt60.png"), (80,80))
+        elif(color == "black"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_ndt60.png"), (80,80))
 
 class king(chesspiece):
     def __init__(self,x,y,color):
@@ -59,6 +71,10 @@ class king(chesspiece):
         self.y = y
         self.possibleMoves = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
         self.color = color
+        if(color == "white"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_klt60.png"), (80,80))
+        elif(color == "black"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_kdt60.png"), (80,80))
 
 class queen(chesspiece):
     def __init__(self,x,y,color):
@@ -77,6 +93,10 @@ class queen(chesspiece):
             self.possibleMoves.append([i,-i])
             self.possibleMoves.append([-i,-i])
         self.color = color
+        if(color == "white"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_qlt60.png"), (80,80))
+        elif(color == "black"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_qdt60.png"), (80,80))
 
 class rook(chesspiece):
     def __init__(self,x,y,color):
@@ -90,6 +110,10 @@ class rook(chesspiece):
             self.possibleMoves.append([i,0])
             self.possibleMoves.append([-i,0])
         self.color = color
+        if(color == "white"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_rlt60.png"), (80,80))
+        elif(color == "black"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_rdt60.png"), (80,80))
 
 class bishop(chesspiece):
     def __init__(self,x,y,color):
@@ -103,3 +127,7 @@ class bishop(chesspiece):
             self.possibleMoves.append([i,-i])
             self.possibleMoves.append([-i,-i])
         self.color = color
+        if(color == "white"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_blt60.png"), (80,80))
+        elif(color == "black"):
+            self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_bdt60.png"), (80,80))

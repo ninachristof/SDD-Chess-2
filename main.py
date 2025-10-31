@@ -3,6 +3,9 @@ import threading
 import p2p
 import global_vars
 from p2p import *
+#TEMP
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 
 def main():
     if(len(sys.argv) < 4 ):
@@ -26,9 +29,10 @@ def main():
     #conn_thread = threading.Thread(target=run_socket, args=(conn_type, ip, port, send_event))
     conn_thread = newgame.get_conn_thread()
 
-    newgame.display()
-    newgame.new_p2p.close_all()
-    conn_thread.join()
+    newgame.main_loop()
+    if(newgame.new_p2p):
+        newgame.new_p2p.close_all()
+        conn_thread.join()
     print("FINISHED PROGRAM")
     #add something to trigger and stop host listening instead of on init
     

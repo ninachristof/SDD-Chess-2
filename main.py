@@ -10,8 +10,9 @@ warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 def main():
     if(len(sys.argv) < 4 ):
         print("ERROR WRONG NUMBER OF ARGUMENTS")
-        print("usage: p2p.py <host/connect> <ip> <port>")
-        print("ex: p2p.py host 0.0.0.0  2020")
+        print("usage: python main.py <host/connect> <ip> <port>")
+        print("ex: python main.py host 0.0.0.0 2020 for host/white and ")
+        print("python main.py connect 127.0.0.1 2020 for connector/black")
         return
 
     conn_type = sys.argv[1].strip()

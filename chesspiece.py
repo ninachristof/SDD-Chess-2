@@ -6,7 +6,7 @@ class chesspiece:
     y = 0
     color = None
     firstMove = True
-    possibleMoves = None
+    possibleMoves = []
     multipleMoves = False
     sprite = None
     
@@ -26,7 +26,7 @@ class chesspiece:
     def updatePossibleMoves(self, newMoves):
         self.possibleMoves = []
         for subList in newMoves:
-            self.possibleMoves.extend(subList)
+            self.possibleMoves.extend([subList])
 
     def get_possible_moves(self):
         return self.possibleMoves.copy()

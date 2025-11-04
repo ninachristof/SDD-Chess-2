@@ -66,7 +66,7 @@ class game:
             self.board.mycolor = "black"
         else:
             self.board.mycolor = "white"
-        self.board.startState(self.board.mycolor)
+        #self.board.startState(self.board.mycolor)
         self.board.whitePieceUpdateLegal()
         self.board.blackPieceUpdateLegal()
         self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
@@ -202,6 +202,7 @@ class game:
                 row = i // 4
                 color = (255,255,255)
                 if row % 2 == 0:
+                    #Screen, color, LH corner, RH corner
                     pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 else:
                     pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])

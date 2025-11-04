@@ -17,6 +17,8 @@ HEIGHT = 800
 
 def printout():
     print("hello world")
+
+
 class game:
     #root = None
     board = None
@@ -90,8 +92,18 @@ class game:
         else:
             self.turn = "white"
         
-        self.board.whitePieceUpdateLegal()
-        self.board.blackPieceUpdateLegal()
+        whiteMoves = self.board.whitePieceUpdateLegal()
+        blackMoves = self.board.blackPieceUpdateLegal()
+        if (whiteMoves == 0):
+            if (self.board.isKinginCheck("white")):
+                print("Checkmate! Black Wins")
+            else:
+                print("Stalemate! White has no valid moves")
+        if (blackMoves == 0):
+            if (self.board.isKinginCheck("black")):
+                print("Checkmate! White Wins")
+            else:
+                print("Stalemate! Black has no valid moves")
         self.currentSquare = None
 
     def selectsquare(self,i,j):
@@ -153,8 +165,8 @@ class game:
             validMoves = self.board.getLegalMoves(currentX,currentY)
             gray = (180,180,180)
             green = (55,96,12)
-            print("Valid moves are ")
-            print(validMoves)
+            #print("Valid moves are ")
+            #print(validMoves)
             for move in validMoves:
                 print("Move is ", move)
                 adj_mov = ((8 * move[0]) + move[1])

@@ -404,10 +404,14 @@ class board:
         self.blackPieceUpdate()
 
     def getSquare(self,i,j):
+        if (i < 0 or j < 0 or i > 7 or j > 7):
+            print("Not on board!")
+            return None
         return self.chessArray[i][j]
 
     #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board)
     def getPossibleMoves(self,x,y):
+        print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {self.chessArray[x][y].findMoves(x, y)}")
         possibleMoves = []
         color = self.chessArray[x][y].get_color()
         if (self.chessArray[x][y].get_name() == "p"): # Pawn

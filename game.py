@@ -68,7 +68,7 @@ class game:
             self.board.mycolor = "black"
         else:
             self.board.mycolor = "white"
-        self.board.startState(self.board.mycolor)
+        # self.board.startState(self.board.mycolor)
         self.board.whitePieceUpdateLegal()
         self.board.blackPieceUpdateLegal()
         self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))

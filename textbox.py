@@ -46,10 +46,11 @@ class Textbox():
             pygame.draw.rect(screen, self.color, self.box)
             text_surface = self.font.render(self.default_text, False, (100,100,100))
             screen.blit(text_surface, (self.x, self.y))
-            return
+            return ""
         pygame.draw.rect(screen, self.color, self.box)
         text_surface = self.font.render(self.text, False, (0,0,0))
         screen.blit(text_surface, (self.x, self.y))
+        return self.text
 
 
 

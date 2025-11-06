@@ -46,19 +46,20 @@ class game:
         self.ip = ip
         self.port = port
         self.board = board.board()
-        if(conn_type == "connect"):
+        self.conn_thread = threading.Thread(target=self.run_socket)
+        pygame.init()
+        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
+        pygame.display.set_caption(f"Chess {self.board.mycolor}")
+        #TODO:somwhere to join or force join this thread
+
+    def setup_game(self):
+        if(self.conn_type == "connect"):
             self.board.mycolor = "black"
         else:
             self.board.mycolor = "white"
         self.board.startState(self.board.mycolor)
         self.board.whitePieceUpdateLegal()
         self.board.blackPieceUpdateLegal()
-        self.conn_thread = threading.Thread(target=self.run_socket)
-        #self.conn_thread.start()
-        pygame.init()
-        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
-        pygame.display.set_caption(f"Chess {self.board.mycolor}")
-        #TODO:somwhere to join or force join this thread
         
     def run_socket(self):
         print("RUNNING SOCKET")
@@ -238,6 +239,28 @@ class game:
                     pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
                     pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
 
+    def OLD_main_loop(self):
+        self.setup_game()
+        self.conn_thread.start()
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False#TODO: THIS SHIT NOT WORKING
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if (self.board.mycolor == "white"):
+                        self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+                    else:
+                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+            self.screen.fill((105,146,62))
+            self.draw_board()
+            self.draw_pieces()
+            pygame.display.flip()
+            #self.draw_captured()
+
+        pygame.display.quit()
+        pygame.quit()
+        global_vars.send_event.set()
+
     def main_loop(self):
         state = "main menu"
 
@@ -272,17 +295,28 @@ class game:
             elif state == "host game":
                 #time.sleep(1)
                 self.conn_type = "host"
+                self.ip = "0.0.0.0"
+                self.port = 2020 #TODO: display a selected available port
                 state = "play game"
+                self.setup_game()
                 self.conn_thread.start()
 
             elif state == "join game":
                 self.conn_type = "connect"
                 self.screen.fill((172,200,255))
-                ip_textbox.handle_textbox(self.screen, eventlist)
-                port_textbox.handle_textbox(self.screen, eventlist)
+                self.ip = ip_textbox.handle_textbox(self.screen, eventlist)
+                port = port_textbox.handle_textbox(self.screen, eventlist)
+
                 if(connect_button.draw(self.screen) == 1):
+                    is_num = True
+                    for char in port:
+                        if not char.isdigit():
+                            is_num = False
+                            break
+                    if is_num:
+                        self.port = int(port)
                     state = "play game"
-                    #self.conn_thread = threading.Thread(target=self.run_socket)
+                    self.setup_game()
                     self.conn_thread.start()
 
             elif state == "play game":

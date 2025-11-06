@@ -12,6 +12,7 @@ class board:
     chessArray = [[None for j in range(8)] for i in range(8)]
     whitePieces = [] # The list of locations for white pieces
     blackPieces = [] # The list of locations for black pieces
+    mycolor = ""
 
     def addPiece(self, x, y, piece, color):
         # The coordinates of this are a little messed up. 

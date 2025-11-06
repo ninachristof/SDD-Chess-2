@@ -7,6 +7,7 @@ import global_vars
 import pygame
 from state import *
 from textbox import *
+from button import *
 
 import os #need this for the images if we want to use relative paths?
 
@@ -231,39 +232,49 @@ class game:
 
     def main_loop(self):
         state = "main menu"
-        textbox = Textbox((100,100,100), WIDTH//2, HEIGHT//2, 400,50, 50)
 
 #for main menu
         scale = 5
         button_x_pos = (WIDTH// 2) - (57*scale // 2)
         height_offset = 50
-        start_button = Button(button_x_pos,HEIGHT//2 - height_offset,"create button", None,"resources/create_game_button.png",57,9,scale)
-        join_button = Button(button_x_pos,HEIGHT//2 + height_offset,"join button", None,"resources/join_game_button.png",57,9,scale)
+        start_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, None,"resources/create_game_button.png",57,9,scale)
+        join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset, None,"resources/join_game_button.png",57,9,scale)
+        textbox_width = 350
+        textbox_height = 50
+#for joining game menu
+        #TODO:add color pallete globals cuz this shits getting ugly
+        ip_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 - height_offset, textbox_width,textbox_height, textbox_height-8, "ip")
+        port_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + height_offset, textbox_width,textbox_height, textbox_height-8, "port")
+        host_button = Button((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + 3*height_offset, textbox_width,textbox_height, textbox_height-8, "host game",None)
         while self.running:
             eventlist = pygame.event.get()
             for event in eventlist:
                 if event.type == pygame.QUIT:
-                    self.running = False#TODO: THIS SHIT NOT WORKING
+                    self.running = False
 
             if state == "main menu":
-                screen.fill((172,200,255))
-                start_button.draw(screen)
-                join_button.draw(screen)
+                self.screen.fill((172,200,255))
+                start_button.draw(self.screen)
+                if(join_button.draw(self.screen) == 1):
+                    state = "join game"
 
-            if state == 8:
+            elif state == "join game":
+                self.screen.fill((172,200,255))
+                ip_textbox.handle_textbox(self.screen, eventlist)
+                port_textbox.handle_textbox(self.screen, eventlist)
+                host_button.draw(self.screen)
+
+            elif state == 8:
                 for event in eventlist:
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #    if (self.board.mycolor == "white"):
                             self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
-                        else:
-                            self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                    else:
+                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
                 self.screen.fill((105,146,62))
                 self.draw_board()
                 self.draw_pieces()
                 
-            #state.handle_state(self.screen)
-            textbox.handle_textbox(self.screen, eventlist)
             pygame.display.flip()
-            #self.draw_captured()
 
         pygame.display.quit()
         pygame.quit()

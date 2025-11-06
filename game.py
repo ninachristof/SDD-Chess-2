@@ -230,23 +230,38 @@ class game:
                     pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
 
     def main_loop(self):
+        state = "main menu"
         textbox = Textbox((100,100,100), WIDTH//2, HEIGHT//2, 400,50, 50)
-        state = init_state_machine()
+
+#for main menu
+        scale = 5
+        button_x_pos = (WIDTH// 2) - (57*scale // 2)
+        height_offset = 50
+        start_button = Button(button_x_pos,HEIGHT//2 - height_offset,"create button", None,"resources/create_game_button.png",57,9,scale)
+        join_button = Button(button_x_pos,HEIGHT//2 + height_offset,"join button", None,"resources/join_game_button.png",57,9,scale)
         while self.running:
             eventlist = pygame.event.get()
             for event in eventlist:
                 if event.type == pygame.QUIT:
                     self.running = False#TODO: THIS SHIT NOT WORKING
-                #if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                #    if (self.board.mycolor == "white"):
-                #        self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
-                #    else:
-                #        self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
-            self.screen.fill((105,146,62))
+
+            if state == "main menu":
+                screen.fill((172,200,255))
+                start_button.draw(screen)
+                join_button.draw(screen)
+
+            if state == 8:
+                for event in eventlist:
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #    if (self.board.mycolor == "white"):
+                            self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+                        else:
+                            self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                self.screen.fill((105,146,62))
+                self.draw_board()
+                self.draw_pieces()
+                
             #state.handle_state(self.screen)
             textbox.handle_textbox(self.screen, eventlist)
-            #self.draw_board()
-            #self.draw_pieces()
             pygame.display.flip()
             #self.draw_captured()
 

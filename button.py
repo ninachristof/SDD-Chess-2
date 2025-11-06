@@ -7,7 +7,7 @@ class Button():
     sprite = None
     box = None
 
-    def __init__(self, x, y, name, callback, filename, width, height, scale):
+    def __init__(self, x, y, name, callback, filename, width, height, scale = 1):
         self.name = name
         self.callback = callback
         self.sprite = pygame.transform.scale(pygame.image.load(filename), (width*scale,height*scale))

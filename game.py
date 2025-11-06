@@ -8,6 +8,7 @@ import pygame
 from state import *
 from textbox import *
 from button import *
+from colors import *
 import time
 
 import os #need this for the images if we want to use relative paths?
@@ -175,23 +176,19 @@ class game:
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
             validMoves = self.board.getLegalMoves(currentX,currentY)
-            gray = (180,180,180)
-            green = (55,96,12)
-            #print("Valid moves are ")
-            #print(validMoves)
             for move in validMoves:
                 print("Move is ", move)
                 adj_mov = ((8 * move[0]) + move[1])
                 if (self.board.mycolor == "white"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GRAY, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     else:
-                        pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GREEN, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 if (self.board.mycolor == "black"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GRAY, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     else:
-                        pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GREEN, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
 
     def draw_captured(self):
         pass
@@ -224,11 +221,10 @@ class game:
             for i in range(32):
                 column = i % 4
                 row = i // 4
-                color = (255,255,255)
                 if row % 2 == 0:
-                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    pygame.draw.rect(self.screen, c.WHITE, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 else:
-                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    pygame.draw.rect(self.screen, c.WHITE, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
                 pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
                 pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
@@ -251,7 +247,7 @@ class game:
                         self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
                     else:
                         self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
-            self.screen.fill((105,146,62))
+            self.screen.fill(g.BOARD_GREEN)
             self.draw_board()
             self.draw_pieces()
             pygame.display.flip()
@@ -274,9 +270,9 @@ class game:
         textbox_height = 50
 #for joining game menu
         #TODO:add color pallete globals cuz this shits getting ugly
-        ip_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 - height_offset, textbox_width,textbox_height, textbox_height-8, "ip")
-        port_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + height_offset, textbox_width,textbox_height, textbox_height-8, "port")
-        connect_button = Button((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + 3*height_offset, textbox_width,textbox_height, textbox_height-8, "join game",None)
+        ip_textbox = Textbox(c.GRAY_1, (WIDTH - textbox_width) // 2, HEIGHT//2 - height_offset, textbox_width,textbox_height, textbox_height-8, "ip")
+        port_textbox = Textbox(c.GRAY_1, (WIDTH - textbox_width) // 2, HEIGHT//2 + height_offset, textbox_width,textbox_height, textbox_height-8, "port")
+        connect_button = Button(c.LIGHT_BLUE_2, (WIDTH - textbox_width + 100) // 2, HEIGHT//2 + 3*height_offset, textbox_width - 100,textbox_height, textbox_height-8, "   join game",None)
         while self.running:
             eventlist = pygame.event.get()
             #if quit is recieved do so immediately
@@ -303,7 +299,7 @@ class game:
 
             elif state == "join game":
                 self.conn_type = "connect"
-                self.screen.fill((172,200,255))
+                self.screen.fill(c.LIGHT_BLUE_1)
                 self.ip = ip_textbox.handle_textbox(self.screen, eventlist)
                 port = port_textbox.handle_textbox(self.screen, eventlist)
 
@@ -326,7 +322,7 @@ class game:
                             self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
                         else:
                             self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
-                self.screen.fill((105,146,62))
+                self.screen.fill(c.BOARD_GREEN)
                 self.draw_board()
                 self.draw_pieces()
                 

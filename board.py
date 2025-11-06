@@ -411,23 +411,37 @@ class board:
 
     #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board)
     def getPossibleMoves(self,x,y):
-        print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {self.chessArray[x][y].findMoves(x, y)}")
-        possibleMoves = []
-        color = self.chessArray[x][y].get_color()
-        if (self.chessArray[x][y].get_name() == "p"): # Pawn
-            possibleMoves = self.getPawnMoves(x, y, color)
-        elif (self.chessArray[x][y].get_name() == "r"): # Rook
-            possibleMoves = self.getRookMoves(x, y, color)
-        elif (self.chessArray[x][y].get_name() == "b"): # Bishop
-            possibleMoves = self.getBishopMoves(x, y, color)
-        elif (self.chessArray[x][y].get_name() == "q"): # Queen
-            possibleMoves += self.getRookMoves(x, y, color)
-            possibleMoves += self.getBishopMoves(x, y, color)
-        elif (self.chessArray[x][y].get_name() == "kn"): # Knight
-            possibleMoves = self.getKnightMoves(x, y, color)
-        elif (self.chessArray[x][y].get_name() == "k"): # King
-            possibleMoves = self.getKingMoves(x, y, color)
-        return possibleMoves
+        #print("getting possible moves for ", x, "," , y)
+        #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {self.chessArray[x][y].findMoves(x, y)}")
+        #return [self.chessArray[x][y].findMoves(x, y)]
+        possibleMoves2 = []
+        captureMoves = self.chessArray[x][y].findMoves(x, y)[0]
+        noncaptureMoves = self.chessArray[x][y].findMoves(x,y)[1]
+        for lineofsight in captureMoves:
+            possibleMoves2.append(lineofsight)
+        for lineofsight in noncaptureMoves:
+            possibleMoves2.append(lineofsight)
+        #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
+
+        return possibleMoves2
+    
+        # possibleMoves = []
+        # color = self.chessArray[x][y].get_color()
+        # if (self.chessArray[x][y].get_name() == "p"): # Pawn
+        #     possibleMoves = self.getPawnMoves(x, y, color)
+        # elif (self.chessArray[x][y].get_name() == "r"): # Rook
+        #     possibleMoves = self.getRookMoves(x, y, color)
+        # elif (self.chessArray[x][y].get_name() == "b"): # Bishop
+        #     possibleMoves = self.getBishopMoves(x, y, color)
+        # elif (self.chessArray[x][y].get_name() == "q"): # Queen
+        #     possibleMoves += self.getRookMoves(x, y, color)
+        #     possibleMoves += self.getBishopMoves(x, y, color)
+        # elif (self.chessArray[x][y].get_name() == "kn"): # Knight
+        #     possibleMoves = self.getKnightMoves(x, y, color)
+        # elif (self.chessArray[x][y].get_name() == "k"): # King
+        #     possibleMoves = self.getKingMoves(x, y, color)
+        # print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves}")
+        # return possibleMoves
     
     # Iterates through each white piece location and updates the pieces with the new available moves. 
     def whitePieceUpdate(self):
@@ -491,6 +505,10 @@ class board:
     def moveprediction(self,newx,newy,oldx,oldy,color):
         #Stores the deleted square if necessary
         temp = self.chessArray[newx][newy]
+
+        #Are you landing on a square that's the same color as you? If so, return False
+        if (temp != None and temp.get_color() == color):
+            return False
 
         #checks if this move is valid; i.e. the king is not in check after this move
         validMove = False

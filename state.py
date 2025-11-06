@@ -11,14 +11,17 @@ class state():
     def __init__(self, name, callback):
         self.name = name
         self.handle_state = callback
+    def get_next_state(self):
+        return self.next_state
 
 def handle_main_menu(screen):
     screen.fill((172,200,255))
     scale = 5
     button_x_pos = (WIDTH// 2) - (57*scale // 2)
     height_offset = 50
+    join_callback = None
    
-    print(button_x_pos)
+    #print(button_x_pos)
     start_button = Button(button_x_pos,HEIGHT//2 - height_offset,"create button", None,"resources/create_game_button.png",57,9,scale)
     join_button = Button(button_x_pos,HEIGHT//2 + height_offset,"join button", None,"resources/join_game_button.png",57,9,scale)
     start_button.draw(screen)

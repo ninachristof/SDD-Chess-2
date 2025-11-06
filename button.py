@@ -39,6 +39,7 @@ class Button():
         if self.box.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1:
                 if self.callback != None:
+                    print("hi")
                     self.callback
                 return 1 
         return 0

@@ -8,6 +8,7 @@ import pygame
 from state import *
 from textbox import *
 from button import *
+import time
 
 import os #need this for the images if we want to use relative paths?
 
@@ -34,13 +35,37 @@ class game:
     screen = None
     current_instruction = ""
     running = True
+    ip = ""
+    port = 0
+    conn_type = ""
 
 #running this function on a separte thread
-    def run_socket(self,conn_type, ip, port):
-        self.new_p2p = p2p(conn_type, ip, port)
+
+    def __init__(self, conn_type, ip, port):
+        self.conn_type = conn_type
+        self.ip = ip
+        self.port = port
+        self.board = board.board()
+        if(conn_type == "connect"):
+            self.board.mycolor = "black"
+        else:
+            self.board.mycolor = "white"
+        self.board.startState(self.board.mycolor)
+        self.board.whitePieceUpdateLegal()
+        self.board.blackPieceUpdateLegal()
+        self.conn_thread = threading.Thread(target=self.run_socket)
+        #self.conn_thread.start()
+        pygame.init()
+        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
+        pygame.display.set_caption(f"Chess {self.board.mycolor}")
+        #TODO:somwhere to join or force join this thread
+        
+    def run_socket(self):
+        print("RUNNING SOCKET")
+        self.new_p2p = p2p(self.conn_type, self.ip, self.port)
         self.new_p2p.init_p2p()
         wait_for_my_move = True
-        if(conn_type == "connect"):
+        if(self.conn_type == "connect"):
             wait_for_my_move = False
 
         while(self.running):
@@ -64,23 +89,6 @@ class game:
                 wait_for_my_move = True
         self.new_p2p.close_all()
 
-
-    def __init__(self, conn_type, ip, port):
-        self.board = board.board()
-        if(conn_type == "connect"):
-            self.board.mycolor = "black"
-        else:
-            self.board.mycolor = "white"
-        self.board.startState(self.board.mycolor)
-        self.board.whitePieceUpdateLegal()
-        self.board.blackPieceUpdateLegal()
-        self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
-        self.conn_thread.start()
-        pygame.init()
-        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
-        pygame.display.set_caption(f"Chess {self.board.mycolor}")
-        #TODO:somwhere to join or force join this thread
-        
     def get_conn_thread(self):
         return self.conn_thread
         
@@ -237,7 +245,7 @@ class game:
         scale = 5
         button_x_pos = (WIDTH// 2) - (57*scale // 2)
         height_offset = 50
-        start_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, None,"resources/create_game_button.png",57,9,scale)
+        host_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, None,"resources/create_game_button.png",57,9,scale)
         join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset, None,"resources/join_game_button.png",57,9,scale)
         textbox_width = 350
         textbox_height = 50
@@ -245,31 +253,45 @@ class game:
         #TODO:add color pallete globals cuz this shits getting ugly
         ip_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 - height_offset, textbox_width,textbox_height, textbox_height-8, "ip")
         port_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + height_offset, textbox_width,textbox_height, textbox_height-8, "port")
-        host_button = Button((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + 3*height_offset, textbox_width,textbox_height, textbox_height-8, "host game",None)
+        connect_button = Button((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + 3*height_offset, textbox_width,textbox_height, textbox_height-8, "join game",None)
         while self.running:
             eventlist = pygame.event.get()
+            #if quit is recieved do so immediately
             for event in eventlist:
                 if event.type == pygame.QUIT:
                     self.running = False
+                    continue
 
             if state == "main menu":
                 self.screen.fill((172,200,255))
-                start_button.draw(self.screen)
-                if(join_button.draw(self.screen) == 1):
+                if host_button.draw(self.screen) == 1:
+                    state = "host game"
+                if join_button.draw(self.screen) == 1:
                     state = "join game"
 
+            elif state == "host game":
+                #time.sleep(1)
+                self.conn_type = "host"
+                state = "play game"
+                self.conn_thread.start()
+
             elif state == "join game":
+                self.conn_type = "connect"
                 self.screen.fill((172,200,255))
                 ip_textbox.handle_textbox(self.screen, eventlist)
                 port_textbox.handle_textbox(self.screen, eventlist)
-                host_button.draw(self.screen)
+                if(connect_button.draw(self.screen) == 1):
+                    state = "play game"
+                    #self.conn_thread = threading.Thread(target=self.run_socket)
+                    self.conn_thread.start()
 
-            elif state == 8:
+            elif state == "play game":
                 for event in eventlist:
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #    if (self.board.mycolor == "white"):
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: 
+                        if (self.board.mycolor == "white"):
                             self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
-                    else:
-                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                        else:
+                            self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
                 self.screen.fill((105,146,62))
                 self.draw_board()
                 self.draw_pieces()

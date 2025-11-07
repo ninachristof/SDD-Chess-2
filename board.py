@@ -410,19 +410,28 @@ class board:
         return self.chessArray[i][j]
 
     #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board)
-    def getPossibleMoves(self,x,y):
+    def getPossibleMoves(self,x,y,color):
         #print("getting possible moves for ", x, "," , y)
         #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {self.chessArray[x][y].findMoves(x, y)}")
         #return [self.chessArray[x][y].findMoves(x, y)]
         possibleMoves2 = []
-        captureMoves = self.chessArray[x][y].findMoves(x, y)[0]
-        noncaptureMoves = self.chessArray[x][y].findMoves(x,y)[1]
-        for lineofsight in captureMoves:
-            possibleMoves2.append(lineofsight)
-        for lineofsight in noncaptureMoves:
-            possibleMoves2.append(lineofsight)
-        #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
+        noncaptureMoves = self.chessArray[x][y].findMoves(x,y)[0]
+        captureMoves = self.chessArray[x][y].findMoves(x, y)[1]
+        for direction in noncaptureMoves:
+            for lineofsight in direction:
+                if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
+                    break
+                possibleMoves2.append(lineofsight)
 
+        for direction in captureMoves:
+            for lineofsight in direction:
+                if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
+                    if (self.chessArray[lineofsight[0]][lineofsight[1]].get_color() != color):
+                        possibleMoves2.append(lineofsight)
+                    break
+                possibleMoves2.append(lineofsight)
+        #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
+        print("AAA: ", possibleMoves2)
         return possibleMoves2
     
         # possibleMoves = []
@@ -447,7 +456,7 @@ class board:
     def whitePieceUpdate(self):
         for x, y in self.whitePieces:
             #print("piece at ", x , ",", y)
-            possibleMoves = self.getPossibleMoves(x,y)
+            possibleMoves = self.getPossibleMoves(x,y, "white")
             #print("WHITE {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
             #print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
@@ -457,16 +466,16 @@ class board:
     def blackPieceUpdate(self):
         for x, y in self.blackPieces:
             #print("piece at ", x , ",", y)
-            possibleMoves = self.getPossibleMoves(x,y)
+            possibleMoves = self.getPossibleMoves(x,y, "black")
             #print("BLACK {} AT ({}, {}). It can move to ".format(self.chessArray[x][y].get_name(), x, y), end="")
             #print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
         #self.isKinginCheck("black")
 
     def getLegalMoves(self,x,y):
-        possibleMoves = self.getPossibleMoves(x,y)
         legalMoves = []
         color = self.chessArray[x][y].get_color()
+        possibleMoves = self.getPossibleMoves(x,y, color)
         for move in possibleMoves:
             if (self.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)

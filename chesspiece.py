@@ -74,7 +74,7 @@ class pawn(chesspiece):
                 possibleCapture.append((x + 1, y - 1))
             if (x != 6 and y != 7): 
                 possibleCapture.append((x + 1, y + 1))
-        return (possibleNoncapture, possibleCapture)
+        return ([possibleNoncapture], [possibleCapture])
 
 
 class knight(chesspiece):
@@ -118,7 +118,7 @@ class knight(chesspiece):
         # Move up 2, left 1 (x - 2, y -  1)
         if (x > 1 and y > 0):
             possibleCapture.append((x - 2,y - 1))
-        return (possibleNoncapture, possibleCapture)
+        return ([possibleNoncapture], [possibleCapture])
 
 class king(chesspiece):
     def __init__(self,x,y,color):
@@ -160,7 +160,7 @@ class king(chesspiece):
         # Move up 1, left 1 (x - 1, y -  1)
         if (x > 0 and y > 0):
             possibleCapture.append((x - 1,y - 1))
-        return (possibleNoncapture, possibleCapture)
+        return ([possibleNoncapture], [possibleCapture])
 
 class rook(chesspiece):
     def __init__(self,x,y,color):
@@ -175,33 +175,36 @@ class rook(chesspiece):
 
     def findMoves(self, x, y):
         possibleNoncapture = []
-        possibleCapture = []
 
+        possibleUp = []
         # Check move upwards (x - 1)
         iter = x - 1
         while (iter >= 0):
             # While the iter is still on the board AND the square is empty...
-            possibleCapture.append((iter, y)) # Add the square to the possible moves. 
+            possibleUp.append((iter, y)) # Add the square to the possible moves. 
             iter -= 1 # Move up. 
 
+        possibleRight = []
         iter = y + 1
         # Check move right (y + 1)
         while (iter <= 7):
-            possibleCapture.append((x, iter))
+            possibleRight.append((x, iter))
             iter += 1
 
+        possibleDown = []
         iter = x + 1
         # Check move downwards (x + 1)
         while (iter <= 7):
-            possibleCapture.append((iter, y))
+            possibleDown.append((iter, y))
             iter += 1
         
+        possibleLeft = []
         iter = y - 1
         # Check move left (y - 1)
         while (iter >= 0):
-            possibleCapture.append((x, iter))
+            possibleLeft.append((x, iter))
             iter -= 1
-        return (possibleNoncapture, possibleCapture)
+        return ([possibleNoncapture], [possibleUp, possibleRight, possibleDown, possibleLeft])
 
 class bishop(chesspiece):
     def __init__(self,x,y,color):
@@ -216,41 +219,44 @@ class bishop(chesspiece):
 
     def findMoves(self, x, y):
         possibleNoncapture = []
-        possibleCapture = []
 
+        possibleUpRight = []
         iter = x - 1
         iter2 = y + 1
         # Check move up-right (x - 1, y + 1)
         while (iter >= 0 and iter2 <= 7):
-            possibleCapture.append((iter, iter2))
+            possibleUpRight.append((iter, iter2))
             iter -= 1
             iter2 += 1
 
+        possibleDownRight = []
         iter = x + 1
         iter2 = y + 1
         # Check move down-right (x + 1, y + 1)
         while (iter <= 7 and iter2 <= 7):
-            possibleCapture.append((iter, iter2))
+            possibleDownRight.append((iter, iter2))
             iter += 1
             iter2 += 1
 
+        possibleDownLeft = []
         iter = x + 1
         iter2 = y - 1
         # Check move down-left (x + 1, y - 1)        
         while (iter <= 7 and iter2 >= 0):
-            possibleCapture.append((iter, iter2))
+            possibleDownLeft.append((iter, iter2))
             iter += 1
             iter2 -= 1
 
+        possibleUpLeft = []
         iter = x - 1
         iter2 = y - 1
         # Check move up-left (x - 1, y - 1)
         while (iter >= 0 and iter2 >= 0):
-            possibleCapture.append((iter, iter2))
+            possibleUpLeft.append((iter, iter2))
             iter -= 1
             iter2 -= 1
 
-        return (possibleNoncapture, possibleCapture)
+        return ([possibleNoncapture], [possibleUpRight, possibleDownRight, possibleDownLeft, possibleUpLeft])
 
 class queen(bishop, rook):
     def __init__(self,x,y,color):

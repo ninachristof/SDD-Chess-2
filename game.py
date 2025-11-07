@@ -136,7 +136,8 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
-            validMoves = self.board.getLegalMoves(currentX,currentY)
+            # validMoves = self.board.getLegalMoves(currentX,currentY)
+            validMoves = pieceObject.get_possible_moves()
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)

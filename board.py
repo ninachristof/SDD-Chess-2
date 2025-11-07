@@ -269,6 +269,7 @@ class board:
         color = self.chessArray[x][y].get_color()
         possibleMoves = self.getPossibleMoves(x,y, color)
         #print("Possible moves are", possibleMoves)
+        #legalMoves = possibleMoves
         for move in possibleMoves:
             if (self.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)
@@ -310,21 +311,17 @@ class board:
 
     def moveprediction(self,newx,newy,oldx,oldy,color):
 
-        return True
-
         #Stores the deleted square if necessary
         temp = self.chessArray[newx][newy]
-
         #Are you landing on a square that's the same color as you? If so, return False
         if (temp != None and temp.get_color() == color):
             return False
-
+        
         #checks if this move is valid; i.e. the king is not in check after this move
         validMove = False
         self.movePiece(newx,newy,oldx,oldy,color)
         if (not self.isKinginCheck(color)):
             validMove = True
-
         #Undoes any of the effects of the move
         self.movePiece(oldx,oldy,newx,newy,color)
         if (temp == None):

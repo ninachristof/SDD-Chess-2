@@ -112,6 +112,7 @@ class game:
         self.currentSquare = None
 
     def selectsquare(self,i,j):
+        print("selected square ", i , "," , j)
         if (self.moved):
             return
         #print("SELECT SQUARE")
@@ -135,6 +136,9 @@ class game:
         elif (not(self.board.getSquare(i,j) == None) and self.board.getSquare(i,j).get_color() == self.turn):
             #print("Selected a piece at ", i , "," , j)
             self.currentSquare = (i,j)
+            print(self.board.chessArray[i][j].get_name())
+            print(self.board.chessArray[i][j].upgrades)
+            print(self.board.chessArray[i][j].get_possible_moves())
             return
         
         #Otherwise, you are attempting to make a move; see if this move is possible, and do it if so
@@ -185,7 +189,7 @@ class game:
             if (self.board.mycolor == "black"):
                 pieces = self.board.blackPieces
             for i in range(4):
-                randomPiece = self.board.whitePieces[rand.randint(0,len(pieces)-1)]
+                randomPiece = pieces[rand.randint(0,len(pieces)-1)]
                 #print("random piece is ", randomPiece)
                 #print("Which is a ", self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
                 powerup = powerups.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
@@ -242,6 +246,7 @@ class game:
         pass
     def draw_pieces(self):
         if (self.board.mycolor == "white"):
+            #print ("white", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
                 x = self.board.whitePieces[i][0]
                 y = self.board.whitePieces[i][1]
@@ -253,6 +258,7 @@ class game:
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
         else:
+            #print ("black", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
                 x = self.board.whitePieces[i][0]
                 y = self.board.whitePieces[i][1]
@@ -297,8 +303,14 @@ class game:
                             self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
                     if (event.pos[0] >= 0.8 * WIDTH and event.pos[1] >= (HEIGHT * 0.2)
                         and event.pos[1] <= (HEIGHT * 0.6)):
-                        print("Chose a powerup")
+                        #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
+                        randomPiece, powerup = self.powerups[int(event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10)]
+                        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting upgraded")
+                        print(powerup.get_capture())
+                        print(powerup.get_move())
+                        self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [powerup.get_capture(),powerup.get_move()]
                         self.offerPowerups = False
+                        self.powerups = []
                     # elif (event.pos[0] == 0.8 * WIDTH):
                     #     self.offerPowerups = False
             self.screen.fill((105,146,62))

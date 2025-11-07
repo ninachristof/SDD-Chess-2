@@ -6,9 +6,6 @@ from p2p import *
 import global_vars
 import pygame
 
-import os #need this for the images if we want to use relative paths?
-
-
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
 WIDTH = 800
@@ -22,7 +19,7 @@ def printout():
 class game:
     #root = None
     board = None
-    turn = None
+    turnCount = 0
     currentSquare = None
     newSquare = None
     turn = "white"
@@ -31,8 +28,10 @@ class game:
     screen = None
     current_instruction = ""
     running = True
+    moved = False
+    offerPowerups = False #Do we offer power ups this round?
 
-#running this function on a separte thread
+#running this function on a separate thread
     def run_socket(self,conn_type, ip, port):
         self.new_p2p = p2p(conn_type, ip, port)
         self.new_p2p.init_p2p()
@@ -87,6 +86,9 @@ class game:
         print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
         self.board.movePiece(i,j,currentX,currentY,self.turn)
 
+        if (self.turn == "black"):
+            self.turnCount += 1
+        
         if (self.turn == "white"):
             self.turn = "black"
         else:
@@ -107,6 +109,8 @@ class game:
         self.currentSquare = None
 
     def selectsquare(self,i,j):
+        if (self.moved):
+            return
         print("SELECT SQUARE")
         print(self.board.whitePieces)
         print(self.board.blackPieces)
@@ -150,13 +154,32 @@ class game:
             if wantedMoveXY in validMoves:
                 print("Valid Move")
                 self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.board.mycolor,"utf-8"))
-
-                global_vars.send_event.set()
+                self.moved = True
                 self.execute_instruction(i,j,currentX,currentY)
-                
+
+                if (self.turnCount > 0 and (self.turnCount % 4 >= 2)):
+                    self.offerPowerups = True
+                else:
+                    self.offerPowerups = False
+
+                # while (self.offerPowerups):
+                #     print("Waiting for user to use a powerup")
+
+                #global_vars.send_event.set()
             else: 
                 print("Invalid move")
                 return
+
+    def draw_powerups(self):
+        #print(self.offerPowerups, " because ", self.turnCount)
+        if (not(self.offerPowerups)):
+            return
+        red = (255,0,0)
+        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.2),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.3),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.4),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.5),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        self.offerPowerups = False
 
     def draw_valid(self):
         if(self.currentSquare != None):
@@ -168,7 +191,7 @@ class game:
             #print("Valid moves are ")
             #print(validMoves)
             for move in validMoves:
-                print("Move is ", move)
+                #print("Move is ", move)
                 adj_mov = ((8 * move[0]) + move[1])
                 if (self.board.mycolor == "white"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
@@ -233,14 +256,26 @@ class game:
                 if event.type == pygame.QUIT:
                     self.running = False#TODO: THIS SHIT NOT WORKING
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if (self.board.mycolor == "white"):
-                        self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
-                    else:
-                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                    if (event.pos[0] < 0.8 * WIDTH):
+                        if (self.board.mycolor == "white"):
+                            self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+                        else:
+                            self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                    # elif (event.pos[0] == 0.8 * WIDTH):
+                    #     self.offerPowerups = False
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()
+            self.draw_powerups()
+            #print("Offering powerups is ", self.offerPowerups, " because ", self.turnCount)
             pygame.display.flip()
+
+            #if (self.moved and not(self.offerPowerups)):
+
+            if (self.moved):
+                global_vars.send_event.set()
+                self.moved = False
+
             #self.draw_captured()
 
         pygame.display.quit()

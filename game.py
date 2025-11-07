@@ -2,6 +2,8 @@ from chesspiece import *
 import threading
 import board
 import struct
+import powerups
+import random as rand
 from p2p import *
 import global_vars
 import pygame
@@ -30,6 +32,7 @@ class game:
     running = True
     moved = False
     offerPowerups = False #Do we offer power ups this round?
+    powerups = []
 
 #running this function on a separate thread
     def run_socket(self,conn_type, ip, port):
@@ -67,7 +70,7 @@ class game:
             self.board.mycolor = "black"
         else:
             self.board.mycolor = "white"
-        self.board.startState(self.board.mycolor)
+        #self.board.startState(self.board.mycolor)
         self.board.whitePieceUpdateLegal()
         self.board.blackPieceUpdateLegal()
         self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
@@ -83,7 +86,7 @@ class game:
          
                     
     def execute_instruction(self,i,j,currentX,currentY):
-        print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
+        #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
         self.board.movePiece(i,j,currentX,currentY,self.turn)
 
         if (self.turn == "black"):
@@ -111,26 +114,26 @@ class game:
     def selectsquare(self,i,j):
         if (self.moved):
             return
-        print("SELECT SQUARE")
-        print(self.board.whitePieces)
-        print(self.board.blackPieces)
+        #print("SELECT SQUARE")
+        #print(self.board.whitePieces)
+        #print(self.board.blackPieces)
         if(self.turn != self.board.mycolor):
             return
-        print("selected square ", i , "," , j)
+        #print("selected square ", i , "," , j)
 
         if (self.currentSquare == None):
             if (self.board.getSquare(i,j) == None or not(self.board.getSquare(i,j).get_color() == self.turn)):
-                print("Invalid square")
+                #print("Invalid square")
                 return
             else: #The square you selected must be one of your pieces
-                print("Selected a piece at ", i , "," , j)
+                #print("Selected a piece at ", i , "," , j)
                 self.currentSquare = (i,j)
                 return
         
         #At this point, you have already selected a piece
         #If you selected another of your piece, swap the current piece to it
         elif (not(self.board.getSquare(i,j) == None) and self.board.getSquare(i,j).get_color() == self.turn):
-            print("Selected a piece at ", i , "," , j)
+            #print("Selected a piece at ", i , "," , j)
             self.currentSquare = (i,j)
             return
         
@@ -144,15 +147,15 @@ class game:
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)
-            print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
-            print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
+            #print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
+            #print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
             
             # Check if it is a valid move
             if (validMoves == None):
-                print("Invalid move")
+                #print("Invalid move")
                 return
             if wantedMoveXY in validMoves:
-                print("Valid Move")
+                #print("Valid Move")
                 self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.board.mycolor,"utf-8"))
                 self.moved = True
                 self.execute_instruction(i,j,currentX,currentY)
@@ -167,7 +170,7 @@ class game:
 
                 #global_vars.send_event.set()
             else: 
-                print("Invalid move")
+                #print("Invalid move")
                 return
 
     def draw_powerups(self):
@@ -175,10 +178,25 @@ class game:
         if (not(self.offerPowerups)):
             return
         red = (255,0,0)
+
+        if (len(self.powerups) == 0):
+            pieces = self.board.whitePieces
+            if (self.board.mycolor == "black"):
+                pieces = self.board.blackPieces
+            for i in range(4):
+                randomPiece = self.board.whitePieces[rand.randint(0,len(pieces)-1)]
+                #print("random piece is ", randomPiece)
+                #print("Which is a ", self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
+                powerup = powerups.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
+                self.powerups.append((randomPiece,powerup))
+                powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
+                print("Power up ", i, " - " , powerupdescription)
         for i in range(2,6):
             #https://stackoverflow.com/questions/63799644/pygame-how-do-i-create-a-button-with-text
             #https://stackoverflow.com/questions/72158111/render-doesnt-apply-to-a-str-object
-            powerupdescription = "power up " + str(i)
+            randomPiece,powerup = self.powerups[i-2]
+            powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name()  + " at " + str(randomPiece) + powerup.get_description()
+            #powerupdescription = "power up " + str(i-1)
             #Why is this so goofy
             font_game = pygame.font.SysFont("Arial",20)
             powerupbutton = pygame.font.Font.render(font_game,powerupdescription,1,(255,255,255))
@@ -292,7 +310,7 @@ class game:
             #if (self.moved and not(self.offerPowerups)):
 
             if (self.moved and not(self.offerPowerups)):
-                print("Sending Move")
+                #print("Sending Move")
                 global_vars.send_event.set()
                 self.moved = False
 

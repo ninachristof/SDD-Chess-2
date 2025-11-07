@@ -464,7 +464,7 @@ class board:
         if (self.isKinginCheck("white")):
             print("White king in check")
         for x, y in self.whitePieces:
-            print("white ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
+            #print("white ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
             countMoves += len(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
@@ -477,7 +477,7 @@ class board:
         if (self.isKinginCheck("black")):
             print("Black king in check")
         for x, y in self.blackPieces:
-            print("black ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
+            #print("black ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
             countMoves += len(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)

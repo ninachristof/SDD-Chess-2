@@ -157,7 +157,7 @@ class game:
                 self.moved = True
                 self.execute_instruction(i,j,currentX,currentY)
 
-                if (self.turnCount > 0 and (self.turnCount % 4 >= 2)):
+                if (self.turnCount > 0 and (self.turnCount % 2 == 0)):
                     self.offerPowerups = True
                 else:
                     self.offerPowerups = False
@@ -179,7 +179,6 @@ class game:
         pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.3),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
         pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.4),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
         pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.5),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        self.offerPowerups = False
 
     def draw_valid(self):
         if(self.currentSquare != None):
@@ -261,6 +260,10 @@ class game:
                             self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
                         else:
                             self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                    if (event.pos[0] >= 0.8 * WIDTH and event.pos[1] >= (HEIGHT * 0.2)
+                        and event.pos[1] <= (HEIGHT * 0.6)):
+                        print("Chose a powerup")
+                        self.offerPowerups = False
                     # elif (event.pos[0] == 0.8 * WIDTH):
                     #     self.offerPowerups = False
             self.screen.fill((105,146,62))
@@ -272,7 +275,8 @@ class game:
 
             #if (self.moved and not(self.offerPowerups)):
 
-            if (self.moved):
+            if (self.moved and not(self.offerPowerups)):
+                print("Sending Move")
                 global_vars.send_event.set()
                 self.moved = False
 

@@ -175,10 +175,26 @@ class game:
         if (not(self.offerPowerups)):
             return
         red = (255,0,0)
-        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.2),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.3),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.4),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.5),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        for i in range(2,6):
+            #https://stackoverflow.com/questions/63799644/pygame-how-do-i-create-a-button-with-text
+            #https://stackoverflow.com/questions/72158111/render-doesnt-apply-to-a-str-object
+            powerupdescription = "power up " + str(i)
+            #Why is this so goofy
+            font_game = pygame.font.SysFont("Arial",20)
+            powerupbutton = pygame.font.Font.render(font_game,powerupdescription,1,(255,255,255))
+            #powerupbutton = pygame.Surface(((HEIGHT * 0.2) ,(HEIGHT * 0.1)),pygame.SRCALPHA,32).convert_alpha()
+            #powerupbutton.blit(,(0,0))
+            #text = pygame.font.render(powerupdescription, 1, (136, 255, 0))
+            pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+            self.screen.blit(powerupbutton,((HEIGHT * 0.8) , (HEIGHT * i * 0.1)))
+        for i in range(2,7):
+            pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
+            #pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i * 0.1), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i),10)
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.2),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.3),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.4),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.5),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
 
     def draw_valid(self):
         if(self.currentSquare != None):

@@ -94,8 +94,6 @@ class game:
 
     def get_conn_thread(self):
         return self.conn_thread
-        
-         
                     
     def execute_instruction(self,i,j,currentX,currentY):
         print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)

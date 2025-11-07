@@ -143,7 +143,8 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
-            validMoves = self.board.getLegalMoves(currentX,currentY)
+            # validMoves = self.board.getLegalMoves(currentX,currentY)
+            validMoves = pieceObject.get_possible_moves()
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)
@@ -218,7 +219,7 @@ class game:
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
-            validMoves = self.board.getLegalMoves(currentX,currentY)
+            validMoves = self.board.returnLegalMoves(currentX,currentY)
             gray = (180,180,180)
             green = (55,96,12)
             #print("Valid moves are ")

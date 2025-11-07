@@ -223,7 +223,7 @@ class game:
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
-            validMoves = self.board.returnLegalMoves(currentX,currentY)
+            validMoves = self.board.getLegalMoves(currentX,currentY)
             gray = (180,180,180)
             green = (55,96,12)
             #print("Valid moves are ")

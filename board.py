@@ -291,7 +291,7 @@ class board:
             print("white ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
             countMoves += len(possibleMoves)
-            print(possibleMoves)
+            print("legal moves are ", possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
         return countMoves
         #self.isKinginCheck("white")
@@ -305,6 +305,7 @@ class board:
             print("black ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
             countMoves += len(possibleMoves)
+            print("legal moves are ", possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves)
         return countMoves
         #self.isKinginCheck("black")

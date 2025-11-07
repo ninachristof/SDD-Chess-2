@@ -175,31 +175,31 @@ class king(chesspiece):
         possibleNoncapture = []
         possibleCapture = []
         if (x > 0):
-            possibleCapture.append((x - 1, y))
+            possibleCapture.append([(x - 1, y)])
         # Move up 1, right 1 (x - 1, y + 1)
         if (x > 0 and y < 7):
-            possibleCapture.append((x - 1, y + 1))
+            possibleCapture.append([(x - 1, y + 1)])
 
         # Move right 1 (y + 1)
         if (y < 7):
-            possibleCapture.append((x, y + 1))
+            possibleCapture.append([(x, y + 1)])
         # Move down 1, right 1 (x + 1, y + 1)
         if (x < 7 and y < 7):
-            possibleCapture.append((x + 1, y + 1))
+            possibleCapture.append([(x + 1, y + 1)])
 
         # Move down 1 (x + 1)
         if (x < 7):
-            possibleCapture.append((x + 1, y))
+            possibleCapture.append([(x + 1, y)])
         # Move down 1, left 1 (x + 1, y - 1)
         if (x < 7 and y > 0):
-            possibleCapture.append((x + 1,y - 1))
+            possibleCapture.append([(x + 1,y - 1)])
 
         # Move left 1 (y - 1)
         if (y > 0):
-            possibleCapture.append((x, y - 1))
+            possibleCapture.append([(x, y - 1)])
         # Move up 1, left 1 (x - 1, y -  1)
         if (x > 0 and y > 0):
-            possibleCapture.append((x - 1,y - 1))
+            possibleCapture.append([(x - 1,y - 1)])
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
         return ([possibleNoncapture], [possibleCapture])
 

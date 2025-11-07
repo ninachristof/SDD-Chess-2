@@ -93,32 +93,32 @@ class knight(chesspiece):
         possibleCapture = []
 
         if (x > 1 and y < 7):
-            possibleCapture.append((x - 2, y + 1))
+            possibleCapture.append([(x - 2, y + 1)])
         # Move up1, right 2 (x - 1, y + 2)
         if (x > 0 and y < 6):
-            possibleCapture.append((x - 1, y + 2))
+            possibleCapture.append([(x - 1, y + 2)])
 
         # Move down1, right 2 (x + 1, y + 2)
         if (x < 7 and y < 6):
-            possibleCapture.append((x + 1, y + 2))
+            possibleCapture.append([(x + 1, y + 2)])
         # Move down2, right 1 (x + 2, y + 1)
         if (x < 6 and y < 7):
-            possibleCapture.append((x + 2, y + 1))
+            possibleCapture.append([(x + 2, y + 1)])
 
         # Move down 2, left 1 (x + 2, y - 1)
         if (x < 6 and y > 0):
-            possibleCapture.append((x + 2, y - 1))
+            possibleCapture.append([(x + 2, y - 1)])
         # Move down 1, left 2 (x + 1, y - 2)
         if (x < 7 and y > 1):
-            possibleCapture.append((x + 1,y - 2))
+            possibleCapture.append([(x + 1,y - 2)])
 
         # Move up 1, left 2 (x - 1, y - 2)
         if (x > 0 and y > 1):
-            possibleCapture.append((x - 1, y - 2))
+            possibleCapture.append([(x - 1, y - 2)])
         # Move up 2, left 1 (x - 2, y -  1)
         if (x > 1 and y > 0):
-            possibleCapture.append((x - 2,y - 1))
-        return ([possibleNoncapture], [possibleCapture])
+            possibleCapture.append([(x - 2,y - 1)])
+        return (possibleNoncapture, possibleCapture)
 
 class king(chesspiece):
     def __init__(self,x,y,color):

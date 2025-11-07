@@ -417,6 +417,10 @@ class board:
         possibleMoves2 = []
         noncaptureMoves = self.chessArray[x][y].findMoves(x,y)[0]
         captureMoves = self.chessArray[x][y].findMoves(x, y)[1]
+        if (self.chessArray[x][y].get_name() == "kn"):
+            print(x, ",",y)
+            print("capture moves: ", captureMoves)
+            print("noncapture moves: ", captureMoves)
         for direction in noncaptureMoves:
             for lineofsight in direction:
                 if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
@@ -431,7 +435,7 @@ class board:
                     break
                 possibleMoves2.append(lineofsight)
         #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
-        print("AAA: ", possibleMoves2)
+        #print("AAA: ", possibleMoves2)
         return possibleMoves2
     
         # possibleMoves = []
@@ -476,6 +480,7 @@ class board:
         legalMoves = []
         color = self.chessArray[x][y].get_color()
         possibleMoves = self.getPossibleMoves(x,y, color)
+        #print("Possible moves are", possibleMoves)
         for move in possibleMoves:
             if (self.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)
@@ -484,6 +489,9 @@ class board:
             #     legalMoves.append(move)
             # self.movePiece(x,y,move[0],move[1],color)
         return legalMoves
+    
+    def returnLegalMoves(self,x,y):
+        return self.chessArray[x][y].get_possible_moves()
     
     # Iterates through each white piece location and updates the pieces with the new available moves. 
     def whitePieceUpdateLegal(self):
@@ -494,6 +502,7 @@ class board:
             print("white ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
             possibleMoves = self.getLegalMoves(x,y)
             countMoves += len(possibleMoves)
+            print(possibleMoves)
             self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
         return countMoves
         #self.isKinginCheck("white")

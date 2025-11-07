@@ -9,6 +9,7 @@ from state import *
 from textbox import *
 from button import *
 from colors import *
+from utils import *
 import time
 
 import os #need this for the images if we want to use relative paths?
@@ -300,20 +301,19 @@ class game:
             elif state == "join game":
                 self.conn_type = "connect"
                 self.screen.fill(c.LIGHT_BLUE_1)
-                self.ip = ip_textbox.handle_textbox(self.screen, eventlist)
+                ip = ip_textbox.handle_textbox(self.screen, eventlist)
                 port = port_textbox.handle_textbox(self.screen, eventlist)
 
+                #TODO:ename the button draw funciton 
                 if(connect_button.draw(self.screen) == 1):
-                    is_num = True
-                    for char in port:
-                        if not char.isdigit():
-                            is_num = False
-                            break
-                    if is_num:
+                    if is_num(port) and is_valid_ip(ip):
                         self.port = int(port)
-                    state = "play game"
-                    self.setup_game()
-                    self.conn_thread.start()
+                        state = "play game"
+                        self.setup_game()
+                        self.conn_thread.start()
+                    else:
+                        print(f"{ip} {port}")
+
 
             elif state == "play game":
                 for event in eventlist:

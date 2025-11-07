@@ -201,7 +201,7 @@ class king(chesspiece):
         if (x > 0 and y > 0):
             possibleCapture.append([(x - 1,y - 1)])
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
-        return ([possibleNoncapture], [possibleCapture])
+        return (possibleNoncapture, possibleCapture)
 
 class rook(chesspiece):
     def __init__(self,x,y,color):

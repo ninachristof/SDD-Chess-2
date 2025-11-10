@@ -271,7 +271,7 @@ class game:
         #TODO:add color pallete globals cuz this shits getting ugly
         ip_textbox = Textbox(c.GRAY_1, (WIDTH - textbox_width) // 2, HEIGHT//2 - height_offset, textbox_width,textbox_height, textbox_height-8, "ip")
         port_textbox = Textbox(c.GRAY_1, (WIDTH - textbox_width) // 2, HEIGHT//2 + height_offset, textbox_width,textbox_height, textbox_height-8, "port")
-        connect_button = Button(c.LIGHT_BLUE_2, (WIDTH - textbox_width + 100) // 2, HEIGHT//2 + 3*height_offset, textbox_width - 100,textbox_height, textbox_height-8, "   join game",None)
+        connect_button = TextButton(c.LIGHT_BLUE_2, (WIDTH - textbox_width + 100) // 2, HEIGHT//2 + 3*height_offset, textbox_width - 100,textbox_height, textbox_height-8, "   join game for me please",None)
         while self.running:
             eventlist = pygame.event.get()
             #if quit is recieved do so immediately

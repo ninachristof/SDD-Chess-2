@@ -19,6 +19,7 @@ class chesspiece:
     
     def hasMoved(self):
         return self.firstMove
+    
     def get_spite(self):
         return self.sprite
     
@@ -80,7 +81,7 @@ class pawn(chesspiece):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_pdt60.png"), (80,80))
     
     def findMoves(self, x, y):
-        powerupCapture,powerupMove = super().findMoves(x,y)
+        powerupCapture, powerupMove = super().findMoves(x,y)
         possibleNoncapture = []
         possibleCapture = []
         # Forwards movement
@@ -322,7 +323,7 @@ class queen(bishop, rook):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_qdt60.png"), (80,80))
 
     def findMoves(self, x, y):
-        powerupCapture,powerupMove = super().findMoves(x,y)
+        powerupCapture, powerupMove = super().findMoves(x,y)
         possibleNoncapture = [[]]
         possibleCapture = []
         b1, b2 = bishop.findMoves(bishop(x, y, self.color), x, y)

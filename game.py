@@ -65,7 +65,7 @@ class game:
 
 
     def __init__(self, conn_type, ip, port):
-        self.board = board.board()
+        self.board = board.board(True)
         if(conn_type == "connect"):
             self.board.mycolor = "black"
         else:
@@ -87,7 +87,7 @@ class game:
                     
     def execute_instruction(self,i,j,currentX,currentY):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
-        self.board.movePiece(i,j,currentX,currentY,self.turn)
+        self.board.movePiece(i,j,currentX,currentY,self.turn, True)
 
         if (self.turn == "black"):
             self.turnCount += 1
@@ -224,8 +224,8 @@ class game:
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
             validMoves = self.board.getLegalMoves(currentX,currentY)
-            gray = (180,180,180)
-            green = (55,96,12)
+            gray = (100, 100, 100)     # darker gray
+            green = (30, 60, 10)  
             #print("Valid moves are ")
             #print(validMoves)
             for move in validMoves:

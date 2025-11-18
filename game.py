@@ -2,12 +2,11 @@ from chesspiece import *
 import threading
 import board
 import struct
+import powerups
+import random as rand
 from p2p import *
 import global_vars
 import pygame
-
-import os #need this for the images if we want to use relative paths?
-
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -17,10 +16,12 @@ HEIGHT = 800
 
 def printout():
     print("hello world")
+
+
 class game:
     #root = None
     board = None
-    turn = None
+    turnCount = 0
     currentSquare = None
     newSquare = None
     turn = "white"
@@ -29,8 +30,11 @@ class game:
     screen = None
     current_instruction = ""
     running = True
+    moved = False
+    offerPowerups = False #Do we offer power ups this round?
+    powerups = []
 
-#running this function on a separte thread
+#running this function on a separate thread
     def run_socket(self,conn_type, ip, port):
         self.new_p2p = p2p(conn_type, ip, port)
         self.new_p2p.init_p2p()
@@ -61,7 +65,7 @@ class game:
 
 
     def __init__(self, conn_type, ip, port):
-        self.board = board.board()
+        self.board = board.board(True)
         if(conn_type == "connect"):
             self.board.mycolor = "black"
         else:
@@ -82,40 +86,60 @@ class game:
          
                     
     def execute_instruction(self,i,j,currentX,currentY):
-        print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
-        self.board.movePiece(i,j,currentX,currentY,self.turn)
+        #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
+        self.board.movePiece(i,j,currentX,currentY,self.turn, True)
+
+        if (self.turn == "black"):
+            self.turnCount += 1
+        
+        whiteMoves = self.board.whitePieceUpdateLegal()
+        blackMoves = self.board.blackPieceUpdateLegal()
+
+        if (whiteMoves == 0):
+            if (self.board.isKinginCheck("white")):
+                print("Checkmate! Black Wins")
+            else:
+                print("Stalemate! White has no valid moves")
+        if (blackMoves == 0):
+            if (self.board.isKinginCheck("black")):
+                print("Checkmate! White Wins")
+            else:
+                print("Stalemate! Black has no valid moves")
+        self.currentSquare = None
 
         if (self.turn == "white"):
             self.turn = "black"
         else:
             self.turn = "white"
-        
-        self.board.whitePieceUpdateLegal()
-        self.board.blackPieceUpdateLegal()
-        self.currentSquare = None
 
     def selectsquare(self,i,j):
-        print("SELECT SQUARE")
+        print("selected square ", i , "," , j)
+        if (self.moved):
+            return
+        #print("SELECT SQUARE")
         #print(self.board.whitePieces)
         #print(self.board.blackPieces)
         if(self.turn != self.board.mycolor):
             return
-        print("selected square ", i , "," , j)
+        #print("selected square ", i , "," , j)
 
         if (self.currentSquare == None):
             if (self.board.getSquare(i,j) == None or not(self.board.getSquare(i,j).get_color() == self.turn)):
-                print("Invalid square")
+                #print("Invalid square")
                 return
             else: #The square you selected must be one of your pieces
-                print("Selected a piece at ", i , "," , j)
+                #print("Selected a piece at ", i , "," , j)
                 self.currentSquare = (i,j)
                 return
         
         #At this point, you have already selected a piece
         #If you selected another of your piece, swap the current piece to it
         elif (not(self.board.getSquare(i,j) == None) and self.board.getSquare(i,j).get_color() == self.turn):
-            print("Selected a piece at ", i , "," , j)
+            #print("Selected a piece at ", i , "," , j)
             self.currentSquare = (i,j)
+            print(self.board.chessArray[i][j].get_name())
+            print(self.board.chessArray[i][j].upgrades)
+            print(self.board.chessArray[i][j].get_possible_moves())
             return
         
         #Otherwise, you are attempting to make a move; see if this move is possible, and do it if so
@@ -124,57 +148,113 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
+            # validMoves = self.board.getLegalMoves(currentX,currentY)
             validMoves = pieceObject.get_possible_moves()
-            #validMoves = self.board.getLegalMoves(currentX,currentY)
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)
-            print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
-            print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
+            #print(f"Moving a {pieceColor} {pieceName} from {currentX}, {currentY} to {newX}, {newY}")
+            #print(f"Possible moves {validMoves} wanted moves {wantedMoveXY}")
             
             # Check if it is a valid move
             if (validMoves == None):
-                print("Invalid move")
+                #print("Invalid move")
                 return
             if wantedMoveXY in validMoves:
-                print("Valid Move")
+                #print("Valid Move")
                 self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.board.mycolor,"utf-8"))
-
-                global_vars.send_event.set()
+                self.moved = True
                 self.execute_instruction(i,j,currentX,currentY)
-                
+
+                if (self.turnCount > 0 and (self.turnCount % 2 == 0)):
+                    self.offerPowerups = True
+                else:
+                    self.offerPowerups = False
+
+                # while (self.offerPowerups):
+                #     print("Waiting for user to use a powerup")
+
+                #global_vars.send_event.set()
             else: 
-                print("Invalid move")
+                #print("Invalid move")
                 return
+
+    def draw_powerups(self):
+        #print(self.offerPowerups, " because ", self.turnCount)
+        if (not(self.offerPowerups)):
+            return
+        red = (255,0,0)
+
+        if (len(self.powerups) == 0):
+            pieces = self.board.whitePieces
+            if (self.board.mycolor == "black"):
+                pieces = self.board.blackPieces
+            for i in range(4):
+                randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                #print("random piece is ", randomPiece)
+                #print("Which is a ", self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
+                powerup = powerups.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
+                self.powerups.append((randomPiece,powerup))
+                powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
+                print("Power up ", i, " - " , powerupdescription)
+        for i in range(2,6):
+            #https://stackoverflow.com/questions/63799644/pygame-how-do-i-create-a-button-with-text
+            #https://stackoverflow.com/questions/72158111/render-doesnt-apply-to-a-str-object
+            randomPiece,powerup = self.powerups[i-2]
+            powerupdescription1 = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name()  + " at " + str(randomPiece)
+            desc2 = powerup.get_description()
+            #powerupdescription = "power up " + str(i-1)
+            #Why is this so goofy
+            font_game = pygame.font.SysFont("Arial",20)
+            powerupbutton1 = pygame.font.Font.render(font_game,powerupdescription1,1,(255,255,255))
+            powerupbutton2 = pygame.font.Font.render(font_game,desc2,1,(255,255,255))
+            #powerupbutton = pygame.Surface(((HEIGHT * 0.2) ,(HEIGHT * 0.1)),pygame.SRCALPHA,32).convert_alpha()
+            #powerupbutton.blit(,(0,0))
+            #text = pygame.font.render(powerupdescription, 1, (136, 255, 0))
+            pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+            self.screen.blit(powerupbutton1,((HEIGHT * 0.8) , (HEIGHT * i * 0.1)))
+            self.screen.blit(powerupbutton2,((HEIGHT * 0.8) , (HEIGHT * (i+0.5) * 0.1)))
+        for i in range(2,7):
+            pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
+            #pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i * 0.1), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i),10)
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.2),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.3),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.4),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.5),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+        # pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
 
     def draw_valid(self):
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
             validMoves = pieceObject.get_possible_moves()
-            #validMoves = self.board.getLegalMoves(currentX,currentY)
-            gray = (180,180,180)
-            green = (55,96,12)
+            gray = (100, 100, 100)     # darker gray
+            green = (30, 60, 10)
+            blue = (0,0,255)
             #print("Valid moves are ")
             #print(validMoves)
             for move in validMoves:
                 #print("Move is ", move)
                 adj_mov = ((8 * move[0]) + move[1])
                 if (self.board.mycolor == "white"):
-                    if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                    else:
-                        pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    #surface,color,center coords, radius, optional width (0 fills the circle)
+                    pygame.draw.circle(self.screen,blue,[((move[1] * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),move[0] * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+                    # if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
+                    #     pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    # else:
+                    #     pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 if (self.board.mycolor == "black"):
-                    if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                    else:
-                        pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    pygame.draw.circle(self.screen,blue,[(((7-move[1]) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-move[0]) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+                    # if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
+                    #     pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    # else:
+                    #     pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
 
     def draw_captured(self):
         pass
     def draw_pieces(self):
         if (self.board.mycolor == "white"):
+            #print ("white", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
                 x = self.board.whitePieces[i][0]
                 y = self.board.whitePieces[i][1]
@@ -186,6 +266,7 @@ class game:
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
         else:
+            #print ("black", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
                 x = self.board.whitePieces[i][0]
                 y = self.board.whitePieces[i][1]
@@ -224,14 +305,37 @@ class game:
                 if event.type == pygame.QUIT:
                     self.running = False#TODO: THIS SHIT NOT WORKING
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if (self.board.mycolor == "white"):
-                        self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
-                    else:
-                        self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                    if (event.pos[0] < 0.8 * WIDTH):
+                        if (self.board.mycolor == "white"):
+                            self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
+                        else:
+                            self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
+                    if (event.pos[0] >= 0.8 * WIDTH and event.pos[1] >= (HEIGHT * 0.2)
+                        and event.pos[1] <= (HEIGHT * 0.6) and self.offerPowerups):
+                        #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
+                        randomPiece, powerup = self.powerups[int(event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10)]
+                        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting upgraded")
+                        print(powerup.get_capture())
+                        print(powerup.get_move())
+                        self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [powerup.get_capture(),powerup.get_move()]
+                        self.offerPowerups = False
+                        self.powerups = []
+                    # elif (event.pos[0] == 0.8 * WIDTH):
+                    #     self.offerPowerups = False
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()
+            self.draw_powerups()
+            #print("Offering powerups is ", self.offerPowerups, " because ", self.turnCount)
             pygame.display.flip()
+
+            #if (self.moved and not(self.offerPowerups)):
+
+            if (self.moved and not(self.offerPowerups)):
+                #print("Sending Move")
+                global_vars.send_event.set()
+                self.moved = False
+
             #self.draw_captured()
 
         pygame.display.quit()

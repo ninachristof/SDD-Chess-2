@@ -33,6 +33,9 @@ class p2p:
         if(self.conn != None):
             self.conn.close()
         if(self.sock != None):
+            #TODO: make sure to only run this when something is actually connected.
+            #replicate:make a move then close the game
+            #self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
 
     def recv_instruction_2(self):
@@ -72,6 +75,7 @@ class p2p:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind((self.ip, self.port))
         self.sock.listen(5)
+        print(self.sock)
         self.conn, addr = self.sock.accept()
         self.conn.setblocking(True)
         self.conn.settimeout(None)
@@ -80,7 +84,9 @@ class p2p:
         #TODO: how are the timers going to be synced up? 
         #todo: if error on receiving end, send a request to resend mesage
         #TODO: timestamp
+
     def connect_to_game_2(self):
+        #TODO: try to connect, if it cant then call close socket because itll leave an open socket
         #TODO: have a loop of connection retries
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.ip,self.port))

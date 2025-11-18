@@ -92,13 +92,9 @@ class game:
         if (self.turn == "black"):
             self.turnCount += 1
         
-        if (self.turn == "white"):
-            self.turn = "black"
-        else:
-            self.turn = "white"
-        
         whiteMoves = self.board.whitePieceUpdateLegal()
         blackMoves = self.board.blackPieceUpdateLegal()
+
         if (whiteMoves == 0):
             if (self.board.isKinginCheck("white")):
                 print("Checkmate! Black Wins")
@@ -110,6 +106,11 @@ class game:
             else:
                 print("Stalemate! Black has no valid moves")
         self.currentSquare = None
+
+        if (self.turn == "white"):
+            self.turn = "black"
+        else:
+            self.turn = "white"
 
     def selectsquare(self,i,j):
         print("selected square ", i , "," , j)
@@ -223,7 +224,7 @@ class game:
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
-            validMoves = self.board.getLegalMoves(currentX,currentY)
+            validMoves = pieceObject.get_possible_moves()
             gray = (100, 100, 100)     # darker gray
             green = (30, 60, 10)  
             #print("Valid moves are ")

@@ -12,7 +12,7 @@ class board:
 
     
     def __init__(self, initialize): 
-        print("INITIALIZEING BOARD")
+        #print("INITIALIZEING BOARD")
         self.chessArray = [[None for j in range(8)] for i in range(8)]
         self.whitePieces = [] # The list of locations for white pieces
         self.blackPieces = [] # The list of locations for black pieces
@@ -268,9 +268,9 @@ class board:
 
 
     def clone_board_state(self):
-        print("In here:")
+        #print("In here:")
         new_board = board(False)
-        print("END here:")
+        #print("END here:")
         new_board.chessArray = [[None for j in range(8)] for i in range(8)]
         new_board.whitePieces = []
         new_board.blackPieces = []

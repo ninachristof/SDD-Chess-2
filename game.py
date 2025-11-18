@@ -96,8 +96,8 @@ class game:
 
     def selectsquare(self,i,j):
         print("SELECT SQUARE")
-        print(self.board.whitePieces)
-        print(self.board.blackPieces)
+        #print(self.board.whitePieces)
+        #print(self.board.blackPieces)
         if(self.turn != self.board.mycolor):
             return
         print("selected square ", i , "," , j)
@@ -124,7 +124,8 @@ class game:
             newX, newY = i, j
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
-            validMoves = self.board.getLegalMoves(currentX,currentY)
+            validMoves = pieceObject.get_possible_moves()
+            #validMoves = self.board.getLegalMoves(currentX,currentY)
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)
@@ -150,13 +151,14 @@ class game:
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
-            validMoves = self.board.getLegalMoves(currentX,currentY)
+            validMoves = pieceObject.get_possible_moves()
+            #validMoves = self.board.getLegalMoves(currentX,currentY)
             gray = (180,180,180)
             green = (55,96,12)
-            print("Valid moves are ")
-            print(validMoves)
+            #print("Valid moves are ")
+            #print(validMoves)
             for move in validMoves:
-                print("Move is ", move)
+                #print("Move is ", move)
                 adj_mov = ((8 * move[0]) + move[1])
                 if (self.board.mycolor == "white"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:

@@ -427,6 +427,7 @@ class board:
     
     # Iterates through each white piece location and updates the pieces with the new available moves. 
     def whitePieceUpdate(self):
+        #print("Updating white")
         for x, y in self.whitePieces:
             #print("piece at ", x , ",", y)
             possibleMoves = self.getPossibleMoves(x,y)
@@ -437,6 +438,7 @@ class board:
 
     # Same as whitePieceCheck, but for the black pieces. 
     def blackPieceUpdate(self):
+        #print("Updating black")
         for x, y in self.blackPieces:
             #print("piece at ", x , ",", y)
             possibleMoves = self.getPossibleMoves(x,y)

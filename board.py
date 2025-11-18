@@ -102,8 +102,6 @@ class board:
             self.blackPieces.append((x, y))
             if piece == 'k': self.blackKingXY = (x, y)
         
-
-
     # Print the board.
     def printBoardState(self):
         print("  ", end="") 
@@ -196,12 +194,17 @@ class board:
                 possibleMoves2.append(lineofsight)
 
         for direction in captureMoves:
+            pieceFound = False
+            temp = []
             for lineofsight in direction:
                 if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
                     if (self.chessArray[lineofsight[0]][lineofsight[1]].get_color() != color):
-                        possibleMoves2.append(lineofsight)
+                        pieceFound = True
+                        temp.append(lineofsight)
                     break
-                possibleMoves2.append(lineofsight)
+                temp.append(lineofsight)
+            if (not self.chessArray[x][y].get_captureOnlyWithPiece() or pieceFound):
+                possibleMoves2.extend(temp)
         #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
         #print("AAA: ", possibleMoves2)
         return possibleMoves2

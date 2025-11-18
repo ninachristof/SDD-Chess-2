@@ -113,7 +113,7 @@ class game:
             self.turn = "white"
 
     def selectsquare(self,i,j):
-        print("selected square ", i , "," , j)
+        #print("selected square ", i , "," , j)
         if (self.moved):
             return
         #print("SELECT SQUARE")

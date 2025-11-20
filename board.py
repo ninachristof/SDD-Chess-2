@@ -130,7 +130,11 @@ class board:
                   "black":(self.blackKingXY,self.whitePieces)}
         kinglocation,enemypieces = lookup[color]
         for piece in enemypieces:
-            if kinglocation in self.chessArray[piece[0]][piece[1]].get_possible_moves():
+            x,y = piece[0],piece[1]
+            color2 = "black"
+            if (color == "black"):
+                color2 = "white"
+            if kinglocation in self.getPossibleMoves(x,y,color2):
                 return True
         return False
         #print("The king is at ", kinglocation)
@@ -157,8 +161,11 @@ class board:
         #return [self.chessArray[x][y].findMoves(x, y)]
         possibleMoves2 = []
         #print(x,y)
-        noncaptureMoves = self.chessArray[x][y].findMoves(x,y)[0]
-        captureMoves = self.chessArray[x][y].findMoves(x, y)[1]
+        noncaptureMoves = self.chessArray[x][y].getPossibleNoncapture()
+        captureMoves = self.chessArray[x][y].getPossibleCapture()
+        # if (x == 7 and y == 6):
+        #     print ("Possible noncapture is ", noncaptureMoves)
+        #     print("Possible capture is ", captureMoves)
         #if (self.chessArray[x][y].get_name() == "kn"):
             #print(x, ",",y)
             #print("capture moves: ", captureMoves)
@@ -177,36 +184,40 @@ class board:
                     break
                 possibleMoves2.append(lineofsight)
         #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
-        #print("AAA: ", possibleMoves2)
+        # if (x == 7 and y == 6):
+        #     print("AAA: ", possibleMoves2)
         return possibleMoves2
 
     
-    def updateAllPieces(self):
-        self.updatePieces("white")
-        self.updatePieces("black")
+    # def updateAllPieces(self):
+    #     self.updatePieces("white")
+    #     self.updatePieces("black")
 
-    def updatePieces(self, color):
-        pieces = self.whitePieces if color == "white" else self.blackPieces
-        for (x, y) in pieces:
-            piece = self.chessArray[x][y]
-            if not piece:
-                continue
-            moves = self.getPossibleMoves(x, y, color)
-            piece.updatePossibleMoves(moves)
+    # def updatePieces(self, color):
+    #     pieces = self.whitePieces if color == "white" else self.blackPieces
+    #     for (x, y) in pieces:
+    #         piece = self.chessArray[x][y]
+    #         if not piece:
+    #             continue
+    #         moves = self.getPossibleMoves(x, y, color)
+    #         piece.updatePossibleMoves(moves)
             
     def getLegalMoves(self,x,y):
         legalMoves = []
         color = self.chessArray[x][y].get_color()
         possibleMoves = self.getPossibleMoves(x,y, color)
-        #print("Possible moves are", possibleMoves)
+        print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves}")
+        #print("Received possible moves are", possibleMoves)
         #legalMoves = possibleMoves
+        newboard= self.clone_board_state()
         for move in possibleMoves:
-            if (self.moveprediction(move[0],move[1],x,y,color)):
+            if (newboard.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)
             # self.movePiece(move[0],move[1],x,y,color)
             # if (not self.isKinginCheck(color)):
             #     legalMoves.append(move)
             # self.movePiece(x,y,move[0],move[1],color)
+        print("Legal moves are ", legalMoves)
         return legalMoves
     
     def returnLegalMoves(self,x,y):
@@ -217,12 +228,12 @@ class board:
         countMoves = 0
         if (self.isKinginCheck("white")):
             print("White king in check")
-        for x, y in self.whitePieces:
+        for x, y in self.whitePieces.copy():
             #print("white ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
-            possibleMoves = self.getLegalMoves(x,y)
-            countMoves += len(possibleMoves)
-            #print("legal moves are ", possibleMoves)
-            self.chessArray[x][y].updatePossibleMoves(possibleMoves) # Updates the moves of the piece.
+            legalMoves = self.getLegalMoves(x,y)
+            countMoves += len(legalMoves)
+            #print("legal moves are ", legalMoves)
+            self.chessArray[x][y].updateLegalMoves(legalMoves) # Updates the moves of the piece.
         print("Finished white legal")
         return countMoves
         #self.isKinginCheck("white")
@@ -232,12 +243,12 @@ class board:
         countMoves = 0
         if (self.isKinginCheck("black")):
             print("Black king in check")
-        for x, y in self.blackPieces:
+        for x, y in self.blackPieces.copy():
             #print("black ", self.chessArray[x][y].get_name(), " at ", x, ",",y)
-            possibleMoves = self.getLegalMoves(x,y)
-            countMoves += len(possibleMoves)
-            #print("legal moves are ", possibleMoves)
-            self.chessArray[x][y].updatePossibleMoves(possibleMoves)
+            legalMoves = self.getLegalMoves(x,y)
+            countMoves += len(legalMoves)
+            #print("legal moves are ", legalMoves)
+            self.chessArray[x][y].updateLegalMoves(legalMoves)
         print("Finished black legal")
         return countMoves
         #self.isKinginCheck("black")
@@ -257,55 +268,53 @@ class board:
                 if piece:
                     new_board.addPiece(i, j, piece.name, piece.color)
         return new_board
-
-    
     
 
     def moveprediction(self,newx,newy,oldx,oldy,color):
+        #Stores the deleted square if necessary
         temp = self.chessArray[newx][newy]
-        # Are you landing on a square that's the same color as you? If so, return False
+        #Are you landing on a square that's the same color as you? If so, return False
         if (temp != None and temp.get_color() == color):
             return False
         
-        # Checks if this move is valid; i.e. the king is not in check after this move
-        clone = self.clone_board_state()
+        #checks if this move is valid; i.e. the king is not in check after this move
         validMove = False
-        clone.movePiece(newx,newy,oldx,oldy,color, False)
-        if (not clone.isKinginCheck(color)):
+        self.movePiece(newx,newy,oldx,oldy,color)
+        if (not self.isKinginCheck(color)):
             validMove = True
+        #Undoes any of the effects of the move
+        self.movePiece(oldx,oldy,newx,newy,color)
+        if (temp == None):
+            return validMove
+        
+        #Resurrects the dead piece if the square we moved to wasn't none
+        color = temp.get_color()
+        if (color == "white"):
+            self.whitePieces.append((newx,newy))
+            self.chessArray[newx][newy] = temp
+        if (color == "black"):
+            self.blackPieces.append((newx,newy))
+            self.chessArray[newx][newy] = temp
         return validMove
         
 
-    def movePiece(self, newx, newy, oldx, oldy, color, update):
-        # Check if location empty 
-        if self.chessArray[oldx][oldy] is None:
-            return
-        
-        # Create a dic for easier usage
-        piece_lists = {
-            "white": (self.whitePieces, self.blackPieces),
-            "black": (self.blackPieces, self.whitePieces)
-        } 
-        
-        # Remove piece from own list and opp if needed, and add new piece to own 
-        ownList, oppList = piece_lists[color]
-        ownList.remove((oldx, oldy))
-        if (newx, newy) in oppList: 
-            oppList.remove((newx, newy))
-        ownList.append((newx, newy))
-
-        # Update board object 
+    def movePiece(self,newx,newy,oldx,oldy,color):
+        #print(self.whitePieces)
+        #print(self.blackPieces)
+        #print(oldx, " ", oldy , " ",newx, " ", newy, " ",color)
+        if (color == "white"):
+            self.whitePieces.remove((oldx,oldy))
+            if ((newx,newy) in self.blackPieces):
+                self.blackPieces.remove((newx,newy))
+            self.whitePieces.append((newx,newy))
+        else:
+            self.blackPieces.remove((oldx,oldy))
+            if ((newx,newy) in self.whitePieces):
+                self.whitePieces.remove((newx,newy))
+            self.blackPieces.append((newx,newy))
         self.chessArray[newx][newy] = self.chessArray[oldx][oldy]
         self.chessArray[oldx][oldy] = None
-
-        if (self.blackKingXY == (oldx,oldy)):
-            self.blackKingXY = (newx,newy)
-        if (self.whiteKingXY == (oldx,oldy)):
-            self.whiteKingXY = (newx,newy)
-        
-        # Test for if we are actually moving the piece or just simulating, dont update pieces if the latter
-        # to avoid overhead
-        #if(update): self.updateAllPieces()
+        self.chessArray[newx][newy].findMoves(newx,newy)
             
 
 

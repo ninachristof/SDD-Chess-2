@@ -87,7 +87,7 @@ class game:
                     
     def execute_instruction(self,i,j,currentX,currentY):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
-        self.board.movePiece(i,j,currentX,currentY,self.turn, True)
+        self.board.movePiece(i,j,currentX,currentY,self.turn)
 
         if (self.turn == "black"):
             self.turnCount += 1
@@ -149,7 +149,7 @@ class game:
             pieceObject = self.board.getSquare(currentX,currentY)
             pieceName = pieceObject.get_name()
             # validMoves = self.board.getLegalMoves(currentX,currentY)
-            validMoves = pieceObject.get_possible_moves()
+            validMoves = pieceObject.getlegalMoves()
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)
@@ -227,7 +227,7 @@ class game:
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
             pieceObject = self.board.getSquare(currentX,currentY)
-            validMoves = pieceObject.get_possible_moves()
+            validMoves = pieceObject.getlegalMoves()
             gray = (100, 100, 100)     # darker gray
             green = (30, 60, 10)
             blue = (0,0,255)

@@ -6,7 +6,11 @@ class chesspiece:
     y = 0
     color = None
     firstMove = True
-    possibleMoves = []
+
+    possible_Capture = []
+    possible_NonCapture = []
+    possibleMoves = [] #These are all moves that don't go off the board
+    legalMoves = [] #These are all possibleMoves that also (1) don't require going through pieces and (2) don't leave the king in check
     multipleMoves = False
     sprite = None
     upgrades = [[],[]]
@@ -23,6 +27,12 @@ class chesspiece:
     def get_spite(self):
         return self.sprite
     
+    def getPossibleCapture(self):
+        return self.possible_Capture.copy()
+
+    def getPossibleNoncapture(self):
+        return self.possible_NonCapture.copy()
+    
     # Takes in a list of lists of possible New moves, split into subgroups. 
     # Unfolds that list of lists. 
     def updatePossibleMoves(self, newMoves):
@@ -30,8 +40,16 @@ class chesspiece:
         for subList in newMoves:
             self.possibleMoves.extend([subList])
 
+    def updateLegalMoves(self,newMoves):
+        self.legalMoves = []
+        for subList in newMoves:
+            self.legalMoves.extend([subList])
+
     def get_possible_moves(self):
         return self.possibleMoves.copy()
+    
+    def getlegalMoves(self):
+        return self.legalMoves.copy()
         
     def set_first_move(self):
         self.firstMove = False
@@ -63,7 +81,6 @@ class chesspiece:
                     else:
                         break
                 filteredMoves.append(filteredLOS)
-        ##print("Finding moves for ", x,",", y)
         return filteredCapture,filteredMoves
         
 
@@ -79,7 +96,8 @@ class pawn(chesspiece):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_plt60.png"), (80,80))
         elif(color == "black"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_pdt60.png"), (80,80))
-    
+        self.findMoves(x,y)
+        
     def findMoves(self, x, y):
         powerupCapture, powerupMove = super().findMoves(x,y)
         possibleNoncapture = []
@@ -109,6 +127,8 @@ class pawn(chesspiece):
         possibleNoncapture = [possibleNoncapture]
         possibleCapture.extend(powerupCapture)
         possibleNoncapture.extend(powerupMove)
+        self.possible_Capture = possibleCapture
+        self.possible_NonCapture = possibleNoncapture
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
         return (possibleNoncapture, possibleCapture)
 
@@ -123,7 +143,8 @@ class knight(chesspiece):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_nlt60.png"), (80,80))
         elif(color == "black"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_ndt60.png"), (80,80))
-    
+        self.findMoves(x,y)
+
     def findMoves(self, x, y):
         powerupCapture,powerupMove = super().findMoves(x,y)
         possibleNoncapture = []
@@ -157,6 +178,9 @@ class knight(chesspiece):
             possibleCapture.append([(x - 2,y - 1)])
         possibleCapture.extend(powerupCapture)
         possibleNoncapture.extend(powerupMove)
+
+        self.possible_Capture = possibleCapture
+        self.possible_NonCapture = possibleNoncapture
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
         return (possibleNoncapture, possibleCapture)
 
@@ -170,6 +194,8 @@ class king(chesspiece):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_klt60.png"), (80,80))
         elif(color == "black"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_kdt60.png"), (80,80))
+        self.findMoves(x,y)
+        
 
     def findMoves(self, x, y):
         powerupCapture,powerupMove = super().findMoves(x,y)
@@ -202,6 +228,9 @@ class king(chesspiece):
         if (x > 0 and y > 0):
             possibleCapture.append([(x - 1,y - 1)])
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
+
+        self.possible_Capture = possibleCapture
+        self.possible_NonCapture = possibleNoncapture
         return (possibleNoncapture, possibleCapture)
 
 class rook(chesspiece):
@@ -214,7 +243,8 @@ class rook(chesspiece):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_rlt60.png"), (80,80))
         elif(color == "black"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_rdt60.png"), (80,80))
-
+        self.findMoves(x,y)
+        
     def findMoves(self, x, y):
         powerupCapture,powerupMove = super().findMoves(x,y)
         possibleNoncapture = [[]]
@@ -251,6 +281,9 @@ class rook(chesspiece):
         possibleNoncapture.extend(powerupMove)
         possibleCapture = [possibleUp, possibleRight, possibleDown, possibleLeft]
         possibleCapture.extend(powerupCapture)
+
+        self.possible_Capture = possibleCapture
+        self.possible_NonCapture = possibleNoncapture
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
         return (possibleNoncapture, possibleCapture)
 
@@ -264,6 +297,7 @@ class bishop(chesspiece):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_blt60.png"), (80,80))
         elif(color == "black"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_bdt60.png"), (80,80))
+        self.findMoves(x,y)
 
     def findMoves(self, x, y):
         powerupCapture,powerupMove = super().findMoves(x,y)
@@ -308,6 +342,9 @@ class bishop(chesspiece):
         possibleNoncapture.extend(powerupMove)
         possibleCapture = [possibleUpRight, possibleDownRight, possibleDownLeft, possibleUpLeft]
         possibleCapture.extend(powerupCapture)
+
+        self.possible_Capture = possibleCapture
+        self.possible_NonCapture = possibleNoncapture
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
         return (possibleNoncapture, possibleCapture)
 
@@ -321,6 +358,7 @@ class queen(bishop, rook):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_qlt60.png"), (80,80))
         elif(color == "black"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_qdt60.png"), (80,80))
+        self.findMoves(x,y)
 
     def findMoves(self, x, y):
         powerupCapture, powerupMove = super().findMoves(x,y)
@@ -336,5 +374,8 @@ class queen(bishop, rook):
 
         possibleCapture.extend(b2)
         possibleCapture.extend(r2)
+
+        self.possible_Capture = possibleCapture
+        self.possible_NonCapture = possibleNoncapture
         #print("Find moves gives ", possibleNoncapture, possibleCapture)
         return (possibleNoncapture, possibleCapture)

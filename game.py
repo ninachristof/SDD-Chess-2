@@ -37,7 +37,7 @@ class game:
 #running this function on a separate thread
     def run_socket(self,conn_type, ip, port):
         self.new_p2p = p2p(conn_type, ip, port)
-        self.new_p2p.init_p2p()
+        self.new_p2p.initP2p()
         wait_for_my_move = True
         if(conn_type == "connect"):
             wait_for_my_move = False
@@ -48,12 +48,12 @@ class game:
                 global_vars.send_event.wait()
                 if(not self.running):
                     break
-                self.new_p2p.send_instruction_2(self.current_instruction)
+                self.new_p2p.sendInstruction(self.current_instruction)
                 global_vars.send_event.clear()
                 wait_for_my_move = False
             else:
                 #wait for instruction
-                instruction = self.new_p2p.recv_instruction_2() 
+                instruction = self.new_p2p.recvInstruction() 
                 if(instruction == 1):
                     print("INSTRUCTION ERROR")
                     break

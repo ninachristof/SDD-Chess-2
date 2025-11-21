@@ -354,14 +354,14 @@ class board:
         self.chessArray[newx][newy].findMoves(newx,newy)
 
         if (self.blackKingXY == (oldx,oldy)):
-            print(self.blackKingXY)
-            print("Updating the location of the black king from ", oldx, ",", oldy, " to ",
-                  newx, ",", newy)
+            # print(self.blackKingXY)
+            # print("Updating the location of the black king from ", oldx, ",", oldy, " to ",
+            #       newx, ",", newy)
             self.blackKingXY = newx,newy
         if (self.whiteKingXY == (oldx,oldy)):
-            print(self.whiteKingXY)
-            print("Updating the location of the white king from ", oldx, ",", oldy, " to ",
-                  newx, ",", newy)
+            # print(self.whiteKingXY)
+            # print("Updating the location of the white king from ", oldx, ",", oldy, " to ",
+            #       newx, ",", newy)
             self.whiteKingXY = newx,newy
 
 

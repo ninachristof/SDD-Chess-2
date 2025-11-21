@@ -54,14 +54,12 @@ class game:
             else:
                 #wait for instruction
                 instruction = self.new_p2p.recv_instruction_2() 
-                print(f"{instruction[0]}, {instruction[0]}")
-                print(f"{instruction[2]}, {instruction[2]}")
                 if(instruction == 1):
                     print("INSTRUCTION ERROR")
                     break
                 self.execute_instruction(instruction[0],instruction[1],instruction[2],instruction[3])
                 wait_for_my_move = True
-        self.new_p2p.close_all()
+        #self.new_p2p.close_all()
 
 
     def __init__(self, conn_type, ip, port):
@@ -296,6 +294,8 @@ class game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False#TODO: THIS SHIT NOT WORKING
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if (event.pos[0] < 0.8 * WIDTH):
                         if (self.board.mycolor == "white"):

@@ -36,6 +36,5 @@ def main():
         newgame.new_p2p.close_all()
         conn_thread.join()
     print("FINISHED PROGRAM")
-    #add something to trigger and stop host listening instead of on init
     
 main()

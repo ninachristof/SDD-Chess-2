@@ -164,6 +164,23 @@ class board:
         #         if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
         #             return True
         # return False
+        
+        if (color == "black"):
+            for piece in self.blackPieces:
+                #print(piece)
+                if self.chessArray[piece[0]][piece[1]].get_name() == 'k':
+                        kinglocation = piece[0],piece[1]
+            for piece in self.whitePieces:
+                # print(self.chessArray[piece[0]][piece[1]].get_color(), " ",
+                #       self.chessArray[piece[0]][piece[1]].get_name(), " at ",
+                #       piece[0], ",", piece[1])
+                for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
+                    #print(move)
+                    if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
+                        #print("Black King in check")
+                        return True
+            #print("Black King not in check")
+            return False
 
 
     ##################################################################################

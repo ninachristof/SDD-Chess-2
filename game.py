@@ -10,9 +10,8 @@ import pygame
 from state import *
 from textbox import *
 from button import *
-from colors import *
-from utils import *
 import time
+import os
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -39,10 +38,13 @@ class game:
     moved = False
     offerPowerups = False #Do we offer power ups this round?
     powerups = []
+    port = 0
+    conn_type = ""
+    ip = ""
 
 #running this function on a separate thread
-    def run_socket(self,conn_type, ip, port):
-        self.new_p2p = p2p(conn_type, ip, port)
+    def run_socket(self):
+        self.new_p2p = p2p(self.conn_type, self.ip, self.port)
         self.new_p2p.init_p2p()
         wait_for_my_move = True
         if(self.conn_type == "connect"):
@@ -71,23 +73,29 @@ class game:
 
 
     def __init__(self, conn_type, ip, port):
+        self.conn_type = conn_type
+        self.ip = ip
+        self.port = port
         self.board = board.board(True)
-        if(conn_type == "connect"):
+        pygame.init()
+        self.conn_thread = threading.Thread(target=self.run_socket)
+        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
+        #pygame.display.set_caption(f"Chess {self.board.mycolor}")
+        #TODO:somwhere to join or force join this thread
+
+    def setup_game(self):
+        if(self.conn_type == "connect"):
             self.board.mycolor = "black"
         else:
             self.board.mycolor = "white"
-        #self.board.startState(self.board.mycolor)
+        self.board.startState()
         self.board.whitePieceUpdateLegal()
         self.board.blackPieceUpdateLegal()
-        self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
-        self.conn_thread.start()
-        pygame.init()
-        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
-        pygame.display.set_caption(f"Chess {self.board.mycolor}")
-        #TODO:somwhere to join or force join this thread
         
     def get_conn_thread(self):
         return self.conn_thread
+        
+         
                     
     def execute_instruction(self,i,j,currentX,currentY):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
@@ -208,13 +216,15 @@ class game:
             powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name()  + " at " + str(randomPiece) + powerup.get_description()
             #powerupdescription = "power up " + str(i-1)
             #Why is this so goofy
-            font_game = pygame.font.SysFont("Arial",20)
-            powerupbutton = pygame.font.Font.render(font_game,powerupdescription,1,(255,255,255))
+            #font_game = pygame.font.SysFont("Arial",20)
+            #powerupbutton = pygame.font.Font.render(font_game,powerupdescription,1,(255,255,255))
             #powerupbutton = pygame.Surface(((HEIGHT * 0.2) ,(HEIGHT * 0.1)),pygame.SRCALPHA,32).convert_alpha()
             #powerupbutton.blit(,(0,0))
             #text = pygame.font.render(powerupdescription, 1, (136, 255, 0))
-            pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-            self.screen.blit(powerupbutton,((HEIGHT * 0.8) , (HEIGHT * i * 0.1)))
+            #pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
+            #self.screen.blit(powerupbutton,((HEIGHT * 0.8) , (HEIGHT * i * 0.1)))
+            button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,powerupdescription ,None)
+            button.draw(self.screen)
         for i in range(2,7):
             pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
             #pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i * 0.1), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i),10)
@@ -238,14 +248,14 @@ class game:
                 adj_mov = ((8 * move[0]) + move[1])
                 if (self.board.mycolor == "white"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, c.SELECT_GRAY, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     else:
-                        pygame.draw.rect(self.screen, c.SELECT_GREEN, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 if (self.board.mycolor == "black"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, c.SELECT_GRAY, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     else:
-                        pygame.draw.rect(self.screen, c.SELECT_GREEN, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
 
     def draw_captured(self):
         pass
@@ -280,11 +290,12 @@ class game:
             for i in range(32):
                 column = i % 4
                 row = i // 4
+                color = (255,255,255)
                 if row % 2 == 0:
-                    pygame.draw.rect(self.screen, c.WHITE, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 else:
-                    pygame.draw.rect(self.screen, c.WHITE, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
+                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                pygame.draw.rect(self.screen, 'white', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
                 pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
                 pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
                 status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
@@ -294,9 +305,9 @@ class game:
                     pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
                     pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
 
-    def OLD_main_loop(self):
-        self.setup_game()
-        self.conn_thread.start()
+    def main_loop(self):
+        #self.setup_game()
+        #self.conn_thread.start()
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -334,6 +345,76 @@ class game:
                 self.moved = False
 
             #self.draw_captured()
+
+        pygame.display.quit()
+        pygame.quit()
+        global_vars.send_event.set()
+
+    def main_loop_menu(self):
+        state = "main menu"
+
+#for main menu
+        scale = 5
+        button_x_pos = (WIDTH// 2) - (57*scale // 2)
+        height_offset = 50
+        host_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, None,"resources/create_game_button.png",57,9,scale)
+        join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset, None,"resources/join_game_button.png",57,9,scale)
+        textbox_width = 350
+        textbox_height = 50
+#for joining game menu
+        #TODO:add color pallete globals cuz this shits getting ugly
+        ip_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 - height_offset, textbox_width,textbox_height, textbox_height-8, "ip")
+        port_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + height_offset, textbox_width,textbox_height, textbox_height-8, "port")
+        connect_button = TextButton((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + 3*height_offset, textbox_width,textbox_height, textbox_height-8, "join game",None)
+        while self.running:
+            eventlist = pygame.event.get()
+            #if quit is recieved do so immediately
+            for event in eventlist:
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    continue
+
+            if state == "main menu":
+                self.screen.fill((172,200,255))
+                if host_button.draw(self.screen) == 1:
+                    state = "host game"
+                if join_button.draw(self.screen) == 1:
+                    state = "join game"
+
+            elif state == "host game":
+                #time.sleep(1)
+                self.conn_type = "host"
+                self.ip = "0.0.0.0"
+                self.port = 2020 #TODO: display a selected available port
+                state = "play game"
+                self.setup_game()
+                self.conn_thread.start()
+
+            elif state == "join game":
+                self.conn_type = "connect"
+                self.screen.fill((172,200,255))
+                #ip_textbox.handle_textbox(self.screen, eventlist)
+                #port_textbox.handle_textbox(self.screen, eventlist)
+                self.ip = ip_textbox.handle_textbox(self.screen, eventlist)
+                port = port_textbox.handle_textbox(self.screen, eventlist)
+
+                if(connect_button.draw(self.screen) == 1):
+                    is_num = True
+                    for char in port:
+                        if not char.isdigit():
+                            is_num = False
+                            break
+                    if is_num:
+                        self.port = int(port)
+                    state = "play game"
+                    #self.conn_thread = threading.Thread(target=self.run_socket)
+                    self.setup_game()
+                    self.conn_thread.start()
+
+            elif state == "play game":
+                self.main_loop()
+
+            pygame.display.flip()
 
         pygame.display.quit()
         pygame.quit()

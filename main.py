@@ -27,9 +27,11 @@ def OLD_main():
     global_vars.init_vars() 
 
     newgame = game.game(conn_type, ip, port)
+    newgame.setup_game()
+    newgame.conn_thread.start()
     conn_thread = newgame.get_conn_thread()
 
-    newgame.OLD_main_loop()
+    newgame.main_loop()
     print("------- FINISHED MAIN LOOP -------")
     if(newgame.new_p2p):
         newgame.new_p2p.close_all()
@@ -41,12 +43,12 @@ def main():
     global_vars.init_vars() 
     newgame = game.game(0,0,0)#this will be removed later
     conn_thread = newgame.get_conn_thread()
-    newgame.main_loop()
+    newgame.main_loop_menu()
     print("------- FINISHED MAIN LOOP -------")
     if(newgame.new_p2p):
         newgame.new_p2p.close_all()
         conn_thread.join()
     print("FINISHED PROGRAM")
 
-#OLD_main()
-main()
+OLD_main()
+#main()

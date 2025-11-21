@@ -7,7 +7,7 @@ from p2p import *
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 
-def OLD_main():
+def main():
     if(len(sys.argv) < 4 ):
         print("ERROR WRONG NUMBER OF ARGUMENTS")
         print("usage: python main.py <host/connect> <ip> <port>")
@@ -27,8 +27,7 @@ def OLD_main():
     global_vars.init_vars() 
 
     newgame = game.game(conn_type, ip, port)
-    newgame.setup_game()
-    newgame.conn_thread.start()
+    #conn_thread = threading.Thread(target=run_socket, args=(conn_type, ip, port, send_event))
     conn_thread = newgame.get_conn_thread()
 
     newgame.main_loop()
@@ -37,21 +36,5 @@ def OLD_main():
         newgame.new_p2p.closeAll()
         conn_thread.join()
     print("FINISHED PROGRAM")
-<<<<<<< HEAD
-=======
-    #TODO:add something to trigger and stop host listening instead of on init
->>>>>>> yuguang-procrastinating-my-real-responsibilities
     
-def main():
-    global_vars.init_vars() 
-    newgame = game.game(0,0,0)#this will be removed later
-    conn_thread = newgame.get_conn_thread()
-    newgame.main_loop_menu()
-    print("------- FINISHED MAIN LOOP -------")
-    if(newgame.new_p2p):
-        newgame.new_p2p.close_all()
-        conn_thread.join()
-    print("FINISHED PROGRAM")
-
-OLD_main()
-#main()
+main()

@@ -146,7 +146,26 @@ class board:
             if kinglocation in self.getPossibleMoves(x,y,color2):
                 return True
         return False
+    
+        #IDK WHO WROTE THIS BUT I'M JUST GONNA USE MY ABOVE CODE :)
         #print("The king is at ", kinglocation)
+        # kinglocation = 0,0
+        # if (color == "white"):
+        #     sameColor = self.whitePieces
+        #     oppColor = self.blackPieces
+        # else:
+        #     sameColor = self.blackPieces
+        #     oppColor = self.whitePieces
+
+        # for piece in sameColor:
+        #     if self.chessArray[piece[0]][piece[1]].get_name() == 'k':
+        #         kinglocation = piece[0],piece[1]
+        #         break
+        # for piece in oppColor:   
+        #     for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
+        #         if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
+        #             return True
+        # return False
 
 
     ##################################################################################
@@ -185,6 +204,8 @@ class board:
                     break
                 possibleMoves2.append(lineofsight)
 
+        print(f"{self.chessArray[x][y].get_name()} MOVES:", end = " ")
+        print(captureMoves)
         for direction in captureMoves:
             pieceFound = False
             temp = []

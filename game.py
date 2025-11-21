@@ -40,11 +40,11 @@ class game:
     powerups = []
 
 #running this function on a separate thread
-    def run_socket(self,conn_type, ip, port):
-        self.new_p2p = p2p(conn_type, ip, port)
+    def run_socket(self):
+        self.new_p2p = p2p(self.conn_type, self.ip, self.port)
         self.new_p2p.initP2p()
         wait_for_my_move = True
-        if(conn_type == "connect"):
+        if(self.conn_type == "connect"):
             wait_for_my_move = False
 
         while(self.running):
@@ -357,6 +357,75 @@ class game:
                 self.moved = False
 
             #self.draw_captured()
+
+        pygame.display.quit()
+        pygame.quit()
+        global_vars.send_event.set()
+    def main_loop_menu(self):
+        state = "main menu"
+
+#for main menu
+        scale = 5
+        button_x_pos = (WIDTH// 2) - (57*scale // 2)
+        height_offset = 50
+        host_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, None,"resources/create_game_button.png",57,9,scale)
+        join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset, None,"resources/join_game_button.png",57,9,scale)
+        textbox_width = 350
+        textbox_height = 50
+#for joining game menu
+        #TODO:add color pallete globals cuz this shits getting ugly
+        ip_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 - height_offset, textbox_width,textbox_height, textbox_height-8, "ip")
+        port_textbox = Textbox((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + height_offset, textbox_width,textbox_height, textbox_height-8, "port")
+        connect_button = TextButton((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + 3*height_offset, textbox_width,textbox_height, textbox_height-8, "join game",None)
+        while self.running:
+            eventlist = pygame.event.get()
+            #if quit is recieved do so immediately
+            for event in eventlist:
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    continue
+
+            if state == "main menu":
+                self.screen.fill((172,200,255))
+                if host_button.draw(self.screen) == 1:
+                    state = "host game"
+                if join_button.draw(self.screen) == 1:
+                    state = "join game"
+
+            elif state == "host game":
+                #time.sleep(1)
+                self.conn_type = "host"
+                self.ip = "0.0.0.0"
+                self.port = 2020 #TODO: display a selected available port
+                state = "play game"
+                self.setup_game()
+                self.conn_thread.start()
+
+            elif state == "join game":
+                self.conn_type = "connect"
+                self.screen.fill((172,200,255))
+                #ip_textbox.handle_textbox(self.screen, eventlist)
+                #port_textbox.handle_textbox(self.screen, eventlist)
+                self.ip = ip_textbox.handle_textbox(self.screen, eventlist)
+                port = port_textbox.handle_textbox(self.screen, eventlist)
+
+                if(connect_button.draw(self.screen) == 1):
+                    is_num = True
+                    for char in port:
+                        if not char.isdigit():
+                            is_num = False
+                            break
+                    if is_num:
+                        self.port = int(port)
+                    state = "play game"
+                    #self.conn_thread = threading.Thread(target=self.run_socket)
+                    self.setup_game()
+                    self.conn_thread.start()
+
+            elif state == "play game":
+                self.main_loop()
+
+            pygame.display.flip()
 
         pygame.display.quit()
         pygame.quit()

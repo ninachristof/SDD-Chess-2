@@ -7,7 +7,7 @@ from p2p import *
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 
-def main():
+def OLD_main():
     if(len(sys.argv) < 4 ):
         print("ERROR WRONG NUMBER OF ARGUMENTS")
         print("usage: python main.py <host/connect> <ip> <port>")
@@ -50,5 +50,5 @@ def main():
         conn_thread.join()
     print("FINISHED PROGRAM")
 
-OLD_main()
-#main()
+#OLD_main()
+main()

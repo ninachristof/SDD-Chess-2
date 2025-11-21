@@ -181,7 +181,6 @@ class board:
                         return True
             #print("Black King not in check")
             return False
->>>>>>> e801842 (erased a couple comments)
 
 
     ##################################################################################

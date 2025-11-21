@@ -231,6 +231,16 @@ class game:
             pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
 
 
+    
+    def promote(self, x,y,piece):
+        self.board.chessArray[x][y] = None
+        if self.board.mycolor =="white":
+            self.board.whitePieces.remove((x,y))
+        else:
+            self.board.blackPieces.remove((x,y))
+        self.board.addPiece(x,y,piece, self.board.mycolor)
+
+
     def draw_promotion_options(self):
         font = pygame.font.Font(None, 36) 
         text_surf = font.render("choose what to promote to", True, "black")
@@ -244,9 +254,11 @@ class game:
                         if self.board.chessArray[i][j].name == "p" and i == 7:
                             print("black promotion")
                             options = ["resources/Chess_ndt60.png", "resources/Chess_rdt60.png", "resources/Chess_bdt60.png", "resources/Chess_qdt60.png"]
+                            n = ["kn", "r", "b", "q"]
                             for i in range(2,6):
-                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), None,options[i-2])
+                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[i-2],1, self.promote, i,j,n[i-2])
                                 piece_promote.draw(self.screen)
+                            return True
         if (self.board.mycolor == "white"):
             for i in range(len(self.board.chessArray)):
                 for j in range(len(self.board.chessArray[i])):
@@ -254,9 +266,12 @@ class game:
                         if self.board.chessArray[i][j].name == "p" and i == 0:
                             print("white promotion")
                             options = ["resources/Chess_nlt60.png", "resources/Chess_rlt60.png", "resources/Chess_blt60.png", "resources/Chess_qlt60.png"]
+                            n = ["kn", "r", "b", "q"]
                             for i in range(2,6):
-                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), None,options[i-2])
+                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[i-2],1, self.promote, i,j,n[i-2])
                                 piece_promote.draw(self.screen)
+                            return True
+        return False
 
     def draw_valid(self):
         if(self.currentSquare != None):

@@ -55,6 +55,14 @@ class board:
         self.addPiece(0, 3, "q", "black")
 
         #self.updateAllPieces()
+
+    def getKing(self,color):
+        if (color == "white"):
+            return self.whiteKingXY
+        if (color == "black"):
+            return self.blackKingXY
+        print("Invalid color")
+        return (-1,-1)
         
 
     # Reset board and remove all pieces. 
@@ -209,7 +217,7 @@ class board:
         legalMoves = []
         color = self.chessArray[x][y].get_color()
         possibleMoves = self.getPossibleMoves(x,y, color)
-        print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves}")
+        #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves}")
         #print("Received possible moves are", possibleMoves)
         #legalMoves = possibleMoves
         newboard= self.clone_board_state()
@@ -220,7 +228,7 @@ class board:
             # if (not self.isKinginCheck(color)):
             #     legalMoves.append(move)
             # self.movePiece(x,y,move[0],move[1],color)
-        print("Legal moves are ", legalMoves)
+        #print("Legal moves are ", legalMoves)
         return legalMoves
     
     def returnLegalMoves(self,x,y):

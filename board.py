@@ -227,20 +227,21 @@ class board:
             pieceFound = False
             temp = []
             for lineofsight in direction:
-                if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
-                    if (self.chessArray[lineofsight[0]][lineofsight[1]].get_color() != color):
-                        pieceFound = True
-                        temp.append(lineofsight)
-                    break
-                temp.append(lineofsight)
-            if (not self.chessArray[x][y].get_captureOnlyWithPiece() or pieceFound):
-                possibleMoves2.extend(temp)
                 if lineofsight[0] >= 0 and lineofsight[0] < 8 and lineofsight[1] >= 0 and lineofsight[1] < 8:
                     if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
                         if (self.chessArray[lineofsight[0]][lineofsight[1]].get_color() != color):
-                            possibleMoves2.append(lineofsight)
+                            pieceFound = True
+                            temp.append(lineofsight)
                         break
-                    possibleMoves2.append(lineofsight)
+                    temp.append(lineofsight)
+            if (not self.chessArray[x][y].get_captureOnlyWithPiece() or pieceFound):
+                possibleMoves2.extend(temp)
+                #if lineofsight[0] >= 0 and lineofsight[0] < 8 and lineofsight[1] >= 0 and lineofsight[1] < 8:
+                #if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
+                #    if (self.chessArray[lineofsight[0]][lineofsight[1]].get_color() != color):
+                #        possibleMoves2.append(lineofsight)
+                #    break
+                #possibleMoves2.append(lineofsight)
         #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
         # if (x == 7 and y == 6):
         #     print("AAA: ", possibleMoves2)

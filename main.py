@@ -50,5 +50,5 @@ def main():
         conn_thread.join()
     print("FINISHED PROGRAM")
 
-#OLD_main()
-main()
+OLD_main()
+#main()

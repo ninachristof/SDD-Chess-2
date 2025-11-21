@@ -234,6 +234,8 @@ class game:
         if self.board.mycolor =="white":
             self.board.whitePieces.remove((x,y))
         else:
+            print(self.board.blackPieces)
+            print(x,y)
             self.board.blackPieces.remove((x,y))
         self.board.addPiece(x,y,piece, self.board.mycolor)
 
@@ -249,11 +251,10 @@ class game:
                 for j in range(len(self.board.chessArray[i])):
                     if self.board.chessArray[i][j]:
                         if self.board.chessArray[i][j].name == "p" and i == 7:
-                            print("black promotion")
                             options = ["resources/Chess_ndt60.png", "resources/Chess_rdt60.png", "resources/Chess_bdt60.png", "resources/Chess_qdt60.png"]
                             n = ["kn", "r", "b", "q"]
-                            for i in range(2,6):
-                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[i-2],1, self.promote, i,j,n[i-2])
+                            for k in range(2,6):
+                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
                                 piece_promote.draw(self.screen)
                             return True
         if (self.board.mycolor == "white"):
@@ -261,11 +262,10 @@ class game:
                 for j in range(len(self.board.chessArray[i])):
                     if self.board.chessArray[i][j]:
                         if self.board.chessArray[i][j].name == "p" and i == 0:
-                            print("white promotion")
                             options = ["resources/Chess_nlt60.png", "resources/Chess_rlt60.png", "resources/Chess_blt60.png", "resources/Chess_qlt60.png"]
                             n = ["kn", "r", "b", "q"]
-                            for i in range(2,6):
-                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[i-2],1, self.promote, i,j,n[i-2])
+                            for k in range(2,6):
+                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
                                 piece_promote.draw(self.screen)
                             return True
         return False

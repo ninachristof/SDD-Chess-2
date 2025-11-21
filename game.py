@@ -105,6 +105,8 @@ class game:
                 print("Stalemate! Black has no valid moves")
         self.currentSquare = None
 
+        print ("The white king is at ", self.board.getKingLocation("white"))
+        print ("The black king is at ", self.board.getKingLocation("black"))
         if (self.turn == "white"):
             self.turn = "black"
         else:
@@ -128,6 +130,13 @@ class game:
             else: #The square you selected must be one of your pieces
                 #print("Selected a piece at ", i , "," , j)
                 self.currentSquare = (i,j)
+
+                #debugging
+                pieceObject = self.board.chessArray[i][j]
+                print("Possible moves are")
+                print(self.board.getPossibleMoves(i,j,pieceObject.color))
+                print("Legal moves are ")
+                print(pieceObject.getlegalMoves())
                 return
         
         #At this point, you have already selected a piece
@@ -135,9 +144,15 @@ class game:
         elif (not(self.board.getSquare(i,j) == None) and self.board.getSquare(i,j).get_color() == self.turn):
             #print("Selected a piece at ", i , "," , j)
             self.currentSquare = (i,j)
-            print(self.board.chessArray[i][j].get_name())
-            print(self.board.chessArray[i][j].upgrades)
-            print(self.board.chessArray[i][j].get_possible_moves())
+            # print(self.board.chessArray[i][j].get_name())
+            # print(self.board.chessArray[i][j].upgrades)
+            # print(self.board.chessArray[i][j].get_possible_moves())
+
+            pieceObject = self.board.chessArray[i][j]
+            print("Possible moves are")
+            print(self.board.getPossibleMoves(i,j,pieceObject.color))
+            print("Legal moves are ")
+            print(pieceObject.getlegalMoves())
             return
         
         #Otherwise, you are attempting to make a move; see if this move is possible, and do it if so
@@ -148,6 +163,7 @@ class game:
             pieceName = pieceObject.get_name()
             # validMoves = self.board.getLegalMoves(currentX,currentY)
             validMoves = pieceObject.getlegalMoves()
+            print(validMoves)
             pieceObject.set_first_move()
             pieceColor = pieceObject.get_color()
             wantedMoveXY = (newX,newY)
@@ -229,6 +245,8 @@ class game:
             gray = (100, 100, 100)     # darker gray
             green = (30, 60, 10)
             blue = (0,0,255)
+            #print("Possible moves are")
+            #print(self.board.getPossibleMoves(currentX,currentY,pieceObject.get_color()))
             #print("Valid moves are ")
             #print(validMoves)
             for move in validMoves:

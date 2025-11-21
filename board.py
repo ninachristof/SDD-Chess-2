@@ -16,8 +16,6 @@ class board:
         self.chessArray = [[None for j in range(8)] for i in range(8)]
         self.whitePieces = [] # The list of locations for white pieces
         self.blackPieces = [] # The list of locations for black pieces
-        self.whiteKingXY = None
-        self.blackKingXY = None
         
         # Automatically initialize start state
         if initialize: 
@@ -204,8 +202,8 @@ class board:
                     break
                 possibleMoves2.append(lineofsight)
 
-        print(f"{self.chessArray[x][y].get_name()} MOVES:", end = " ")
-        print(captureMoves)
+        #print(f"{self.chessArray[x][y].get_name()} MOVES:", end = " ")
+        #print(captureMoves)
         for direction in captureMoves:
             pieceFound = False
             temp = []
@@ -302,6 +300,10 @@ class board:
                # print(" NEW PIECE", piece)
                 if piece:
                     new_board.addPiece(i, j, piece.name, piece.color)
+                    if (piece.color == "white"):
+                        new_board.whitePieces.append((i,j))
+                    if (piece.color == "black"):
+                        new_board.blackPieces.append((i,j))
         return new_board
     
 
@@ -350,7 +352,17 @@ class board:
         self.chessArray[newx][newy] = self.chessArray[oldx][oldy]
         self.chessArray[oldx][oldy] = None
         self.chessArray[newx][newy].findMoves(newx,newy)
-            
+
+        if (self.blackKingXY == (oldx,oldy)):
+            print(self.blackKingXY)
+            print("Updating the location of the black king from ", oldx, ",", oldy, " to ",
+                  newx, ",", newy)
+            self.blackKingXY = newx,newy
+        if (self.whiteKingXY == (oldx,oldy)):
+            print(self.whiteKingXY)
+            print("Updating the location of the white king from ", oldx, ",", oldy, " to ",
+                  newx, ",", newy)
+            self.whiteKingXY = newx,newy
 
 
 # EN PASSANT CHECK: 

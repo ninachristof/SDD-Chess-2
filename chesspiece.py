@@ -96,9 +96,9 @@ class pawn(chesspiece):
                     possibleNoncapture.append((x - 2, y))
             # Capture Movement
             if (x != 0 and y != 0):
-                possibleCapture.append(((x - 1, y - 1)))
+                possibleCapture.append([(x - 1, y - 1)])
             if (x != 0 and y != 7):
-                possibleCapture.append(((x - 1, y + 1)))
+                possibleCapture.append([(x - 1, y + 1)])
         else:
             if (x != 7):
                 possibleNoncapture.append((x + 1, y))
@@ -106,10 +106,10 @@ class pawn(chesspiece):
                     possibleNoncapture.append((x + 2, y))
             # Capture Movement
             if (x != 7 and y != 0):
-                possibleCapture.append(((x + 1, y - 1)))
+                possibleCapture.append([(x + 1, y - 1)])
             if (x != 6 and y != 7): 
-                possibleCapture.append(((x + 1, y + 1)))
-        possibleCapture = [possibleCapture]
+                possibleCapture.append([(x + 1, y + 1)])
+        # possibleCapture = [possibleCapture]
         possibleNoncapture = [possibleNoncapture]
         possibleCapture.extend(powerupCapture)
         possibleNoncapture.extend(powerupMove)

@@ -123,41 +123,21 @@ class board:
     def isKinginCheck(self,color):
         kinglocation = 0,0
         if (color == "white"):
-            for piece in self.whitePieces:
-                #print(piece)
-                if self.chessArray[piece[0]][piece[1]].get_name() == 'k':
-                        kinglocation = piece[0],piece[1]
-            for piece in self.blackPieces:
-                #print(self.chessArray[piece[0]][piece[1]].get_color(), " ",
-                      #self.chessArray[piece[0]][piece[1]].get_name(), " at ",
-                      #piece[0], ",", piece[1])
-                      
-                for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
-                    #print(move)
-                    if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
-                        #print("White King in check")
-                        return True
-            #print("White King not in check")
-            return False
+            sameColor = self.whitePieces
+            oppColor = self.blackPieces
+        else:
+            sameColor = self.blackPieces
+            oppColor = self.whitePieces
 
-        
-        if (color == "black"):
-            for piece in self.blackPieces:
-                #print(piece)
-                if self.chessArray[piece[0]][piece[1]].get_name() == 'k':
-                        kinglocation = piece[0],piece[1]
-            for piece in self.whitePieces:
-                # print(self.chessArray[piece[0]][piece[1]].get_color(), " ",
-                #       self.chessArray[piece[0]][piece[1]].get_name(), " at ",
-                #       piece[0], ",", piece[1])
-                for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
-                    #print(move)
-                    if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
-                        #print("Black King in check")
-                        return True
-            #print("Black King not in check")
-            return False
-        #print("The king is at ", kinglocation)
+        for piece in sameColor:
+            if self.chessArray[piece[0]][piece[1]].get_name() == 'k':
+                kinglocation = piece[0],piece[1]
+                break
+        for piece in oppColor:   
+            for move in self.chessArray[piece[0]][piece[1]].get_possible_moves():
+                if (move[0] == kinglocation[0] and move[1] == kinglocation[1]):
+                    return True
+        return False
 
 
     ##################################################################################
@@ -193,6 +173,8 @@ class board:
                     break
                 possibleMoves2.append(lineofsight)
 
+        print(f"{self.chessArray[x][y].get_name()} MOVES:", end = " ")
+        print(captureMoves)
         for direction in captureMoves:
             pieceFound = False
             temp = []

@@ -214,37 +214,17 @@ class game:
                 pieces = self.board.blackPieces
             for i in range(4):
                 randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                #print("random piece is ", randomPiece)
-                #print("Which is a ", self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
                 powerup = powerups.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
                 self.powerups.append((randomPiece,powerup))
                 powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
                 print("Power up ", i, " - " , powerupdescription)
         for i in range(2,6):
-            #https://stackoverflow.com/questions/63799644/pygame-how-do-i-create-a-button-with-text
-            #https://stackoverflow.com/questions/72158111/render-doesnt-apply-to-a-str-object
             randomPiece,powerup = self.powerups[i-2]
-            powerupdescription1 = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name()  + " at " + str(randomPiece)
-            desc2 = powerup.get_description()
-            #powerupdescription = "power up " + str(i-1)
-            #Why is this so goofy
-            font_game = pygame.font.SysFont("Arial",20)
-            powerupbutton1 = pygame.font.Font.render(font_game,powerupdescription1,1,(255,255,255))
-            powerupbutton2 = pygame.font.Font.render(font_game,desc2,1,(255,255,255))
-            #powerupbutton = pygame.Surface(((HEIGHT * 0.2) ,(HEIGHT * 0.1)),pygame.SRCALPHA,32).convert_alpha()
-            #powerupbutton.blit(,(0,0))
-            #text = pygame.font.render(powerupdescription, 1, (136, 255, 0))
-            pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-            self.screen.blit(powerupbutton1,((HEIGHT * 0.8) , (HEIGHT * i * 0.1)))
-            self.screen.blit(powerupbutton2,((HEIGHT * 0.8) , (HEIGHT * (i+0.5) * 0.1)))
+            powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name()  + " at " + str(randomPiece) + powerup.get_description()
+            button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,powerupdescription ,None)
+            button.draw(self.screen)
         for i in range(2,7):
             pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
-            #pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i * 0.1), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i),10)
-        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.2),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.3),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.4),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        # pygame.draw.rect(self.screen, red, [ (HEIGHT * 0.8) , (HEIGHT * 0.5),(HEIGHT * 0.2) ,(HEIGHT * 0.1) ])
-        # pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
 
     def draw_valid(self):
         if(self.currentSquare != None):

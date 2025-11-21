@@ -7,6 +7,12 @@ import random as rand
 from p2p import *
 import global_vars
 import pygame
+from state import *
+from textbox import *
+from button import *
+from colors import *
+from utils import *
+import time
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -39,7 +45,7 @@ class game:
         self.new_p2p = p2p(conn_type, ip, port)
         self.new_p2p.init_p2p()
         wait_for_my_move = True
-        if(conn_type == "connect"):
+        if(self.conn_type == "connect"):
             wait_for_my_move = False
 
         while(self.running):
@@ -82,8 +88,6 @@ class game:
         
     def get_conn_thread(self):
         return self.conn_thread
-        
-         
                     
     def execute_instruction(self,i,j,currentX,currentY):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
@@ -234,14 +238,14 @@ class game:
                 adj_mov = ((8 * move[0]) + move[1])
                 if (self.board.mycolor == "white"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GRAY, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     else:
-                        pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GREEN, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 if (self.board.mycolor == "black"):
                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                        pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GRAY, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     else:
-                        pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                        pygame.draw.rect(self.screen, c.SELECT_GREEN, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
 
     def draw_captured(self):
         pass
@@ -276,11 +280,10 @@ class game:
             for i in range(32):
                 column = i % 4
                 row = i // 4
-                color = (255,255,255)
                 if row % 2 == 0:
-                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    pygame.draw.rect(self.screen, c.WHITE, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 else:
-                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                    pygame.draw.rect(self.screen, c.WHITE, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
                 pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
                 pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
@@ -291,7 +294,9 @@ class game:
                     pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
                     pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
 
-    def main_loop(self):
+    def OLD_main_loop(self):
+        self.setup_game()
+        self.conn_thread.start()
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

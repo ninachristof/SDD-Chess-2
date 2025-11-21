@@ -4,6 +4,7 @@ from struct import *
 import global_vars
 
 ERROR = 1
+SUCCESS = 0
 PKT_HDR = b"C2PKT"
 PKT_HDR_SIZE = 12 #len(PKT_HDR) + 7 #idk why 
 #can have different packet types to define different actions easily

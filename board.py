@@ -24,10 +24,12 @@ class board:
     def startState(self):
         self.clear()
         # Initialize Pawns
-        for i in range(8):
+        for i in range(6):
             self.addPiece(1, i, "p", "black")
             self.addPiece(6, i, "p", "white")
 
+        self.addPiece(1, 7, "p", "black")
+        self.addPiece(6, 6, "p", "black")
         # Initialize Knights
         self.addPiece(7, 1, "kn", "white")
         self.addPiece(7, 6, "kn", "white")
@@ -233,6 +235,12 @@ class board:
                 temp.append(lineofsight)
             if (not self.chessArray[x][y].get_captureOnlyWithPiece() or pieceFound):
                 possibleMoves2.extend(temp)
+                if lineofsight[0] >= 0 and lineofsight[0] < 8 and lineofsight[1] >= 0 and lineofsight[1] < 8:
+                    if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
+                        if (self.chessArray[lineofsight[0]][lineofsight[1]].get_color() != color):
+                            possibleMoves2.append(lineofsight)
+                        break
+                    possibleMoves2.append(lineofsight)
         #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves2}")
         # if (x == 7 and y == 6):
         #     print("AAA: ", possibleMoves2)

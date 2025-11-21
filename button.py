@@ -75,7 +75,7 @@ class ImageButton(Button):
     sprite = None
     filename = ""
 
-    def __init__(self, x, y, callback, filename, width, height, scale = 1):
+    def __init__(self, x, y, width, height, callback, filename, scale = 1):
         self.x = x
         self.y = y
         self.width = width

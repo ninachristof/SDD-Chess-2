@@ -7,11 +7,15 @@ import random as rand
 from p2p import *
 import global_vars
 import pygame
+<<<<<<< HEAD
 from state import *
 from textbox import *
 from button import *
 import time
 import os
+=======
+from button import *
+>>>>>>> 3196f4b (tryna get promotion but too tired and i have to do mbe and get on a train soon)
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -226,6 +230,34 @@ class game:
         for i in range(2,7):
             pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
 
+
+    def draw_promotion_options(self):
+        font = pygame.font.Font(None, 36) 
+        text_surf = font.render("choose what to promote to", True, "black")
+        rect = text_surf.get_rect(center=(WIDTH*.4, HEIGHT*.9))
+        self.screen.blit(text_surf, rect)
+        
+        if (self.board.mycolor == "black"):
+            for i in range(len(self.board.chessArray)):
+                for j in range(len(self.board.chessArray[i])):
+                    if self.board.chessArray[i][j]:
+                        if self.board.chessArray[i][j].name == "p" and i == 7:
+                            print("black promotion")
+                            options = ["resources/Chess_ndt60.png", "resources/Chess_rdt60.png", "resources/Chess_bdt60.png", "resources/Chess_qdt60.png"]
+                            for i in range(2,6):
+                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), None,options[i-2])
+                                piece_promote.draw(self.screen)
+        if (self.board.mycolor == "white"):
+            for i in range(len(self.board.chessArray)):
+                for j in range(len(self.board.chessArray[i])):
+                    if self.board.chessArray[i][j]:
+                        if self.board.chessArray[i][j].name == "p" and i == 0:
+                            print("white promotion")
+                            options = ["resources/Chess_nlt60.png", "resources/Chess_rlt60.png", "resources/Chess_blt60.png", "resources/Chess_qlt60.png"]
+                            for i in range(2,6):
+                                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), None,options[i-2])
+                                piece_promote.draw(self.screen)
+
     def draw_valid(self):
         if(self.currentSquare != None):
             currentX, currentY = self.currentSquare
@@ -294,7 +326,7 @@ class game:
                     pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                 else:
                     pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
+                pygame.draw.rect(self.screen, 'white', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
                 pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
                 pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
                 status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
@@ -346,6 +378,8 @@ class game:
             self.draw_board()
             self.draw_pieces()
             self.draw_powerups()
+            if not self.offerPowerups:
+                self.draw_promotion_options()
             #print("Offering powerups is ", self.offerPowerups, " because ", self.turnCount)
             pygame.display.flip()
 

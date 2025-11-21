@@ -7,6 +7,11 @@ import random as rand
 from p2p import *
 import global_vars
 import pygame
+from state import *
+from textbox import *
+from button import *
+import time
+import os
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -63,20 +68,24 @@ class game:
 
 
     def __init__(self, conn_type, ip, port):
+        self.conn_type = conn_type
+        self.ip = ip
+        self.port = port
         self.board = board.board(True)
-        if(conn_type == "connect"):
+        pygame.init()
+        self.conn_thread = threading.Thread(target=self.run_socket)
+        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
+        #pygame.display.set_caption(f"Chess {self.board.mycolor}")
+        #TODO:somwhere to join or force join this thread
+
+    def setup_game(self):
+        if(self.conn_type == "connect"):
             self.board.mycolor = "black"
         else:
             self.board.mycolor = "white"
-        #self.board.startState(self.board.mycolor)
+        self.board.startState()
         self.board.whitePieceUpdateLegal()
         self.board.blackPieceUpdateLegal()
-        self.conn_thread = threading.Thread(target=self.run_socket, args=(conn_type, ip, port))
-        self.conn_thread.start()
-        pygame.init()
-        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
-        pygame.display.set_caption(f"Chess {self.board.mycolor}")
-        #TODO:somwhere to join or force join this thread
         
     def get_conn_thread(self):
         return self.conn_thread

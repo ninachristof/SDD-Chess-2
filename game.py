@@ -296,6 +296,19 @@ class game:
                 for i in range(9):
                     pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
                     pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
+            red = (255,0,0)
+            if (self.board.isKinginCheck("white")):
+                x,y = self.board.getKingLocation("white")
+                if (self.board.mycolor == "white"):
+                    pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+                if (self.board.mycolor == "black"):
+                    pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+            if (self.board.isKinginCheck("black")):
+                x,y = self.board.getKingLocation("black")
+                if (self.board.mycolor == "white"):
+                    pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+                if (self.board.mycolor == "black"):
+                    pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
 
     def main_loop(self):
         while self.running:

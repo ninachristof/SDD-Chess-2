@@ -54,9 +54,12 @@ class board:
         self.addPiece(0, 4, "k", "black")
         self.addPiece(0, 3, "q", "black")
 
+        self.whiteKingXY = (7,4)
+        self.blackKingXY = (0,4)
+
         #self.updateAllPieces()
 
-    def getKing(self,color):
+    def getKingLocation(self,color):
         if (color == "white"):
             return self.whiteKingXY
         if (color == "black"):

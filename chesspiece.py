@@ -12,6 +12,7 @@ class chesspiece:
     possibleMoves = [] #These are all moves that don't go off the board
     legalMoves = [] #These are all possibleMoves that also (1) don't require going through pieces and (2) don't leave the king in check
     multipleMoves = False
+    captureOnlyWithPiece = False
     sprite = None
     upgrades = [[],[]]
     
@@ -51,6 +52,9 @@ class chesspiece:
     def getlegalMoves(self):
         return self.legalMoves.copy()
         
+    def get_captureOnlyWithPiece(self):
+        return self.captureOnlyWithPiece
+
     def set_first_move(self):
         self.firstMove = False
 
@@ -98,6 +102,8 @@ class pawn(chesspiece):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_pdt60.png"), (80,80))
         self.findMoves(x,y)
         
+        self.captureOnlyWithPiece = True
+    
     def findMoves(self, x, y):
         powerupCapture, powerupMove = super().findMoves(x,y)
         possibleNoncapture = []
@@ -110,9 +116,9 @@ class pawn(chesspiece):
                     possibleNoncapture.append((x - 2, y))
             # Capture Movement
             if (x != 0 and y != 0):
-                possibleCapture.append((x - 1, y - 1))
+                possibleCapture.append(((x - 1, y - 1)))
             if (x != 0 and y != 7):
-                possibleCapture.append((x - 1, y + 1))
+                possibleCapture.append(((x - 1, y + 1)))
         else:
             if (x != 7):
                 possibleNoncapture.append((x + 1, y))
@@ -120,9 +126,9 @@ class pawn(chesspiece):
                     possibleNoncapture.append((x + 2, y))
             # Capture Movement
             if (x != 7 and y != 0):
-                possibleCapture.append((x + 1, y - 1))
+                possibleCapture.append(((x + 1, y - 1)))
             if (x != 6 and y != 7): 
-                possibleCapture.append((x + 1, y + 1))
+                possibleCapture.append(((x + 1, y + 1)))
         possibleCapture = [possibleCapture]
         possibleNoncapture = [possibleNoncapture]
         possibleCapture.extend(powerupCapture)

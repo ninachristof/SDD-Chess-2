@@ -29,41 +29,76 @@ class p2p:
             self.ip = ""
         self.port = port
         
-    def close_all(self):
-        if(self.conn != None):
-            self.conn.close()
-        if(self.sock != None):
-            #TODO: make sure to only run this when something is actually connected.
-            #replicate:make a move then close the game
-            #self.sock.shutdown(socket.SHUT_RDWR)
-            self.sock.close()
+    def closeAll(self):
+        if self.sock:
+            try:
+                self.sock.shutdown(socket.SHUT_WR)
+            except Exception as e:
+                print("self.sock.shutdown(socket.SHUT_WR) Exception:", e)
 
-    def recv_instruction_2(self):
+            try:
+                self.sock.close()
+            except Exception as e:
+                print("self.sock.close() Exception:", e)
+            self.sock = None
+        if self.conn:
+            try:
+                self.conn.close()
+            except Exception as e:
+                print("self.conn.close() Exception:", e)
+
+            self.conn = None
+
+    def recvInstruction(self):
         print("host:", self.conn)
         self.waiting = True
-        data = self.conn.recv(PKT_HDR_SIZE)
-        self.waiting = False
-        if not data:
-            print("empty packet")
-            return ERROR
-        recvd_hdr, instruction_size = unpack("5si",data)
-        if(recvd_hdr != PKT_HDR or len(data) != PKT_HDR_SIZE):
-            print("header error")
-            return ERROR
-        print(f"Received header {data}")
-        print(f"size {instruction_size}")
-        self.waiting = True
-        instruction = self.conn.recv(instruction_size)
-        self.waiting = False
-        if not instruction:
-            print("empty packet")
-            return ERROR
-        print(f"Received  instruction {data}")
-        #instruction should be validated before sending. this should only parse
-        x1,y1,x0,y0,color = unpack("iiii5s", instruction)
-        return (x1,y1,x0,y0,color)#TODO: prob get rid of color since both parties keep track individually
 
-    def send_instruction_2(self, current_instruction):
+        try:
+            data = self.conn.recv(PKT_HDR_SIZE)
+        except Exception as e:
+            print("recv header exception:", e)
+            self.waiting = False
+            return ERROR
+
+        self.waiting = False
+
+        if not data:
+            print("empty packet (no header)")
+            return ERROR
+
+        try:
+            recvd_hdr, instruction_size = unpack("5si", data)
+        except Exception as e:
+            print("unpack header exception:", e)
+            return ERROR
+
+        if recvd_hdr != PKT_HDR or len(data) != PKT_HDR_SIZE:
+            print("header error: bad magic or wrong header size")
+            return ERROR
+
+        self.waiting = True
+        try:
+            instruction = self.conn.recv(instruction_size)
+        except Exception as e:
+            print("recv body exception:", e)
+            self.waiting = False
+            return ERROR
+
+        self.waiting = False
+
+        if not instruction:
+            print("empty packet (no body)")
+            return ERROR
+
+        try:
+            x1, y1, x0, y0, color = unpack("iiii5s", instruction)
+        except Exception as e:
+            print("unpack body exception:", e)
+            return ERROR
+
+        return (x1, y1, x0, y0, color)
+
+    def sendInstruction(self, current_instruction):
             print(f"sending {current_instruction}")
             hdr = pack("5si", PKT_HDR, len(current_instruction))
             bytes_sent = self.conn.sendall(hdr)
@@ -71,8 +106,9 @@ class p2p:
             self.conn.sendall(current_instruction)
 
     #host is host ip probably 0.0.0.0 so that it listens to inconming traffic
-    def host_game_2(self):
+    def hostGame(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.ip, self.port))
         self.sock.listen(5)
         print(self.sock)
@@ -85,19 +121,20 @@ class p2p:
         #todo: if error on receiving end, send a request to resend mesage
         #TODO: timestamp
 
-    def connect_to_game_2(self):
+    def connectToGame(self):
         #TODO: try to connect, if it cant then call close socket because itll leave an open socket
         #TODO: have a loop of connection retries
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.connect((self.ip,self.port))
         self.conn = self.sock
         print("CLIENT CONNECTED")
 
-    def init_p2p(self):
+    def initP2p(self):
         if(self.conn_type == "host"):
             print("hosting")
-            self.host_game_2()
+            self.hostGame()
         else:
             print("connecting")
-            self.connect_to_game_2()
+            self.connectToGame()
     

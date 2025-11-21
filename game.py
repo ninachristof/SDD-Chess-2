@@ -39,6 +39,9 @@ class game:
     offerPowerups = False #Do we offer power ups this round?
     powerups = []
 
+    yourTurnTime = pygame.time.get_ticks()
+    oppTurnTime = pygame.time.get_ticks()
+
 #running this function on a separate thread
     def run_socket(self):
         self.new_p2p = p2p(self.conn_type, self.ip, self.port)
@@ -56,6 +59,7 @@ class game:
                 self.new_p2p.sendInstruction(self.current_instruction)
                 global_vars.send_event.clear()
                 wait_for_my_move = False
+                self.oppTurnTime = pygame.time.get_ticks()
             else:
                 #wait for instruction
                 instruction = self.new_p2p.recvInstruction() 
@@ -64,6 +68,7 @@ class game:
                     break
                 self.execute_instruction(instruction[0],instruction[1],instruction[2],instruction[3])
                 wait_for_my_move = True
+                self.yourTurnTime = pygame.time.get_ticks()
         #self.new_p2p.close_all()
 
 
@@ -99,23 +104,32 @@ class game:
         if (self.turn == "black"):
             self.turnCount += 1
         
-        whiteMoves = self.board.whitePieceUpdateLegal()
-        blackMoves = self.board.blackPieceUpdateLegal()
+        if (self.turn == "white"):
 
-        if (whiteMoves == 0):
-            if (self.board.isKinginCheck("white")):
-                print("Checkmate! Black Wins")
-            else:
-                print("Stalemate! White has no valid moves")
-        if (blackMoves == 0):
-            if (self.board.isKinginCheck("black")):
-                print("Checkmate! White Wins")
-            else:
-                print("Stalemate! Black has no valid moves")
+            blackMoves = self.board.blackPieceUpdateLegal()
+            if (blackMoves == 0):
+                if (self.board.isKinginCheck("black")):
+                    print("Checkmate! White Wins")
+                else:
+                    print("Stalemate! Black has no valid moves")
+
+        if (self.turn == "black"):
+            whiteMoves = self.board.whitePieceUpdateLegal()
+            if (whiteMoves == 0):
+                if (self.board.isKinginCheck("white")):
+                    print("Checkmate! Black Wins")
+                else:
+                    print("Stalemate! White has no valid moves")
+
+        # if (whiteMoves == 0):
+        #     if (self.board.isKinginCheck("white")):
+        #         print("Checkmate! Black Wins")
+        #     else:
+        #         print("Stalemate! White has no valid moves")
         self.currentSquare = None
 
-        print ("The white king is at ", self.board.getKingLocation("white"))
-        print ("The black king is at ", self.board.getKingLocation("black"))
+        #print ("The white king is at ", self.board.getKingLocation("white"))
+        #print ("The black king is at ", self.board.getKingLocation("black"))
         if (self.turn == "white"):
             self.turn = "black"
         else:
@@ -257,15 +271,40 @@ class game:
 
     def draw_captured(self):
         pass
+
+    def draw_clock(self):
+        if (self.board.mycolor == self.turn):
+            yourtime = str((pygame.time.get_ticks() - self.yourTurnTime)/1000)
+            opptime = "0"
+        else:
+            yourtime = "0"
+            opptime = str((pygame.time.get_ticks() - self.oppTurnTime)/1000)
+        # button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * 1 * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,time,None)
+        # button.draw(self.screen)
+        if (self.board.mycolor == "white"):
+            button1 = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * 0 * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,yourtime,None)
+            button1.draw(self.screen)
+            button2 = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * 1 * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,opptime,None)
+            button2.draw(self.screen)
+        if (self.board.mycolor == "black"):
+            button1 = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * 0 * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,opptime,None)
+            button1.draw(self.screen)
+            button2 = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * 1 * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,yourtime,None)
+            button2.draw(self.screen)
+
     def draw_pieces(self):
         if (self.board.mycolor == "white"):
             #print ("white", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
+                if (i > len(self.board.whitePieces)): #DEBUG
+                    print (i , ",", self.board.whitePieces)
                 x = self.board.whitePieces[i][0]
                 y = self.board.whitePieces[i][1]
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
             for i in range(len(self.board.blackPieces)):
+                if (i > len(self.board.blackPieces)): #DEBUG
+                    print (i , ",", self.board.blackPieces)
                 x = self.board.blackPieces[i][0]
                 y = self.board.blackPieces[i][1]
                 piece = self.board.chessArray[x][y]
@@ -273,11 +312,15 @@ class game:
         else:
             #print ("black", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
+                if (i > len(self.board.whitePieces)): #DEBUG
+                    print (i , ",", self.board.whitePieces)
                 x = self.board.whitePieces[i][0]
                 y = self.board.whitePieces[i][1]
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, ((7-y) * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
             for i in range(len(self.board.blackPieces)):
+                if (i > len(self.board.blackPieces)): #DEBUG
+                    print (i , ",", self.board.blackPieces)
                 x = self.board.blackPieces[i][0]
                 y = self.board.blackPieces[i][1]
                 piece = self.board.chessArray[x][y]
@@ -346,6 +389,7 @@ class game:
             self.draw_board()
             self.draw_pieces()
             self.draw_powerups()
+            self.draw_clock()
             #print("Offering powerups is ", self.offerPowerups, " because ", self.turnCount)
             pygame.display.flip()
 

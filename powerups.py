@@ -5,7 +5,8 @@ pawnPowerUps= [
     powerup(" can move backwards one square",[],[[(-1,0)],[(1,0)]])
 ]
 knightPowerUps = [
-    powerup(" can move one square along a row or column", [],[[(-1,0)],[(1,0)],[(0,1)],[(0,-1)]])
+    powerup(" can move one square along a row or column", [],[[(-1,0)],[(1,0)],[(0,1)],[(0,-1)]]),
+    powerup(" can move one square diagonally", [],[[(-1,-1)],[(1,1)],[(-1,1)],[(1,-1)]])
 ]
 
 bishopPowerUps = [

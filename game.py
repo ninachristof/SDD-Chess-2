@@ -7,15 +7,12 @@ import random as rand
 from p2p import *
 import global_vars
 import pygame
-<<<<<<< HEAD
 from state import *
 from textbox import *
 from button import *
 import time
 import os
-=======
 from button import *
->>>>>>> 3196f4b (tryna get promotion but too tired and i have to do mbe and get on a train soon)
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -417,8 +414,8 @@ class game:
         scale = 5
         button_x_pos = (WIDTH// 2) - (57*scale // 2)
         height_offset = 50
-        host_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, None,"resources/create_game_button.png",57,9,scale)
-        join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset, None,"resources/join_game_button.png",57,9,scale)
+        host_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, 57,9,"resources/create_game_button.png",scale,None)
+        join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset, 57,9,"resources/join_game_button.png",scale,None)
         textbox_width = 350
         textbox_height = 50
 #for joining game menu

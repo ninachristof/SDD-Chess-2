@@ -86,12 +86,10 @@ class game:
         self.board.startState()
         self.board.whitePieceUpdateLegal()
         self.board.blackPieceUpdateLegal()
-        
+
     def get_conn_thread(self):
         return self.conn_thread
         
-         
-                    
     def execute_instruction(self,i,j,currentX,currentY):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
         self.board.movePiece(i,j,currentX,currentY,self.turn)
@@ -260,14 +258,10 @@ class game:
     def draw_pieces(self):
         if (self.board.mycolor == "white"):
             #print ("white", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
-            for i in range(len(self.board.whitePieces)):
-                x = self.board.whitePieces[i][0]
-                y = self.board.whitePieces[i][1]
+            for x,y in self.board.whitePieces:
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
-            for i in range(len(self.board.blackPieces)):
-                x = self.board.blackPieces[i][0]
-                y = self.board.blackPieces[i][1]
+            for x,y in self.board.blackPieces:
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
         else:
@@ -282,7 +276,6 @@ class game:
                 y = self.board.blackPieces[i][1]
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, ((7-y) *(HEIGHT * 0.1) , (7-x)  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
-
 
     def draw_board(self):
             for i in range(32):
@@ -321,7 +314,7 @@ class game:
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False#TODO: THIS SHIT NOT WORKING
+                    self.running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -363,7 +356,6 @@ class game:
         global_vars.send_event.set()
     def main_loop_menu(self):
         state = "main menu"
-
 #for main menu
         scale = 5
         button_x_pos = (WIDTH// 2) - (57*scale // 2)
@@ -379,11 +371,12 @@ class game:
         connect_button = TextButton((150,150,150), (WIDTH - textbox_width) // 2, HEIGHT//2 + 3*height_offset, textbox_width,textbox_height, textbox_height-8, "join game",None)
         while self.running:
             eventlist = pygame.event.get()
-            #if quit is recieved do so immediately
             for event in eventlist:
                 if event.type == pygame.QUIT:
                     self.running = False
                     continue
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    self.running = False
 
             if state == "main menu":
                 self.screen.fill((172,200,255))
@@ -393,7 +386,6 @@ class game:
                     state = "join game"
 
             elif state == "host game":
-                #time.sleep(1)
                 self.conn_type = "host"
                 self.ip = "0.0.0.0"
                 self.port = 2020 #TODO: display a selected available port
@@ -404,8 +396,6 @@ class game:
             elif state == "join game":
                 self.conn_type = "connect"
                 self.screen.fill((172,200,255))
-                #ip_textbox.handle_textbox(self.screen, eventlist)
-                #port_textbox.handle_textbox(self.screen, eventlist)
                 self.ip = ip_textbox.handle_textbox(self.screen, eventlist)
                 port = port_textbox.handle_textbox(self.screen, eventlist)
 

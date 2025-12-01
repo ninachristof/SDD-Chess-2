@@ -81,11 +81,12 @@ class game:
     def setup_game(self):
         if(self.conn_type == "connect"):
             self.board.mycolor = "black"
+            
         else:
             self.board.mycolor = "white"
-        self.board.startState()
-        self.board.whitePieceUpdateLegal()
-        self.board.blackPieceUpdateLegal()
+        #self.board.startState()
+        #self.board.whitePieceUpdateLegal()
+        #elf.board.blackPieceUpdateLegal()
 
     def get_conn_thread(self):
         return self.conn_thread
@@ -97,8 +98,8 @@ class game:
         if (self.turn == "black"):
             self.turnCount += 1
         
-        whiteMoves = self.board.whitePieceUpdateLegal()
-        blackMoves = self.board.blackPieceUpdateLegal()
+        whiteMoves = self.board.updateLegal("white")
+        blackMoves = self.board.updateLegal("black")
 
         if (whiteMoves == 0):
             if (self.board.isKinginCheck("white")):

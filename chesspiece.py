@@ -15,6 +15,21 @@ class chesspiece:
     captureOnlyWithPiece = False
     sprite = None
     upgrades = [[],[]]
+    debuff = None
+
+    def __init__(self,x,y,color):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.upgrades = [[],[]]
+        self.isUpgraded = False
+        self.debuff = None
+
+    def get_isUpgraded(self):
+        return not(len(self.upgrades[0]) == 0 and len(self.upgrades[1]) == 0)
+    
+    def get_isDebuffed(self):
+        return not(self.debuff == None)
     
     def get_name(self): 
         return self.name
@@ -92,10 +107,8 @@ class pawn(chesspiece):
     def __init__(self,x,y,color):
         #self.multipleMoves = True
         #needs initial [2,0] move
+        super().__init__(x,y,color)
         self.name = "p"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_plt60.png"), (80,80))
         elif(color == "black"):
@@ -141,10 +154,8 @@ class pawn(chesspiece):
 
 class knight(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "kn"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_nlt60.png"), (80,80))
         elif(color == "black"):
@@ -192,10 +203,8 @@ class knight(chesspiece):
 
 class king(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "k"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_klt60.png"), (80,80))
         elif(color == "black"):
@@ -241,10 +250,8 @@ class king(chesspiece):
 
 class rook(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "r"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_rlt60.png"), (80,80))
         elif(color == "black"):
@@ -295,10 +302,8 @@ class rook(chesspiece):
 
 class bishop(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "b"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_blt60.png"), (80,80))
         elif(color == "black"):
@@ -356,10 +361,8 @@ class bishop(chesspiece):
 
 class queen(bishop, rook):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "q"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_qlt60.png"), (80,80))
         elif(color == "black"):

@@ -2,7 +2,7 @@ from chesspiece import *
 import threading
 import board
 import struct
-import powerups
+import modifiers
 import random as rand
 from p2p import *
 import global_vars
@@ -28,6 +28,7 @@ class game:
     board = None
     turnCount = 0
     currentSquare = None
+    clickedSquare = None
     newSquare = None
     turn = "white"
     conn_thread = None
@@ -36,8 +37,8 @@ class game:
     current_instruction = ""
     running = True
     moved = False
-    offerPowerups = False #Do we offer power ups this round?
-    powerups = []
+    offermodifiers = False #Do we offer modifiers this round?
+    modifiers = []
 
 #running this function on a separate thread
     def run_socket(self):
@@ -78,6 +79,8 @@ class game:
         #pygame.display.set_caption(f"Chess {self.board.mycolor}")
         #TODO:somwhere to join or force join this thread
 
+        self.clickedSquare = None
+
     def setup_game(self):
         if(self.conn_type == "connect"):
             self.board.mycolor = "black"
@@ -93,6 +96,7 @@ class game:
         
     def execute_instruction(self,i,j,currentX,currentY):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
+        self.clickedSquare = None
         self.board.movePiece(i,j,currentX,currentY,self.turn)
 
         if (self.turn == "black"):
@@ -121,6 +125,8 @@ class game:
             self.turn = "white"
 
     def selectsquare(self,i,j):
+        if (self.board.getSquare(i,j) != None):
+            self.clickedSquare = (i,j)
         #print("selected square ", i , "," , j)
         if (self.moved):
             return
@@ -141,9 +147,9 @@ class game:
 
                 #debugging
                 pieceObject = self.board.chessArray[i][j]
-                print("Possible moves are")
+                #print("Possible moves are")
                 print(self.board.getPossibleMoves(i,j,pieceObject.color))
-                print("Legal moves are ")
+                #print("Legal moves are ")
                 print(pieceObject.getlegalMoves())
                 return
         
@@ -157,9 +163,9 @@ class game:
             # print(self.board.chessArray[i][j].get_possible_moves())
 
             pieceObject = self.board.chessArray[i][j]
-            print("Possible moves are")
+            #print("Possible moves are")
             print(self.board.getPossibleMoves(i,j,pieceObject.color))
-            print("Legal moves are ")
+            #print("Legal moves are ")
             print(pieceObject.getlegalMoves())
             return
         
@@ -189,11 +195,11 @@ class game:
                 self.execute_instruction(i,j,currentX,currentY)
 
                 if (self.turnCount > 0 and (self.turnCount % 2 == 0)):
-                    self.offerPowerups = True
+                    self.offermodifiers = True
                 else:
-                    self.offerPowerups = False
+                    self.offermodifiers = False
 
-                # while (self.offerPowerups):
+                # while (self.offermodifiers):
                 #     print("Waiting for user to use a powerup")
 
                 #global_vars.send_event.set()
@@ -201,35 +207,46 @@ class game:
                 #print("Invalid move")
                 return
 
-    def draw_powerups(self):
-        #print(self.offerPowerups, " because ", self.turnCount)
-        if (not(self.offerPowerups)):
+    def draw_modifiers(self):
+        #print(self.offermodifiers, " because ", self.turnCount)
+        if (not(self.offermodifiers)):
             return
         red = (255,0,0)
 
-        if (len(self.powerups) == 0):
-            pieces = self.board.whitePieces
-            if (self.board.mycolor == "black"):
-                pieces = self.board.blackPieces
+        if (len(self.modifiers) == 0):
+            pieces = self.board.whitePieces + self.board.blackPieces
+            # if (self.board.mycolor == "black"):
+            #     my_pieces = self.board.blackPieces
+            for piece in pieces:
+                if (self.board.chessArray[piece[0]][piece[1]].get_name() == "k"):
+                    pieces.remove(piece)
             for i in range(4):
                 randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                powerup = powerups.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
-                self.powerups.append((randomPiece,powerup))
-                powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
-                print("Power up ", i, " - " , powerupdescription)
+                if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
+                    powerup = modifiers.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
+                    powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
+                    print("Power up ", i, " - " , powerupdescription)
+                    self.modifiers.append((randomPiece,powerup,powerupdescription))
+                else:
+                    debuff = modifiers.getDebuff()
+                    debuffdescription = "Your opponent's " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + debuff.get_description()
+                    print("Debuff ", i, " - " , debuffdescription)
+                    self.modifiers.append((randomPiece,debuff,debuffdescription))
         for i in range(2,6):
-            randomPiece,powerup = self.powerups[i-2]
-            powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name()  + " at " + str(randomPiece) + powerup.get_description()
-            button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,powerupdescription ,None)
+            randomPiece,modifier,description = self.modifiers[i-2]
+            button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,None)
             button.draw(self.screen)
         for i in range(2,7):
             pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
 
     def draw_valid(self):
-        if(self.currentSquare != None):
-            currentX, currentY = self.currentSquare
+        if(self.clickedSquare != None):
+            currentX, currentY = self.clickedSquare
+            #print("Drawing valid for ", currentX, ",", currentY)
             pieceObject = self.board.getSquare(currentX,currentY)
+            #print("got object at ", currentX, ",", currentY)
             validMoves = pieceObject.getlegalMoves()
+            #print("Drawing validMoves for ", currentX, ",", currentY)
             gray = (100, 100, 100)     # darker gray
             green = (30, 60, 10)
             blue = (0,0,255)
@@ -257,14 +274,24 @@ class game:
     def draw_captured(self):
         pass
     def draw_pieces(self):
+        uparrow = pygame.transform.scale(pygame.image.load("resources/uparrow.png"), (30,30))
+        downarrow = pygame.transform.scale(pygame.image.load("resources/downarrow.png"), (30,30))
         if (self.board.mycolor == "white"):
             #print ("white", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for x,y in self.board.whitePieces:
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                if (piece.get_isUpgraded()):
+                    self.screen.blit(uparrow, (y * (HEIGHT * 0.1) + 50, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                if (piece.get_isDebuffed()):
+                    self.screen.blit(downarrow, (y * (HEIGHT * 0.1) + 10, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
             for x,y in self.board.blackPieces:
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
+                if (piece.get_isUpgraded()):
+                    self.screen.blit(uparrow, (y * (HEIGHT * 0.1) + 50, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                if (piece.get_isDebuffed()):
+                    self.screen.blit(downarrow, (y * (HEIGHT * 0.1) + 10, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
         else:
             #print ("black", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
@@ -272,11 +299,19 @@ class game:
                 y = self.board.whitePieces[i][1]
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, ((7-y) * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                if (piece.get_isUpgraded()):
+                    self.screen.blit(uparrow,  ((7-y) * (HEIGHT * 0.1) + 50, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                if (piece.get_isDebuffed()):
+                    self.screen.blit(downarrow,  ((7-y) * (HEIGHT * 0.1) + 10, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
             for i in range(len(self.board.blackPieces)):
                 x = self.board.blackPieces[i][0]
                 y = self.board.blackPieces[i][1]
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, ((7-y) *(HEIGHT * 0.1) , (7-x)  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
+                if (piece.get_isUpgraded()):
+                    self.screen.blit(uparrow,  ((7-y) * (HEIGHT * 0.1) + 50, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                if (piece.get_isDebuffed()):
+                    self.screen.blit(downarrow,  ((7-y) * (HEIGHT * 0.1) + 10, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
 
     def draw_board(self):
             for i in range(32):
@@ -325,27 +360,30 @@ class game:
                         else:
                             self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
                     if (event.pos[0] >= 0.8 * WIDTH and event.pos[1] >= (HEIGHT * 0.2)
-                        and event.pos[1] <= (HEIGHT * 0.6) and self.offerPowerups):
+                        and event.pos[1] <= (HEIGHT * 0.6) and self.offermodifiers):
                         #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
-                        randomPiece, powerup = self.powerups[int(event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10)]
-                        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting upgraded")
-                        print(powerup.get_capture())
-                        print(powerup.get_move())
-                        self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [powerup.get_capture(),powerup.get_move()]
-                        self.offerPowerups = False
-                        self.powerups = []
+                        randomPiece, powerup,description = self.modifiers[int(event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10)]
+                        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
+                        # print(powerup.get_capture())
+                        # print(powerup.get_move())
+                        if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
+                            self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [powerup.get_capture(),powerup.get_move()]
+                        else:
+                            print("debuffing opponent's piece!")
+                        self.offermodifiers = False
+                        self.modifiers = []
                     # elif (event.pos[0] == 0.8 * WIDTH):
-                    #     self.offerPowerups = False
+                    #     self.offermodifiers = False
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()
-            self.draw_powerups()
-            #print("Offering powerups is ", self.offerPowerups, " because ", self.turnCount)
+            self.draw_modifiers()
+            #print("Offering modifiers is ", self.offermodifiers, " because ", self.turnCount)
             pygame.display.flip()
 
-            #if (self.moved and not(self.offerPowerups)):
+            #if (self.moved and not(self.offermodifiers)):
 
-            if (self.moved and not(self.offerPowerups)):
+            if (self.moved and not(self.offermodifiers)):
                 #print("Sending Move")
                 global_vars.send_event.set()
                 self.moved = False

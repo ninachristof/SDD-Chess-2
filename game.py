@@ -127,6 +127,15 @@ class game:
     def selectsquare(self,i,j):
         if (self.board.getSquare(i,j) != None):
             self.clickedSquare = (i,j)
+            piece = self.board.chessArray[i][j]
+            print("Starting info for ", i , ",", j)
+            #print(piece.possible_Capture)
+            #print(piece.possible_NonCapture)
+            #print(piece.upgrade)
+            #print(piece.upgrades)
+            #print(piece.getlegalMoves())
+            #print(self.board.getPossibleMoves(i,j,piece.get_color()))
+            #print(self.board.getLegalMoves(i,j))
         #print("selected square ", i , "," , j)
         if (self.moved):
             return
@@ -146,11 +155,11 @@ class game:
                 self.currentSquare = (i,j)
 
                 #debugging
-                pieceObject = self.board.chessArray[i][j]
+                #pieceObject = self.board.chessArray[i][j]
                 #print("Possible moves are")
-                print(self.board.getPossibleMoves(i,j,pieceObject.color))
+                #print(self.board.getPossibleMoves(i,j,pieceObject.color))
                 #print("Legal moves are ")
-                print(pieceObject.getlegalMoves())
+                #print(pieceObject.getlegalMoves())
                 return
         
         #At this point, you have already selected a piece
@@ -164,9 +173,9 @@ class game:
 
             pieceObject = self.board.chessArray[i][j]
             #print("Possible moves are")
-            print(self.board.getPossibleMoves(i,j,pieceObject.color))
+            #print(self.board.getPossibleMoves(i,j,pieceObject.color))
             #print("Legal moves are ")
-            print(pieceObject.getlegalMoves())
+            #print(pieceObject.getlegalMoves())
             return
         
         #Otherwise, you are attempting to make a move; see if this move is possible, and do it if so
@@ -225,12 +234,12 @@ class game:
                 if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
                     powerup = modifiers.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
                     powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
-                    print("Power up ", i, " - " , powerupdescription)
+                    #print("Power up ", i, " - " , powerupdescription)
                     self.modifiers.append((randomPiece,powerup,powerupdescription))
                 else:
                     debuff = modifiers.getDebuff()
                     debuffdescription = "Your opponent's " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + debuff.get_description()
-                    print("Debuff ", i, " - " , debuffdescription)
+                    #print("Debuff ", i, " - " , debuffdescription)
                     self.modifiers.append((randomPiece,debuff,debuffdescription))
         # for i in range(2,6):
         #     randomPiece,modifier,description = self.modifiers[i-2]
@@ -277,6 +286,42 @@ class game:
                     #     pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
                     # else:
                     #     pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            
+    
+    def draw_selected_info(self):
+        if(self.clickedSquare != None):
+            currentX, currentY = self.clickedSquare
+            #print("Drawing valid for ", currentX, ",", currentY)
+            pieceObject = self.board.getSquare(currentX,currentY)
+            self.screen.blit(pieceObject.sprite, (HEIGHT * 0.9, HEIGHT * 0.7))#bro why is this inverted x should always horizontal
+            upgrades = "Upgrades: "
+            debuffs = "Debuffs: "
+            if (pieceObject.get_isUpgraded()):
+                upgrades += pieceObject.get_upgrade_desc()
+            else:
+                upgrades += "None"
+            if (pieceObject.get_isDebuffed()):
+                debuffs += pieceObject.get_debuff_desc()
+            else:
+                debuffs += "None"
+            button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.8),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,upgrades,None)
+            button.draw(self.screen)
+            button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.9),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,debuffs,None)
+            button.draw(self.screen)
+
+    def draw_grid(self):
+        if (self.board.mycolor == "white"):
+            for i in range (8):
+                button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * i),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(" + str(i) + ",y)",None)
+                button.draw(self.screen)
+                button = TextButton((255,255,255),(HEIGHT * 0.1 * i),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
+                button.draw(self.screen)
+        elif (self.board.mycolor == "black"):
+            for i in range (8):
+                button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(" + str(i) + ",y)",None)
+                button.draw(self.screen)
+                button = TextButton((255,255,255),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
+                button.draw(self.screen)
 
     def draw_captured(self):
         pass
@@ -371,25 +416,28 @@ class game:
                     elif (event.pos[0] <= 0.8 * WIDTH and event.pos[1] >= 0.9 * WIDTH and self.offermodifiers):
                         print(event.pos[0], " x ", event.pos[1])
                         #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
-                        randomPiece, modifier,description = self.modifiers[int(event.pos[0] - HEIGHT * 0.2) // (WIDTH // 10)]
+                        randomPiece, modifier,description = self.modifiers[int(event.pos[0]) // (WIDTH // 5)]
                         print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
-                        # print(powerup.get_capture())
-                        # print(powerup.get_move())
+
+                        #This means you are buffing one of your pieces
                         if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
+                            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
+                            self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
+                        #This means you are debuffing one of your opponent's pieces
                         else:
-                            print("debuffing opponent's piece!")
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier.get_id())
+                            #print("debuffing opponent's piece!")
+                            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
                         self.offermodifiers = False
                         self.modifiers = []
-                    # elif (event.pos[0] == 0.8 * WIDTH):
-                    #     self.offermodifiers = False
                     else:
                         print("What are you clicking on!!!!!!")
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()
             self.draw_modifiers()
+            self.draw_grid()
+            self.draw_selected_info()
             #print("Offering modifiers is ", self.offermodifiers, " because ", self.turnCount)
             pygame.display.flip()
 

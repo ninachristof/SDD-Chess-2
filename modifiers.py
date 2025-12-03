@@ -34,13 +34,24 @@ lookup = {
 
 debuffs = [
     debuff(" can move a Euclidean Distance of at most 6", 0),
-    debuff(" can't move more than 2 rows or columns from current position ", 1),
-    debuff(" can only move during odd turns", 2)
+    debuff(" can't move more than 4 rows or columns from current position ", 1)
 ]
+
+def apply_debuff(x,y,moveset,id):
+    new_moveset = []
+    if (id == 0):
+        for move in moveset:
+            if (abs(x-move[0]) + abs(y-move[1]) <= 6):
+                new_moveset.append(move)
+    if (id == 1):
+        for move in moveset:
+            if (not(abs(x-move[0]) > 4 and abs(y-move[1] > 4))):
+                new_moveset.append(move)
+    return new_moveset
 
 def getPowerups(piecename):
     return lookup[piecename][0]
 
 def getDebuff():
-    print("Debuffing!")
-    return debuffs[random.randint(0,2)]
+    #print("Debuffing!")
+    return debuffs[random.randint(0,len(debuffs)-1)]

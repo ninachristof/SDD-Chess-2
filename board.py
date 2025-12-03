@@ -1,6 +1,6 @@
 from chesspiece import *
 import time
-import copy 
+import copy
 class board:
 
     ##################################################################################
@@ -157,7 +157,7 @@ class board:
             return None
         return self.chessArray[i][j]
 
-    #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board)
+    #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board) subject to debuffs
     def getPossibleMoves(self,x,y,color):
         possibleMoves2 = []
         noncaptureMoves = self.chessArray[x][y].getPossibleNoncapture()
@@ -181,6 +181,9 @@ class board:
                 temp.append(lineofsight)
             if (not self.chessArray[x][y].get_captureOnlyWithPiece() or pieceFound):
                 possibleMoves2.extend(temp)
+
+        if (self.chessArray[x][y].get_isDebuffed()):
+            possibleMoves2 = self.chessArray[x][y].apply_debuff(possibleMoves2)
         return possibleMoves2
 
     

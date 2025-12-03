@@ -1,4 +1,5 @@
 import pygame
+import modifiers
 
 class chesspiece:
     name = None
@@ -15,6 +16,7 @@ class chesspiece:
     captureOnlyWithPiece = False
     sprite = None
     upgrades = [[],[]]
+    upgrade = None
     debuff = None
 
     def __init__(self,x,y,color):
@@ -23,6 +25,7 @@ class chesspiece:
         self.color = color
         self.upgrades = [[],[]]
         self.isUpgraded = False
+        self.upgrade = None
         self.debuff = None
 
     def get_isUpgraded(self):
@@ -31,8 +34,20 @@ class chesspiece:
     def get_isDebuffed(self):
         return not(self.debuff == None)
     
-    def set_debuff(self,debuffid):
-        self.debuff = debuffid
+    def set_upgrade(self,upgrade):
+        self.upgrade = upgrade
+    
+    def set_debuff(self,debuff):
+        self.debuff = debuff
+
+    def apply_debuff(self,moveset):
+        return modifiers.apply_debuff(self.x,self.y,moveset,self.debuff.get_id())
+
+    def get_upgrade_desc(self):
+        return self.upgrade.get_description()
+    
+    def get_debuff_desc(self):
+        return self.debuff.get_description()
     
     def get_name(self): 
         return self.name

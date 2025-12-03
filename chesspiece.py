@@ -31,6 +31,9 @@ class chesspiece:
     def get_isDebuffed(self):
         return not(self.debuff == None)
     
+    def set_debuff(self,debuffid):
+        self.debuff = debuffid
+    
     def get_name(self): 
         return self.name
     

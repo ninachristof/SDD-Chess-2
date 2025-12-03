@@ -232,12 +232,19 @@ class game:
                     debuffdescription = "Your opponent's " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + debuff.get_description()
                     print("Debuff ", i, " - " , debuffdescription)
                     self.modifiers.append((randomPiece,debuff,debuffdescription))
-        for i in range(2,6):
-            randomPiece,modifier,description = self.modifiers[i-2]
-            button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,None)
+        # for i in range(2,6):
+        #     randomPiece,modifier,description = self.modifiers[i-2]
+        #     button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,None)
+        #     button.draw(self.screen)
+        # for i in range(2,7):
+        #     pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
+
+        for i in range(4):
+            randomPiece,modifier,description = self.modifiers[i]
+            button = TextButton((250,50,50),(HEIGHT * i * 0.2),(HEIGHT * 0.9),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,None)
             button.draw(self.screen)
-        for i in range(2,7):
-            pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
+        for i in range(1,5):
+            pygame.draw.line(self.screen, 'black', ((HEIGHT * i * 0.2),HEIGHT*0.9), ((HEIGHT * i * 0.2),HEIGHT), 2)
 
     def draw_valid(self):
         if(self.clickedSquare != None):
@@ -284,14 +291,14 @@ class game:
                 if (piece.get_isUpgraded()):
                     self.screen.blit(uparrow, (y * (HEIGHT * 0.1) + 50, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
                 if (piece.get_isDebuffed()):
-                    self.screen.blit(downarrow, (y * (HEIGHT * 0.1) + 10, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                    self.screen.blit(downarrow, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
             for x,y in self.board.blackPieces:
                 piece = self.board.chessArray[x][y]
                 self.screen.blit(piece.sprite, (y *(HEIGHT * 0.1) , x  *(HEIGHT * 0.1) ))#bro why is this inverted x should always horizontal
                 if (piece.get_isUpgraded()):
                     self.screen.blit(uparrow, (y * (HEIGHT * 0.1) + 50, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
                 if (piece.get_isDebuffed()):
-                    self.screen.blit(downarrow, (y * (HEIGHT * 0.1) + 10, x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                    self.screen.blit(downarrow, (y * (HEIGHT * 0.1), x  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
         else:
             #print ("black", len(self.board.whitePieces), " - ", len(self.board.blackPieces))
             for i in range(len(self.board.whitePieces)):
@@ -302,7 +309,7 @@ class game:
                 if (piece.get_isUpgraded()):
                     self.screen.blit(uparrow,  ((7-y) * (HEIGHT * 0.1) + 50, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
                 if (piece.get_isDebuffed()):
-                    self.screen.blit(downarrow,  ((7-y) * (HEIGHT * 0.1) + 10, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                    self.screen.blit(downarrow,  ((7-y) * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
             for i in range(len(self.board.blackPieces)):
                 x = self.board.blackPieces[i][0]
                 y = self.board.blackPieces[i][1]
@@ -311,7 +318,7 @@ class game:
                 if (piece.get_isUpgraded()):
                     self.screen.blit(uparrow,  ((7-y) * (HEIGHT * 0.1) + 50, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
                 if (piece.get_isDebuffed()):
-                    self.screen.blit(downarrow,  ((7-y) * (HEIGHT * 0.1) + 10, (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
+                    self.screen.blit(downarrow,  ((7-y) * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
 
     def draw_board(self):
             for i in range(32):
@@ -354,26 +361,31 @@ class game:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if (event.pos[0] < 0.8 * WIDTH):
+                    if (event.pos[0] < 0.8 * WIDTH and event.pos[1] < 0.8 * WIDTH):
                         if (self.board.mycolor == "white"):
                             self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
                         else:
                             self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
-                    if (event.pos[0] >= 0.8 * WIDTH and event.pos[1] >= (HEIGHT * 0.2)
-                        and event.pos[1] <= (HEIGHT * 0.6) and self.offermodifiers):
+
+                    #(HEIGHT * i * 0.2)
+                    elif (event.pos[0] <= 0.8 * WIDTH and event.pos[1] >= 0.9 * WIDTH and self.offermodifiers):
+                        print(event.pos[0], " x ", event.pos[1])
                         #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
-                        randomPiece, powerup,description = self.modifiers[int(event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10)]
+                        randomPiece, modifier,description = self.modifiers[int(event.pos[0] - HEIGHT * 0.2) // (WIDTH // 10)]
                         print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
                         # print(powerup.get_capture())
                         # print(powerup.get_move())
                         if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [powerup.get_capture(),powerup.get_move()]
+                            self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
                         else:
                             print("debuffing opponent's piece!")
+                            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier.get_id())
                         self.offermodifiers = False
                         self.modifiers = []
                     # elif (event.pos[0] == 0.8 * WIDTH):
                     #     self.offermodifiers = False
+                    else:
+                        print("What are you clicking on!!!!!!")
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()

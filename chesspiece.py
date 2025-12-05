@@ -33,6 +33,9 @@ class chesspiece:
     
     def get_isDebuffed(self):
         return not(self.debuff == None)
+
+    #def get_upgrades(self):
+    #    return upgrades
     
     def set_upgrade(self,upgrade):
         self.upgrade = upgrade
@@ -62,6 +65,11 @@ class chesspiece:
         return self.sprite
     
     def getPossibleCapture(self):
+        moves = self.possible_Capture.copy()
+        for i in range(len(moves)):
+            for move in moves[i]:
+                if 8 in move:
+                    self.possible_Capture[i].remove(move)
         return self.possible_Capture.copy()
 
     def getPossibleNoncapture(self):

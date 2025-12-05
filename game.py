@@ -12,6 +12,7 @@ from textbox import *
 from button import *
 import time
 import os
+import json
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -41,33 +42,8 @@ class game:
     modifiers = []
     whitekinginCheck = False
     blackkinginCheck = False
+    offerpromotion = False
 
-#running this function on a separate thread
-    def run_socket(self):
-        self.new_p2p = p2p(self.conn_type, self.ip, self.port)
-        self.new_p2p.initP2p()
-        wait_for_my_move = True
-        if(self.conn_type == "connect"):
-            wait_for_my_move = False
-
-        while(self.running):
-            #send instruction
-            if(wait_for_my_move):
-                global_vars.send_event.wait()
-                if(not self.running):
-                    break
-                self.new_p2p.sendInstruction(self.current_instruction)
-                global_vars.send_event.clear()
-                wait_for_my_move = False
-            else:
-                #wait for instruction
-                instruction = self.new_p2p.recvInstruction() 
-                if(instruction == 1):
-                    print("INSTRUCTION ERROR")
-                    break
-                self.execute_instruction(instruction[0],instruction[1],instruction[2],instruction[3])
-                wait_for_my_move = True
-        #self.new_p2p.close_all()
 
 
     def __init__(self, conn_type, ip, port):
@@ -91,17 +67,81 @@ class game:
             
         else:
             self.board.mycolor = "white"
-        #self.board.startState()
-        #self.board.whitePieceUpdateLegal()
-        #elf.board.blackPieceUpdateLegal()
 
     def get_conn_thread(self):
         return self.conn_thread
+
+#running this function on a separate thread
+    def run_socket(self):
+        self.new_p2p = p2p(self.conn_type, self.ip, self.port)
+        self.new_p2p.initP2p()
+        wait_for_my_move = True
+        if(self.conn_type == "connect"):
+            wait_for_my_move = False
+
+        while(self.running):
+            #send instruction
+            if(wait_for_my_move):
+                global_vars.send_event.wait()
+                if(not self.running):
+                    break
+                instruction = json.dumps(self.move_data)
+                instruction = instruction.encode("utf-8")
+                self.new_p2p.sendInstruction(instruction)
+                global_vars.send_event.clear()
+                wait_for_my_move = False
+            else:
+                #wait for instruction
+                instruction = self.new_p2p.recvInstruction() 
+                if(instruction == 1):
+                    print("INSTRUCTION ERROR")
+                    break
+                json_move_data = instruction.decode("utf-8")
+                self.move_data = json.loads(json_move_data)
+                self.execute_instruction()
+                wait_for_my_move = True
+        #self.new_p2p.close_all()
         
-    def execute_instruction(self,i,j,currentX,currentY):
+    def execute_instruction(self):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
+        print("CURRENT INSTRUCTION", self.move_data)
+        x0 = self.move_data["x0"]
+        y0 = self.move_data["y0"]
+        x1 = self.move_data["x1"]
+        y1 = self.move_data["y1"]
+
+        
         self.clickedSquare = None
-        self.board.movePiece(i,j,currentX,currentY,self.turn)
+        self.board.movePiece(x1,y1,x0,y0,self.turn)
+        print("ddf",self.board.chessArray[x0][y0])
+        print("ddf",self.board.chessArray[x1][y1])
+
+    #PIECE PROMOTIONN
+        piece = self.move_data["promote"] 
+        if piece != "":
+            self.board.chessArray[x1][y1] = None
+            if self.turn =="white":
+                self.board.whitePieces.remove((x1,y1))
+            if self.turn =="black":
+                self.board.blackPieces.remove((x1,y1))
+            self.board.addPiece(x1,y1,piece, self.turn)
+
+        #UPGRADE YUH
+        mx = self.move_data["mx"]
+        my = self.move_data["my"]
+        mpiece = self.move_data["mpiece"]
+        upgrade = self.move_data["upgrade"]
+        debuff  = self.move_data["debuff"]
+        if upgrade != "" and mpiece != "":
+            modifier = modifiers.lookup[mpiece][upgrade]
+            self.board.chessArray[mx][my].upgrades = [modifier.get_capture(),modifier.get_move()]
+            self.board.chessArray[mx][my].set_upgrade(modifier)
+            self.board.chessArray[mx][my].findMoves(mx,my)
+        if debuff != "" and mpiece != "":
+            modifier = modifiers.debuff_map[0]
+            self.board.chessArray[mx][my].set_debuff(modifier)
+
+
 
         if (self.turn == "black"):
             self.turnCount += 1
@@ -133,6 +173,7 @@ class game:
             self.turn = "black"
         else:
             self.turn = "white"
+
 
     def selectsquare(self,i,j):
         if (self.board.getSquare(i,j) != None):
@@ -209,14 +250,35 @@ class game:
                 return
             if wantedMoveXY in validMoves:
                 #print("Valid Move")
+                self.move_data = {
+                    "x0" : currentX,
+                    "y0" : currentY,
+                    "x1" : i,
+                    "y1" : j,
+                    "color" : self.board.mycolor,
+                    "promote" : "",
+                    "mpiece" : "",
+                    "upgrade" : "",
+                    "debuff" : "",
+                    "mx" : "", #since the modifier can be on any piece
+                    "my" : ""
+                }
+
+                #this is so stupid idk why i still keep this AND USE IT 
                 self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.board.mycolor,"utf-8"))
-                self.moved = True
-                self.execute_instruction(i,j,currentX,currentY)
 
                 if (self.turnCount > 0 and (self.turnCount % 2 == 0)):
                     self.offermodifiers = True
                 else:
                     self.offermodifiers = False
+
+                if pieceObject.name == "p" and i == 7 and pieceObject.color == "black":
+                    self.offerpromotion = True
+                if pieceObject.name == "p" and i == 0 and pieceObject.color == "white":
+                    self.offerpromotion = True
+                if not self.offermodifiers and not self.offerpromotion:
+                    self.moved = True
+                    self.execute_instruction()
 
                 # while (self.offermodifiers):
                 #     print("Waiting for user to use a powerup")
@@ -225,6 +287,12 @@ class game:
             else: 
                 #print("Invalid move")
                 return
+
+    def upgrade_callback(self):
+        if not self.offerpromotion:
+            self.execute_instruction()
+            self.moved = True
+            self.offermodifiers = False
 
     def draw_modifiers(self):
         #print(self.offermodifiers, " because ", self.turnCount)
@@ -260,7 +328,7 @@ class game:
 
         for i in range(4):
             randomPiece,modifier,description = self.modifiers[i]
-            button = TextButton((250,50,50),(HEIGHT * i * 0.2),(HEIGHT * 0.9),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,None)
+            button = TextButton((250,50,50),(HEIGHT * i * 0.2),(HEIGHT * 0.9),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,self.upgrade_callback)
             button.draw(self.screen)
         for i in range(1,5):
             pygame.draw.line(self.screen, 'black', ((HEIGHT * i * 0.2),HEIGHT*0.9), ((HEIGHT * i * 0.2),HEIGHT), 2)
@@ -376,37 +444,74 @@ class game:
                     self.screen.blit(downarrow,  ((7-y) * (HEIGHT * 0.1), (7-x)  * (HEIGHT * 0.1)))#bro why is this inverted x should always horizontal
 
     def draw_board(self):
-            for i in range(32):
-                column = i % 4
-                row = i // 4
-                color = (255,255,255)
-                if row % 2 == 0:
-                    #Screen, color, LH corner, RH corner
-                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                else:
-                    pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
-                pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
-                pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
-                status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
-                            'Black: Select a Piece to Move!', 'Black: Select a Destination!']
-                self.draw_valid()
-                for i in range(9):
-                    pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
-                    pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
-            red = (255,0,0)
-            if (self.whitekinginCheck):
-                x,y = self.board.getKingLocation("white")
-                if (self.board.mycolor == "white"):
-                    pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
-                if (self.board.mycolor == "black"):
-                    pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
-            if (self.blackkinginCheck):
-                x,y = self.board.getKingLocation("black")
-                if (self.board.mycolor == "white"):
-                    pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
-                if (self.board.mycolor == "black"):
-                    pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+        for i in range(32):
+            column = i % 4
+            row = i // 4
+            color = (255,255,255)
+            if row % 2 == 0:
+                #Screen, color, LH corner, RH corner
+                pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            else:
+                pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
+            pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
+            pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
+            status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
+                        'Black: Select a Piece to Move!', 'Black: Select a Destination!']
+            self.draw_valid()
+            for i in range(9):
+                pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
+                pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
+        red = (255,0,0)
+        if (self.board.isKinginCheck("white")):
+            x,y = self.board.getKingLocation("white")
+            if (self.board.mycolor == "white"):
+                pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+            if (self.board.mycolor == "black"):
+                pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+        if (self.board.isKinginCheck("black")):
+            x,y = self.board.getKingLocation("black")
+            if (self.board.mycolor == "white"):
+                pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+            if (self.board.mycolor == "black"):
+                pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+
+    #promotion callback
+
+    def promote(self, x,y,piece):
+        self.board.chessArray[x][y] = None
+        if self.board.mycolor =="white":
+            self.board.whitePieces.remove((x,y))
+        if self.board.mycolor =="black":
+            self.board.blackPieces.remove((x,y))
+        self.board.addPiece(x,y,piece, self.board.mycolor)
+        self.move_data["promote"] = piece
+        self.offerpromotion = False
+        self.moved = True
+        self.execute_instruction()
+
+    def draw_promotion_options(self):
+        i = self.move_data["x0"]
+        j = self.move_data["y0"]
+
+        font = pygame.font.Font(None, 36) 
+        text_surf = font.render("choose what to promote to", True, "black")
+        rect = text_surf.get_rect(center=(WIDTH*.4, HEIGHT*.9))
+        self.screen.blit(text_surf, rect)
+        if (self.board.mycolor == "black"):
+            options = ["resources/Chess_ndt60.png", "resources/Chess_rdt60.png", "resources/Chess_bdt60.png", "resources/Chess_qdt60.png"]
+            n = ["kn", "r", "b", "q"]
+            for k in range(2,6):
+                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
+                piece_promote.draw(self.screen)
+        if (self.board.mycolor == "white"):
+            options = ["resources/Chess_nlt60.png", "resources/Chess_rlt60.png", "resources/Chess_blt60.png", "resources/Chess_qlt60.png"]
+            n = ["kn", "r", "b", "q"]
+            for k in range(2,6):
+                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
+                piece_promote.draw(self.screen)
+        return True
+        
 
     def main_loop(self):
         while self.running:
@@ -427,19 +532,30 @@ class game:
                         #print(event.pos[0], " x ", event.pos[1])
                         #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
                         randomPiece, modifier,description = self.modifiers[int(event.pos[0]) // (WIDTH // 5)]
+                        
                         print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
+                        #TODO: remove this but i legit have no idea why the other callback isnt working
+                        self.upgrade_callback()
 
                         #This means you are buffing one of your pieces
+                        self.move_data["mpiece"] = self.board.chessArray[randomPiece[0]][randomPiece[1]].name
+                        self.move_data["mx"] = randomPiece[0]
+                        self.move_data["my"] = randomPiece[1]
                         if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
                             legalMoves = self.board.getLegalMoves(randomPiece[0], randomPiece[1])
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].updateLegalMoves(legalMoves)
+                            #piece bring upgraded
+                            #upgrade index = 0 since theres only 1 upgrade for every piece right now
+                            self.move_data["upgrade"] = 0
                         #This means you are debuffing one of your opponent's pieces
                         else:
                             #print("debuffing opponent's piece!")
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
+                            #TODO: this is temp
+                            self.move_data["debuff"] = 0
                         self.offermodifiers = False
                         self.modifiers = []
                     # else:
@@ -450,6 +566,9 @@ class game:
             self.draw_modifiers()
             self.draw_grid()
             self.draw_selected_info()
+            if not self.offermodifiers and self.offerpromotion:
+                self.draw_promotion_options()
+            #self.draw_promotion_options()
             #print("Offering modifiers is ", self.offermodifiers, " because ", self.turnCount)
             pygame.display.flip()
 
@@ -465,6 +584,7 @@ class game:
         pygame.display.quit()
         pygame.quit()
         global_vars.send_event.set()
+
     def main_loop_menu(self):
         state = "main menu"
 #for main menu

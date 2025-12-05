@@ -37,6 +37,12 @@ debuffs = [
     debuff(" can't move more than 4 rows or columns from current position ", 1)
 ]
 
+#temp fix:
+debuff_map = {
+    0 : debuffs[0],
+    1 : debuffs[1]
+}
+
 def apply_debuff(x,y,moveset,id):
     new_moveset = []
     if (id == 0):

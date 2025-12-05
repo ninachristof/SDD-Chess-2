@@ -8,22 +8,26 @@ class Button():
     x = 0
     y = 0
     callback = None
+    args = None
+    kwargs = None
 
-    def __init__(self,x,y,width, height, callback):
+    def __init__(self,x,y,width, height, callback, *args, **kwargs):
         self.box = pygame.Rect(x,y,width,height)
         self.width = width
         self.height = height
         self.x = x
         self.y = y
         self.callback = callback
+        self.args = args
+        self.kwargs = kwargs
 
     def handle_click(self):
         pos = pygame.mouse.get_pos()
-
         if self.box.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1:
                 if self.callback != None:
-                    self.callback()
+                    #print("CALLBACK:",self.callback)
+                    self.callback(*self.args, **self.kwargs)
                 return 1 
         return 0
 
@@ -33,7 +37,7 @@ class TextButton(Button):
     text = ""
     color = None
 
-    def __init__(self,color,x,y,width, height, font_size, text, callback):
+    def __init__(self,color,x,y,width, height, font_size, text, callback, *args, **kwargs):
         pygame.font.init()
         self.font = pygame.font.SysFont("arial", font_size)
         self.color = color
@@ -44,6 +48,8 @@ class TextButton(Button):
         self.y = y
         self.text = text
         self.callback = callback
+        self.args = args
+        self.kwargs = kwargs
 
     def draw(self,screen):
         pygame.draw.rect(screen, self.color, self.box)
@@ -74,8 +80,9 @@ class ImageButton(Button):
     callback = None
     sprite = None
     filename = ""
+    
 
-    def __init__(self, x, y, callback, filename, width, height, scale = 1):
+    def __init__(self, x, y, width, height, filename, scale, callback, *args, **kwargs):
         self.x = x
         self.y = y
         self.width = width
@@ -85,6 +92,8 @@ class ImageButton(Button):
         self.sprite = pygame.transform.scale(pygame.image.load(filename), (width*scale,height*scale))
         self.box = self.sprite.get_rect()
         self.box.topleft = (x,y)
+        self.args = args
+        self.kwargs = kwargs
 
     def draw(self,screen):
         screen.blit(self.sprite,(self.box.x, self.box.y))

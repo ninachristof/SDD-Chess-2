@@ -398,6 +398,48 @@ class game:
                 if (self.board.mycolor == "black"):
                     pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
 
+    #promotion callback
+
+    def promote(self, x,y,piece):
+            self.board.chessArray[x][y] = None
+            if self.board.mycolor =="white":
+                self.board.whitePieces.remove((x,y))
+            else:
+                print(self.board.blackPieces)
+                print(x,y)
+                self.board.blackPieces.remove((x,y))
+            self.board.addPiece(x,y,piece, self.board.mycolor)
+
+    def draw_promotion_options(self):
+            font = pygame.font.Font(None, 36) 
+            text_surf = font.render("choose what to promote to", True, "black")
+            rect = text_surf.get_rect(center=(WIDTH*.4, HEIGHT*.9))
+            self.screen.blit(text_surf, rect)
+            
+            if (self.board.mycolor == "black"):
+                for i in range(len(self.board.chessArray)):
+                    for j in range(len(self.board.chessArray[i])):
+                        if self.board.chessArray[i][j]:
+                            if self.board.chessArray[i][j].name == "p" and i == 7:
+                                options = ["resources/Chess_ndt60.png", "resources/Chess_rdt60.png", "resources/Chess_bdt60.png", "resources/Chess_qdt60.png"]
+                                n = ["kn", "r", "b", "q"]
+                                for k in range(2,6):
+                                    piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
+                                    piece_promote.draw(self.screen)
+                                return True
+            if (self.board.mycolor == "white"):
+                for i in range(len(self.board.chessArray)):
+                    for j in range(len(self.board.chessArray[i])):
+                        if self.board.chessArray[i][j]:
+                            if self.board.chessArray[i][j].name == "p" and i == 0:
+                                options = ["resources/Chess_nlt60.png", "resources/Chess_rlt60.png", "resources/Chess_blt60.png", "resources/Chess_qlt60.png"]
+                                n = ["kn", "r", "b", "q"]
+                                for k in range(2,6):
+                                    piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
+                                    piece_promote.draw(self.screen)
+                                return True
+            return False
+
     def main_loop(self):
         while self.running:
             for event in pygame.event.get():
@@ -438,6 +480,9 @@ class game:
             self.draw_modifiers()
             self.draw_grid()
             self.draw_selected_info()
+            if not self.offermodifiers:
+                self.draw_promotion_options()
+            #self.draw_promotion_options()
             #print("Offering modifiers is ", self.offermodifiers, " because ", self.turnCount)
             pygame.display.flip()
 

@@ -1,6 +1,4 @@
 from chesspiece import *
-import time
-import copy 
 class board:
 
     ##################################################################################
@@ -16,11 +14,13 @@ class board:
         self.chessArray = [[None for j in range(8)] for i in range(8)]
         self.whitePieces = [] # The list of locations for white pieces
         self.blackPieces = [] # The list of locations for black pieces
+        self.en_passant_square = None   # For en passant check
+        self.en_passant_pawn = None   # For en passant check
         
         # Automatically initialize start state
         if initialize: 
             #print("Loading tester.txt")
-            self.loadPosition("test_positions/start_state.txt")
+            self.loadPosition("test_positions/enpassant.txt")
             self.updateAllLegal()
             
 
@@ -202,6 +202,76 @@ class board:
             #     legalMoves.append(move)
             # self.movePiece(x,y,move[0],move[1],color)
         #print("Legal moves are ", legalMoves)
+
+        
+        # Castling logic
+        piece = self.chessArray[x][y]
+        if piece.get_name() == "k" and piece.firstMove:
+
+            if color == "white":
+                king_start = (7, 4)
+                rooks = {
+                    "king_side": (7, 7, (7, 6), (7, 5)),
+                    "queen_side": (7, 0, (7, 2), (7, 3))
+                }
+            else:
+                king_start = (0, 4)
+                rooks = {
+                    "king_side": (0, 7, (0, 6), (0, 5)),
+                    "queen_side": (0, 0, (0, 2), (0, 3))
+                }
+
+            # King must be on original square
+            if (x, y) == king_start and not self.isKinginCheck(color):
+
+                for side in rooks:
+                    rook_x, rook_y, king_target, rook_target = rooks[side]
+
+                    rook_piece = self.chessArray[rook_x][rook_y]
+
+                    # Rook must exist and never have moved
+                    if rook_piece is None or rook_piece.get_name() != "r" or rook_piece.firstMove == False:
+                        continue
+
+                    # Squares between king and rook must be empty
+                    path_clear = True
+                    min_y = min(y, rook_y)
+                    max_y = max(y, rook_y)
+                    for col in range(min_y + 1, max_y):
+                        if self.chessArray[rook_x][col] is not None:
+                            path_clear = False
+                            break
+                    if not path_clear:
+                        continue
+
+                    # King cannot castle through check—test the squares he passes through
+                    through_squares = [ (x, y), rook_target, king_target ]
+                    newboard_test = self.clone_board_state()
+                    safe = True
+    
+
+                    temp_king = newboard_test.chessArray[x][y]
+
+                    for sq in through_squares:
+                        tx, ty = sq
+                        # simulate moveing king
+                        old_piece = newboard_test.chessArray[tx][ty]
+                        newboard_test.chessArray[x][y] = None
+                        newboard_test.chessArray[tx][ty] = temp_king
+                        newboard_test.whiteKingXY = (tx, ty) if color == "white" else newboard_test.whiteKingXY
+                        newboard_test.blackKingXY = (tx, ty) if color == "black" else newboard_test.blackKingXY
+
+                        if newboard_test.isKinginCheck(color):
+                            safe = False
+
+                        # Undo
+                        newboard_test.chessArray[tx][ty] = old_piece
+                        newboard_test.chessArray[x][y] = temp_king
+
+                    if safe:
+                        # King move is added to legal moves
+                        legalMoves.append(king_target)
+
         return legalMoves
     
     def returnLegalMoves(self,x,y):
@@ -305,9 +375,49 @@ class board:
             # print("Updating the location of the white king from ", oldx, ",", oldy, " to ",
             #       newx, ",", newy)
             self.whiteKingXY = newx,newy
+       
+        # brute-force rook movement
+        moved_piece = self.chessArray[newx][newy]
+        # King must be moving
+        if moved_piece.get_name() == "k":
+            # King-side castling
+            if oldy == 4 and newy == 6:
+                # White rook movement 
+                if color == "white" and oldx == 7:
+                    rook = self.chessArray[7][7]
+                    self.chessArray[7][7] = None
+                    self.chessArray[7][5] = rook
+                    self.whitePieces.remove((7,7))
+                    self.whitePieces.append((7,5))
+                    rook.findMoves(7,5)
+
+                # Black rook movement
+                if color == "black" and oldx == 0:
+                    rook = self.chessArray[0][7]
+                    self.chessArray[0][7] = None
+                    self.chessArray[0][5] = rook
+                    self.blackPieces.remove((0,7))
+                    self.blackPieces.append((0,5))
+                    rook.findMoves(0,5)
+
+            # Queen-side castling 
+            if oldy == 4 and newy == 2:
+                # White rook movement
+                if color == "white" and oldx == 7:
+                    rook = self.chessArray[7][0]
+                    self.chessArray[7][0] = None
+                    self.chessArray[7][3] = rook
+                    self.whitePieces.remove((7,0))
+                    self.whitePieces.append((7,3))
+                    rook.findMoves(7,3)
+
+                # Black rook from movement
+                if color == "black" and oldx == 0:
+                    rook = self.chessArray[0][0]
+                    self.chessArray[0][0] = None
+                    self.chessArray[0][3] = rook
+                    self.blackPieces.remove((0,0))
+                    self.blackPieces.append((0,3))
+                    rook.findMoves(0,3)
 
 
-# EN PASSANT CHECK: 
-#     Capturing en passant is permitted only on the turn *immediately* 
-#     after the two-square advance; it cannot be done on a later turn. 
-# This means that a pawn needs a boolean or something so it knows it moved twice.

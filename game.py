@@ -321,34 +321,34 @@ class game:
     def draw_valid(self):
         if(self.clickedSquare != None):
             currentX, currentY = self.clickedSquare
-            #print("Drawing valid for ", currentX, ",", currentY)
             pieceObject = self.board.getSquare(currentX,currentY)
-            #print("got object at ", currentX, ",", currentY)
             validMoves = pieceObject.getlegalMoves()
-            #print("Drawing validMoves for ", currentX, ",", currentY)
-            gray = (100, 100, 100)     # darker gray
-            green = (30, 60, 10)
+            gray = (150, 150, 150)     
+            green = (80, 110, 60)
             blue = (0,0,255)
-            #print("Possible moves are")
-            #print(self.board.getPossibleMoves(currentX,currentY,pieceObject.get_color()))
-            #print("Valid moves are ")
-            #print(validMoves)
+
+            if self.board.mycolor == "white" and(((8 * currentX) + (currentY )) + (currentX % 2)) % 2 == 0:
+                pygame.draw.rect(self.screen, gray, [ (currentY * (HEIGHT * 0.1) ), currentX * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            elif self.board.mycolor == "white":
+                pygame.draw.rect(self.screen, green, [ (currentY * (HEIGHT * 0.1) ), currentX * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            if self.board.mycolor == "black" and(((8 * currentX) + (currentY )) + (currentX % 2)) % 2 == 0:
+                pygame.draw.rect(self.screen, gray, [ ((7-currentY) * (HEIGHT * 0.1) ), (7-currentX) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+            elif self.board.mycolor == "black":
+                pygame.draw.rect(self.screen, green, [ ((7-currentY) * (HEIGHT * 0.1) ), (7-currentX) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+
             for move in validMoves:
-                #print("Move is ", move)
                 adj_mov = ((8 * move[0]) + move[1])
                 if (self.board.mycolor == "white"):
-                    #surface,color,center coords, radius, optional width (0 fills the circle)
-                    pygame.draw.circle(self.screen,blue,[((move[1] * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),move[0] * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
-                    # if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                    #     pygame.draw.rect(self.screen, gray, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                    # else:
-                    #     pygame.draw.rect(self.screen, green, [ (move[1] * (HEIGHT * 0.1) ), move[0] * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
+                         pygame.draw.circle(self.screen,gray,[((move[1] * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),move[0] * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+                     else:
+                         pygame.draw.circle(self.screen,green,[((move[1] * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),move[0] * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
                 if (self.board.mycolor == "black"):
-                    pygame.draw.circle(self.screen,blue,[(((7-move[1]) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-move[0]) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
-                    # if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
-                    #     pygame.draw.rect(self.screen, gray, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7-move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-                    # else:
-                    #     pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                     if (((8 * move[0]) + (move[1] )) + (move[0] % 2)) % 2 == 0:
+                         pygame.draw.circle(self.screen,gray,[(((7-move[1]) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-move[0]) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
+                     else:
+                         #pygame.draw.rect(self.screen, green, [ ((7-move[1]) * (HEIGHT * 0.1) ), (7 - move[0]) * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
+                         pygame.draw.circle(self.screen,green,[(((7-move[1]) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-move[0]) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
             
     
     def draw_selected_info(self):
@@ -373,18 +373,25 @@ class game:
             button.draw(self.screen)
 
     def draw_grid(self):
+        font = pygame.font.Font(None, 25) 
         if (self.board.mycolor == "white"):
             for i in range (8):
-                button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * i),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(" + str(i) + ",y)",None)
-                button.draw(self.screen)
-                button = TextButton((255,255,255),(HEIGHT * 0.1 * i),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
-                button.draw(self.screen)
-        elif (self.board.mycolor == "black"):
-            for i in range (8):
-                button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(" + str(i) + ",y)",None)
-                button.draw(self.screen)
-                button = TextButton((255,255,255),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
-                button.draw(self.screen)
+                text_surf = font.render(str(i), True, "black")
+                rect = text_surf.get_rect(center=(WIDTH*.8 - 10, HEIGHT*.1 * i + (HEIGHT*0.015)))
+                self.screen.blit(text_surf, rect)
+
+                rect = text_surf.get_rect(center=(WIDTH*.1 * i + (WIDTH*0.015),HEIGHT*.8 - 7))
+                self.screen.blit(text_surf, rect)
+                #button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * i),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 15, "(" + str(i) + ",y)",None)
+                #button.draw(self.screen)
+                #button = TextButton((255,255,255),(HEIGHT * 0.1 * i),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
+                #button.draw(self.screen)
+        #elif (self.board.mycolor == "black"):
+            #for i in range (8):
+            #    button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(" + str(i) + ",y)",None)
+            #    button.draw(self.screen)
+            #    button = TextButton((255,255,255),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
+            #    button.draw(self.screen)
 
     def draw_captured(self):
         pass

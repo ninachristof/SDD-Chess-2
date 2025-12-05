@@ -40,6 +40,7 @@ class TextButton(Button):
     def __init__(self,color,x,y,width, height, font_size, text, callback, *args, **kwargs):
         pygame.font.init()
         self.font = pygame.font.SysFont("arial", font_size)
+        #self.font = pygame.font.Font("resources/Coolvetica Rg.otf", font_size)
         self.color = color
         self.box = pygame.Rect(x,y,width,height)
         self.width = width
@@ -52,7 +53,7 @@ class TextButton(Button):
         self.kwargs = kwargs
 
     def draw(self,screen):
-        pygame.draw.rect(screen, self.color, self.box)
+        pygame.draw.rect(screen, self.color, self.box,width = 0, border_radius = 2)
         text_words = self.text.split()
         text_lines = []
         curr_line = ""

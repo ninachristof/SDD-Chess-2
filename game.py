@@ -180,13 +180,13 @@ class game:
             self.clickedSquare = (i,j)
             piece = self.board.chessArray[i][j]
             print("Starting info for ", i , ",", j)
-            #print(piece.possible_Capture)
-            #print(piece.possible_NonCapture)
+            print("Capture: ", piece.possible_Capture)
+            print("Noncapture: ", piece.possible_NonCapture)
             #print(piece.upgrade)
             #print(piece.upgrades)
-            #print(piece.getlegalMoves())
-            #print(self.board.getPossibleMoves(i,j,piece.get_color()))
-            #print(self.board.getLegalMoves(i,j))
+            print("object.legal ", piece.getlegalMoves())
+            print(self.board.getPossibleMoves(i,j,piece.get_color()))
+            print("board.legal ", self.board.getLegalMoves(i,j))
         #print("selected square ", i , "," , j)
         if (self.moved):
             return
@@ -205,28 +205,13 @@ class game:
                 #print("Selected a piece at ", i , "," , j)
                 self.currentSquare = (i,j)
 
-                #debugging
-                #pieceObject = self.board.chessArray[i][j]
-                #print("Possible moves are")
-                #print(self.board.getPossibleMoves(i,j,pieceObject.color))
-                #print("Legal moves are ")
-                #print(pieceObject.getlegalMoves())
                 return
         
         #At this point, you have already selected a piece
         #If you selected another of your piece, swap the current piece to it
         elif (not(self.board.getSquare(i,j) == None) and self.board.getSquare(i,j).get_color() == self.turn):
-            #print("Selected a piece at ", i , "," , j)
             self.currentSquare = (i,j)
-            # print(self.board.chessArray[i][j].get_name())
-            # print(self.board.chessArray[i][j].upgrades)
-            # print(self.board.chessArray[i][j].get_possible_moves())
-
             pieceObject = self.board.chessArray[i][j]
-            #print("Possible moves are")
-            #print(self.board.getPossibleMoves(i,j,pieceObject.color))
-            #print("Legal moves are ")
-            #print(pieceObject.getlegalMoves())
             return
         
         #Otherwise, you are attempting to make a move; see if this move is possible, and do it if so
@@ -463,13 +448,13 @@ class game:
                 pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
                 pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
         red = (255,0,0)
-        if (self.board.isKinginCheck("white")):
+        if (self.whitekinginCheck):
             x,y = self.board.getKingLocation("white")
             if (self.board.mycolor == "white"):
                 pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
             if (self.board.mycolor == "black"):
                 pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
-        if (self.board.isKinginCheck("black")):
+        if (self.blackkinginCheck):
             x,y = self.board.getKingLocation("black")
             if (self.board.mycolor == "white"):
                 pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)

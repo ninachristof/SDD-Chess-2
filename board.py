@@ -137,10 +137,10 @@ class board:
         kinglocation,enemypieces = lookup[color]
         for piece in enemypieces:
             x,y = piece[0],piece[1]
-            color2 = "black"
-            if (color == "black"):
-                color2 = "white"
+            color2 = self.chessArray[x][y].get_color()
             if kinglocation in self.getPossibleMoves(x,y,color2):
+                # print("King is in check by ", self.chessArray[x][y].get_color(),
+                #        " " , self.chessArray[x][y].get_name(), " at " , x, ",", y)
                 return True
         return False
     
@@ -160,8 +160,11 @@ class board:
     #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board) subject to debuffs
     def getPossibleMoves(self,x,y,color):
         possibleMoves2 = []
+        #print(self.chessArray[x][y].get_color()," ", self.chessArray[x][y].get_name(), " at ", x, "," , y)
         noncaptureMoves = self.chessArray[x][y].getPossibleNoncapture()
         captureMoves = self.chessArray[x][y].getPossibleCapture()
+        #print("Noncapture moves: ", noncaptureMoves)
+        #print("Capture moves: ", captureMoves)
         # Line of sight check, stop if you hit a piece 
         for direction in noncaptureMoves:
             for lineofsight in direction:
@@ -184,27 +187,18 @@ class board:
 
         if (self.chessArray[x][y].get_isDebuffed()):
             possibleMoves2 = self.chessArray[x][y].apply_debuff(possibleMoves2)
+        #print("After filtering, the possible moves for ", self.chessArray[x][y], " at ", x, "," , y, "" ,
+        #" are ", possibleMoves2)
         return possibleMoves2
-
-    
-
             
     def getLegalMoves(self,x,y):
         legalMoves = []
         color = self.chessArray[x][y].get_color()
         possibleMoves = self.getPossibleMoves(x,y, color)
-        #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves}")
-        #print("Received possible moves are", possibleMoves)
-        #legalMoves = possibleMoves
         newboard = self.clone_board_state()
         for move in possibleMoves:
             if (newboard.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)
-            # self.movePiece(move[0],move[1],x,y,color)
-            # if (not self.isKinginCheck(color)):
-            #     legalMoves.append(move)
-            # self.movePiece(x,y,move[0],move[1],color)
-        #print("Legal moves are ", legalMoves)
         return legalMoves
     
     def returnLegalMoves(self,x,y):
@@ -281,9 +275,6 @@ class board:
         
 
     def movePiece(self,newx,newy,oldx,oldy,color):
-        #print(self.whitePieces)
-        #print(self.blackPieces)
-        #print(oldx, " ", oldy , " ",newx, " ", newy, " ",color)
         if (color == "white"):
             self.whitePieces.remove((oldx,oldy))
             if ((newx,newy) in self.blackPieces):
@@ -299,14 +290,8 @@ class board:
         self.chessArray[newx][newy].findMoves(newx,newy)
 
         if (self.blackKingXY == (oldx,oldy)):
-            # print(self.blackKingXY)
-            # print("Updating the location of the black king from ", oldx, ",", oldy, " to ",
-            #       newx, ",", newy)
             self.blackKingXY = newx,newy
         if (self.whiteKingXY == (oldx,oldy)):
-            # print(self.whiteKingXY)
-            # print("Updating the location of the white king from ", oldx, ",", oldy, " to ",
-            #       newx, ",", newy)
             self.whiteKingXY = newx,newy
 
 

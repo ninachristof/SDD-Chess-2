@@ -315,6 +315,7 @@ class game:
             #TODO: this is temp
             self.move_data["debuff"] = 0
         self.offermodifiers = False
+        time.sleep(0.1)
         #self.modifiers = []
 
 
@@ -408,8 +409,10 @@ class game:
             else:
                 debuffs += "None"
             button = TextButton((255,255,255),0,(HEIGHT * 0.8),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,upgrades,None)
+            button.hover = False
             button.draw(self.screen)
             button = TextButton((255,255,255),0,(HEIGHT * 0.9),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,debuffs,None)
+            button.hover = False
             button.draw(self.screen)
 
     def draw_grid(self):
@@ -487,8 +490,10 @@ class game:
             else:
                 pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
             button = TextButton((255,255,255),0,(HEIGHT * 0.8),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,"",None)
+            button.hover = False
             button.draw(self.screen)
             button = TextButton((255,255,255),0,(HEIGHT * 0.9),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,"",None)
+            button.hover = False
             button.draw(self.screen)
             #pygame.draw.rect(self.screen, 'white', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
             #pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
@@ -528,18 +533,20 @@ class game:
         self.execute_instruction()
 
     def draw_promotion_options(self):
+    
         i = self.move_data["x0"]
         j = self.move_data["y0"]
 
+        offset = 10
+
         font = pygame.font.Font(None, 36) 
-        text_surf = font.render("choose what to promote to", True, "black")
-        rect = text_surf.get_rect(center=(WIDTH*.4, HEIGHT*.9))
-        self.screen.blit(text_surf, rect)
         if (self.board.mycolor == "black"):
             options = ["resources/Chess_ndt60.png", "resources/Chess_rdt60.png", "resources/Chess_bdt60.png", "resources/Chess_qdt60.png"]
             n = ["kn", "r", "b", "q"]
             for k in range(2,6):
-                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
+                piece_background = TextButton((150,150,150),(HEIGHT * 0.85) , (HEIGHT * k * 0.1 + offset * k),(HEIGHT * 0.1),(HEIGHT * 0.1) ,0, "",None)
+                piece_background.draw(self.screen)
+                piece_promote = ImageButton((HEIGHT * 0.85) , (HEIGHT * k * 0.1 + offset * k),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
                 piece_promote.draw(self.screen)
         if (self.board.mycolor == "white"):
             options = ["resources/Chess_nlt60.png", "resources/Chess_rlt60.png", "resources/Chess_blt60.png", "resources/Chess_qlt60.png"]

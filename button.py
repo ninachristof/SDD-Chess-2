@@ -51,11 +51,12 @@ class TextButton(Button):
         self.callback = callback
         self.args = args
         self.kwargs = kwargs
+        self.hover = True
 
     def draw(self,screen):
         pos = pygame.mouse.get_pos()
         outline = pygame.Rect(self.x-1,self.y-1,self.width+1,self.height+1)
-        if not self.box.collidepoint(pos):
+        if not self.box.collidepoint(pos) or not self.hover:
             pygame.draw.rect(screen, self.color, self.box,width = 0, border_radius = 2)
         else:
             darker_color = (max(self.color[0]-20,0),max(self.color[1]-20,0),max(self.color[2]-20,0))

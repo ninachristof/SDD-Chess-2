@@ -91,13 +91,6 @@ class p2p:
             print("empty packet (no body)")
             return ERROR
 
-        #try:
-        #    x1, y1, x0, y0, color = unpack("iiii5s", instruction)
-        #except Exception as e:
-        #    print("unpack body exception:", e)
-        #    return ERROR
-
-        #return (x1, y1, x0, y0, color)
         return instruction
 
     def sendInstruction(self, current_instruction):

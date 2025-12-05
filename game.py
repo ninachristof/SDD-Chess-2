@@ -12,6 +12,7 @@ from textbox import *
 from button import *
 import time
 import os
+import json
 
 #colors = ['#a52a2a','#ffffff']
 colors = ['#FFDAB9','#008000']
@@ -41,33 +42,6 @@ class game:
     modifiers = []
     offerpromotion = False
 
-#running this function on a separate thread
-    def run_socket(self):
-        self.new_p2p = p2p(self.conn_type, self.ip, self.port)
-        self.new_p2p.initP2p()
-        wait_for_my_move = True
-        if(self.conn_type == "connect"):
-            wait_for_my_move = False
-
-        while(self.running):
-            #send instruction
-            if(wait_for_my_move):
-                global_vars.send_event.wait()
-                if(not self.running):
-                    break
-                self.new_p2p.sendInstruction(self.current_instruction)
-                global_vars.send_event.clear()
-                wait_for_my_move = False
-            else:
-                #wait for instruction
-                instruction = self.new_p2p.recvInstruction() 
-                if(instruction == 1):
-                    print("INSTRUCTION ERROR")
-                    break
-                self.current_instruction = instruction
-                self.execute_instruction()
-                wait_for_my_move = True
-        #self.new_p2p.close_all()
 
 
     def __init__(self, conn_type, ip, port):
@@ -89,19 +63,52 @@ class game:
             
         else:
             self.board.mycolor = "white"
-        #self.board.startState()
-        #self.board.whitePieceUpdateLegal()
-        #elf.board.blackPieceUpdateLegal()
 
     def get_conn_thread(self):
         return self.conn_thread
+
+#running this function on a separate thread
+    def run_socket(self):
+        self.new_p2p = p2p(self.conn_type, self.ip, self.port)
+        self.new_p2p.initP2p()
+        wait_for_my_move = True
+        if(self.conn_type == "connect"):
+            wait_for_my_move = False
+
+        while(self.running):
+            #send instruction
+            if(wait_for_my_move):
+                global_vars.send_event.wait()
+                if(not self.running):
+                    break
+                instruction = json.dumps(self.move_data)
+                instruction = instruction.encode("utf-8")
+                self.new_p2p.sendInstruction(instruction)
+                global_vars.send_event.clear()
+                wait_for_my_move = False
+            else:
+                #wait for instruction
+                instruction = self.new_p2p.recvInstruction() 
+                if(instruction == 1):
+                    print("INSTRUCTION ERROR")
+                    break
+                json_move_data = instruction.decode("utf-8")
+                self.move_data = json.loads(json_move_data)
+                self.execute_instruction()
+                wait_for_my_move = True
+        #self.new_p2p.close_all()
         
     def execute_instruction(self):
         #print("Moving a piece from ", i , ", ", j , " to ", currentX, ", ", currentY)
-        print("CURRENT INSTRUCTION", self.current_instruction)
-        i,j,currentX,currentY,color = unpack("iiii5s", self.current_instruction) 
+        print("CURRENT INSTRUCTION", self.move_data)
+        x0 = self.move_data["x0"]
+        y0 = self.move_data["y0"]
+        x1 = self.move_data["x1"]
+        y1 = self.move_data["y1"]
+
+        
         self.clickedSquare = None
-        self.board.movePiece(i,j,currentX,currentY,self.turn)
+        self.board.movePiece(x1,y1,x0,y0,self.turn)
 
         if (self.turn == "black"):
             self.turnCount += 1
@@ -204,16 +211,17 @@ class game:
                 return
             if wantedMoveXY in validMoves:
                 #print("Valid Move")
-                move_data = {
-                    "x1" : currentX,
-                    "y1" : currentY,
-                    "x2" : i,
-                    "y2" : j,
-                    "name" : None,
-                    "color" : self.board.mycolor
-                    
+                self.move_data = {
+                    "x0" : currentX,
+                    "y0" : currentY,
+                    "x1" : i,
+                    "y1" : j,
+                    "color" : self.board.mycolor,
+                    "piece" : "",
+                    "upgrades" : ""
                 }
 
+                #this is so stupid idk why i still keep this AND USE IT 
                 self.current_instruction = struct.pack("iiii5s",i, j, currentX, currentY, bytes(self.board.mycolor,"utf-8"))
 
                 if (self.turnCount > 0 and (self.turnCount % 2 == 0)):
@@ -446,7 +454,9 @@ class game:
         self.execute_instruction()
 
     def draw_promotion_options(self):
-        x1,y1,i,j,color = unpack("iiii5s", self.current_instruction) 
+        i = self.move_data["x0"]
+        j = self.move_data["y0"]
+
         font = pygame.font.Font(None, 36) 
         text_surf = font.render("choose what to promote to", True, "black")
         rect = text_surf.get_rect(center=(WIDTH*.4, HEIGHT*.9))

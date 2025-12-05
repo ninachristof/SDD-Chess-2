@@ -1,4 +1,5 @@
 import pygame
+import modifiers
 
 class chesspiece:
     name = None
@@ -15,6 +16,46 @@ class chesspiece:
     captureOnlyWithPiece = False
     sprite = None
     upgrades = [[],[]]
+    upgrade = None
+    debuff = None
+
+    def __init__(self,x,y,color):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.upgrades = [[],[]]
+        self.isUpgraded = False
+        self.upgrade = None
+        self.debuff = None
+
+    def get_isUpgraded(self):
+        return not(len(self.upgrades[0]) == 0 and len(self.upgrades[1]) == 0)
+    
+    def get_isDebuffed(self):
+        return not(self.debuff == None)
+
+    #def get_upgrades(self):
+    #    return upgrades
+    
+    def set_upgrade(self,upgrade):
+        self.upgrade = upgrade
+    
+    def set_debuff(self,debuff):
+        self.debuff = debuff
+
+    def update_coordinates(self,x,y):
+        self.x = x
+        self.y = y
+
+    def apply_debuff(self,moveset):
+        print("Applying debuffs for ", self.x, self.y)
+        return modifiers.apply_debuff(self.x,self.y,moveset,self.debuff.get_id())
+
+    def get_upgrade_desc(self):
+        return self.upgrade.get_description()
+    
+    def get_debuff_desc(self):
+        return self.debuff.get_description()
     
     def get_name(self): 
         return self.name
@@ -30,12 +71,6 @@ class chesspiece:
     
     def getPossibleCapture(self):
         moves = self.possible_Capture.copy()
-        print("HHHEHEHEHE", moves)
-        for i in range(len(moves)):
-            for move in moves[i]:
-                if 8 in move:
-                    self.possible_Capture[i].remove(move)
-
         return self.possible_Capture.copy()
 
     def getPossibleNoncapture(self):
@@ -99,10 +134,8 @@ class pawn(chesspiece):
     def __init__(self,x,y,color):
         #self.multipleMoves = True
         #needs initial [2,0] move
+        super().__init__(x,y,color)
         self.name = "p"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_plt60.png"), (80,80))
         elif(color == "black"):
@@ -117,27 +150,25 @@ class pawn(chesspiece):
         possibleCapture = []
         # Forwards movement
         if (self.color == "white"):
-            if (x != 0):
+            if (x > 0):
                 possibleNoncapture.append((x - 1, y))
                 if (x != 1 and self.firstMove):
                     possibleNoncapture.append((x - 2, y))
             # Capture Movement
-            if (x != 0 and y != 0):
+            if (x > 0 and y > 0):
                 possibleCapture.append([(x - 1, y - 1)])
-                print(1,possibleCapture[-1])
-            if (x != 0 and y != 7):
+            if (x > 0 and y < 7):
                 possibleCapture.append([(x - 1, y + 1)])
                 print(2,possibleCapture[-1])
         else:
-            if (x != 7):
+            if (x < 7):
                 possibleNoncapture.append((x + 1, y))
-                if (x != 6 and self.firstMove):
+                if (x < 6 and self.firstMove):
                     possibleNoncapture.append((x + 2, y))
             # Capture Movement
-            if (x != 7 and y != 0):
+            if (x < 7 and y > 0):
                 possibleCapture.append([(x + 1, y - 1)])
-                print(3,possibleCapture[-1])
-            if (x != 6 and y != 7): 
+            if (x < 7 and y < 7): 
                 possibleCapture.append([(x + 1, y + 1)])
         # possibleCapture = [possibleCapture]
         possibleNoncapture = [possibleNoncapture]
@@ -151,10 +182,8 @@ class pawn(chesspiece):
 
 class knight(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "kn"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_nlt60.png"), (80,80))
         elif(color == "black"):
@@ -202,10 +231,8 @@ class knight(chesspiece):
 
 class king(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "k"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_klt60.png"), (80,80))
         elif(color == "black"):
@@ -251,10 +278,8 @@ class king(chesspiece):
 
 class rook(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "r"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_rlt60.png"), (80,80))
         elif(color == "black"):
@@ -305,10 +330,8 @@ class rook(chesspiece):
 
 class bishop(chesspiece):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "b"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_blt60.png"), (80,80))
         elif(color == "black"):
@@ -366,10 +389,8 @@ class bishop(chesspiece):
 
 class queen(bishop, rook):
     def __init__(self,x,y,color):
+        super().__init__(x,y,color)
         self.name = "q"
-        self.x = x
-        self.y = y
-        self.color = color
         if(color == "white"):
             self.sprite = pygame.transform.scale(pygame.image.load("resources/Chess_qlt60.png"), (80,80))
         elif(color == "black"):
@@ -384,10 +405,10 @@ class queen(bishop, rook):
         r1, r2 = rook.findMoves(rook(x, y, self.color), x, y)
 
         possibleNoncapture.extend(powerupMove)
-        possibleCapture.extend(powerupCapture)
         possibleNoncapture.extend(b1)
         possibleNoncapture.extend(r1)
 
+        possibleCapture.extend(powerupCapture)
         possibleCapture.extend(b2)
         possibleCapture.extend(r2)
 

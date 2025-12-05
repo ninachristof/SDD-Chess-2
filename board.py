@@ -1,4 +1,6 @@
 from chesspiece import *
+import time
+import copy
 class board:
 
     ##################################################################################
@@ -137,10 +139,10 @@ class board:
         kinglocation,enemypieces = lookup[color]
         for piece in enemypieces:
             x,y = piece[0],piece[1]
-            color2 = "black"
-            if (color == "black"):
-                color2 = "white"
+            color2 = self.chessArray[x][y].get_color()
             if kinglocation in self.getPossibleMoves(x,y,color2):
+                # print("King is in check by ", self.chessArray[x][y].get_color(),
+                #        " " , self.chessArray[x][y].get_name(), " at " , x, ",", y)
                 return True
         return False
     
@@ -157,17 +159,25 @@ class board:
             return None
         return self.chessArray[i][j]
 
-    #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board)
+    #Gets all possible moves (i.e. moves that aren't blocked by other pieces or don't send you off the board) subject to debuffs
     def getPossibleMoves(self,x,y,color):
         possibleMoves2 = []
+        #print(self.chessArray[x][y].get_color()," ", self.chessArray[x][y].get_name(), " at ", x, "," , y)
         noncaptureMoves = self.chessArray[x][y].getPossibleNoncapture()
         captureMoves = self.chessArray[x][y].getPossibleCapture()
+
+        # if (self.chessArray[x][y].get_name() == "q"):
+        #     print (self.chessArray[x][y].get_color(), " ", self.chessArray[x][y].get_name())
+        #     print("Noncapture moves: ", noncaptureMoves)
+        #     print("Capture moves: ", captureMoves)
         # Line of sight check, stop if you hit a piece 
         for direction in noncaptureMoves:
             for lineofsight in direction:
                 if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
                     break
                 possibleMoves2.append(lineofsight)
+
+        #print("PossibleMoves up to this point are ", possibleMoves2)
                 
         for direction in captureMoves:
             pieceFound = False
@@ -181,97 +191,24 @@ class board:
                 temp.append(lineofsight)
             if (not self.chessArray[x][y].get_captureOnlyWithPiece() or pieceFound):
                 possibleMoves2.extend(temp)
+
+        # if (self.chessArray[x][y].get_name() == "q"):
+        #     print("Now after debuffs ", possibleMoves2)
+
+        if (self.chessArray[x][y].get_isDebuffed()):
+            possibleMoves2 = self.chessArray[x][y].apply_debuff(possibleMoves2)
+        #print("After filtering, the possible moves for ", self.chessArray[x][y], " at ", x, "," , y, "" ,
+        #" are ", possibleMoves2)
         return possibleMoves2
-
-    
-
             
     def getLegalMoves(self,x,y):
         legalMoves = []
         color = self.chessArray[x][y].get_color()
         possibleMoves = self.getPossibleMoves(x,y, color)
-        #print(f"{self.chessArray[x][y].get_name()}: at {x}, {y}: {possibleMoves}")
-        #print("Received possible moves are", possibleMoves)
-        #legalMoves = possibleMoves
         newboard = self.clone_board_state()
         for move in possibleMoves:
             if (newboard.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)
-            # self.movePiece(move[0],move[1],x,y,color)
-            # if (not self.isKinginCheck(color)):
-            #     legalMoves.append(move)
-            # self.movePiece(x,y,move[0],move[1],color)
-        #print("Legal moves are ", legalMoves)
-
-        
-        # Castling logic
-        piece = self.chessArray[x][y]
-        if piece.get_name() == "k" and piece.firstMove:
-
-            if color == "white":
-                king_start = (7, 4)
-                rooks = {
-                    "king_side": (7, 7, (7, 6), (7, 5)),
-                    "queen_side": (7, 0, (7, 2), (7, 3))
-                }
-            else:
-                king_start = (0, 4)
-                rooks = {
-                    "king_side": (0, 7, (0, 6), (0, 5)),
-                    "queen_side": (0, 0, (0, 2), (0, 3))
-                }
-
-            # King must be on original square
-            if (x, y) == king_start and not self.isKinginCheck(color):
-
-                for side in rooks:
-                    rook_x, rook_y, king_target, rook_target = rooks[side]
-
-                    rook_piece = self.chessArray[rook_x][rook_y]
-
-                    # Rook must exist and never have moved
-                    if rook_piece is None or rook_piece.get_name() != "r" or rook_piece.firstMove == False:
-                        continue
-
-                    # Squares between king and rook must be empty
-                    path_clear = True
-                    min_y = min(y, rook_y)
-                    max_y = max(y, rook_y)
-                    for col in range(min_y + 1, max_y):
-                        if self.chessArray[rook_x][col] is not None:
-                            path_clear = False
-                            break
-                    if not path_clear:
-                        continue
-
-                    # King cannot castle through check—test the squares he passes through
-                    through_squares = [ (x, y), rook_target, king_target ]
-                    newboard_test = self.clone_board_state()
-                    safe = True
-    
-
-                    temp_king = newboard_test.chessArray[x][y]
-
-                    for sq in through_squares:
-                        tx, ty = sq
-                        # simulate moveing king
-                        old_piece = newboard_test.chessArray[tx][ty]
-                        newboard_test.chessArray[x][y] = None
-                        newboard_test.chessArray[tx][ty] = temp_king
-                        newboard_test.whiteKingXY = (tx, ty) if color == "white" else newboard_test.whiteKingXY
-                        newboard_test.blackKingXY = (tx, ty) if color == "black" else newboard_test.blackKingXY
-
-                        if newboard_test.isKinginCheck(color):
-                            safe = False
-
-                        # Undo
-                        newboard_test.chessArray[tx][ty] = old_piece
-                        newboard_test.chessArray[x][y] = temp_king
-
-                    if safe:
-                        # King move is added to legal moves
-                        legalMoves.append(king_target)
-
         return legalMoves
     
     def returnLegalMoves(self,x,y):
@@ -348,9 +285,6 @@ class board:
         
 
     def movePiece(self,newx,newy,oldx,oldy,color):
-        #print(self.whitePieces)
-        #print(self.blackPieces)
-        #print(oldx, " ", oldy , " ",newx, " ", newy, " ",color)
         if (color == "white"):
             self.whitePieces.remove((oldx,oldy))
             if ((newx,newy) in self.blackPieces):
@@ -362,18 +296,13 @@ class board:
                 self.whitePieces.remove((newx,newy))
             self.blackPieces.append((newx,newy))
         self.chessArray[newx][newy] = self.chessArray[oldx][oldy]
+        self.chessArray[newx][newy].update_coordinates(newx,newy)
         self.chessArray[oldx][oldy] = None
         self.chessArray[newx][newy].findMoves(newx,newy)
 
         if (self.blackKingXY == (oldx,oldy)):
-            # print(self.blackKingXY)
-            # print("Updating the location of the black king from ", oldx, ",", oldy, " to ",
-            #       newx, ",", newy)
             self.blackKingXY = newx,newy
         if (self.whiteKingXY == (oldx,oldy)):
-            # print(self.whiteKingXY)
-            # print("Updating the location of the white king from ", oldx, ",", oldy, " to ",
-            #       newx, ",", newy)
             self.whiteKingXY = newx,newy
        
         # brute-force rook movement

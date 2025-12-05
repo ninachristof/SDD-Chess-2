@@ -29,6 +29,13 @@ class chesspiece:
         return self.sprite
     
     def getPossibleCapture(self):
+        moves = self.possible_Capture.copy()
+        print("HHHEHEHEHE", moves)
+        for i in range(len(moves)):
+            for move in moves[i]:
+                if 8 in move:
+                    self.possible_Capture[i].remove(move)
+
         return self.possible_Capture.copy()
 
     def getPossibleNoncapture(self):
@@ -117,8 +124,10 @@ class pawn(chesspiece):
             # Capture Movement
             if (x != 0 and y != 0):
                 possibleCapture.append([(x - 1, y - 1)])
+                print(1,possibleCapture[-1])
             if (x != 0 and y != 7):
                 possibleCapture.append([(x - 1, y + 1)])
+                print(2,possibleCapture[-1])
         else:
             if (x != 7):
                 possibleNoncapture.append((x + 1, y))
@@ -127,6 +136,7 @@ class pawn(chesspiece):
             # Capture Movement
             if (x != 7 and y != 0):
                 possibleCapture.append([(x + 1, y - 1)])
+                print(3,possibleCapture[-1])
             if (x != 6 and y != 7): 
                 possibleCapture.append([(x + 1, y + 1)])
         # possibleCapture = [possibleCapture]

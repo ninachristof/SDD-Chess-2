@@ -22,7 +22,7 @@ class board:
         # Automatically initialize start state
         if initialize: 
             #print("Loading tester.txt")
-            self.loadPosition("test_positions/enpassant.txt")
+            self.loadPosition("test_positions/black_castling_queenside.txt")
             self.updateAllLegal()
             
 
@@ -205,11 +205,48 @@ class board:
         legalMoves = []
         color = self.chessArray[x][y].get_color()
         possibleMoves = self.getPossibleMoves(x,y, color)
+
+        # Castling shit 
+        piece = self.chessArray[x][y]
+        if piece.get_name() == "k":
+            # white king 
+            if color == "white" and (x, y) == (7, 4):
+                # King-side 
+                if self.chessArray[7][5] is None and self.chessArray[7][6] is None:
+                    rook = self.chessArray[7][7]
+                    if rook is not None and rook.get_name() == "r":
+                        possibleMoves.append((7, 6))  # K to g1
+
+                # Queen-side 
+                if (self.chessArray[7][1] is None and
+                    self.chessArray[7][2] is None and
+                    self.chessArray[7][3] is None):
+                    rook = self.chessArray[7][0]
+                    if rook is not None and rook.get_name() == "r":
+                        possibleMoves.append((7, 2))  
+
+            # black king 
+            elif color == "black" and (x, y) == (0, 4):
+                # King-side 
+                if self.chessArray[0][5] is None and self.chessArray[0][6] is None:
+                    rook = self.chessArray[0][7]
+                    if rook is not None and rook.get_name() == "r":
+                        possibleMoves.append((0, 6)) 
+
+                # Queen-side 
+                if (self.chessArray[0][1] is None and
+                    self.chessArray[0][2] is None and
+                    self.chessArray[0][3] is None):
+                    rook = self.chessArray[0][0]
+                    if rook is not None and rook.get_name() == "r":
+                        possibleMoves.append((0, 2))  
+                        
         newboard = self.clone_board_state()
         for move in possibleMoves:
             if (newboard.moveprediction(move[0],move[1],x,y,color)):
                 legalMoves.append(move)
         return legalMoves
+
     
     def returnLegalMoves(self,x,y):
         return self.chessArray[x][y].get_possible_moves()
@@ -297,6 +334,7 @@ class board:
             self.blackPieces.append((newx,newy))
         self.chessArray[newx][newy] = self.chessArray[oldx][oldy]
         self.chessArray[newx][newy].update_coordinates(newx,newy)
+        self.chessArray[newx][newy].firstMove = False
         self.chessArray[oldx][oldy] = None
         self.chessArray[newx][newy].findMoves(newx,newy)
 

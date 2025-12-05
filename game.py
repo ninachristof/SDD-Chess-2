@@ -43,6 +43,8 @@ class game:
     whitekinginCheck = False
     blackkinginCheck = False
     offerpromotion = False
+    endgame = ""
+
 
 
 
@@ -153,19 +155,23 @@ class game:
 
         if (self.board.isKinginCheck("white")):
             self.whitekinginCheck = True
+        else: 
+            self.whitekinginCheck = False
         if (self.board.isKinginCheck("black")):
             self.blackkinginCheck = True
+        else: 
+            self.blackkinginCheck = False
 
         if (whiteMoves == 0):
-            if (self.blackkinginCheck):
-                print("Checkmate! Black Wins")
+            if (self.whitekinginCheck):
+                self.endgame = "Checkmate! Black Wins"
             else:
-                print("Stalemate! White has no valid moves")
+                self.endgame = "Stalemate!"
         if (blackMoves == 0):
             if (self.blackkinginCheck):
-                print("Checkmate! White Wins")
+                self.endgame = "Checkmate! White Wins"
             else:
-                print("Stalemate! Black has no valid moves")
+                self.endgame = "Stalemate!"
         self.currentSquare = None
 
         #print ("The white king is at ", self.board.getKingLocation("white"))
@@ -274,16 +280,52 @@ class game:
                 #print("Invalid move")
                 return
 
-    def upgrade_callback(self):
+    def upgrade_callback(self,modifierData):
+        randomPiece, modifier,description, idx= modifierData
+        print("--R", randomPiece)
+        print("--M",modifier)
+        print("--D",description)
+        
+        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
+
         if not self.offerpromotion:
             self.execute_instruction()
             self.moved = True
-            self.offermodifiers = False
+
+        x0 = self.move_data["x0"]
+        y0 = self.move_data["y0"]
+
+        x = randomPiece[0]
+        y = randomPiece[1]
+
+        if (x == self.move_data["x0"] and y == self.move_data["y0"]):
+            x = self.move_data["x1"]
+            y = self.move_data["y1"]
+
+        #This means you are buffing one of your pieces
+        self.move_data["mpiece"] = self.board.chessArray[x][y].name
+        self.move_data["mx"] = x
+        self.move_data["my"] = y
+        if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
+            self.board.chessArray[x][y].upgrades = [modifier.get_capture(),modifier.get_move()]
+            self.board.chessArray[x][y].set_upgrade(modifier)
+            self.board.chessArray[x][y].findMoves(x,y)
+            legalMoves = self.board.getLegalMoves(x, y)
+            self.board.chessArray[x][y].updateLegalMoves(legalMoves)
+            #piece bring upgraded
+            #upgrade index = 0 since theres only 1 upgrade for every piece right now
+            self.move_data["upgrade"] = 0
+        else:
+            #print("debuffing opponent's piece!")
+            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
+            #TODO: this is temp
+            self.move_data["debuff"] = idx
+        self.offermodifiers = False
+        time.sleep(0.1)
+        #self.modifiers = []
+
 
     def draw_modifiers(self):
-        #print(self.offermodifiers, " because ", self.turnCount)
-        if (not(self.offermodifiers)):
-            return
         color = (105, 194, 250)
 
         if (len(self.modifiers) == 0):
@@ -291,36 +333,59 @@ class game:
             # if (self.board.mycolor == "black"):
             #     my_pieces = self.board.blackPieces
             for piece in pieces.copy():
+                pass
                 # if (self.board.chessArray[piece[0]][piece[1]].get_name() == "k"):
                 #     pieces.remove(piece)
-                if (not (self.board.chessArray[piece[0]][piece[1]].get_name() == "q")):
-                    pieces.remove(piece)
+                #if (not (self.board.chessArray[piece[0]][piece[1]].get_name() == "q")):
+                #    pieces.remove(piece)
             
+
+            print("======================================")
             for piece in pieces:
                 print(piece , " at ", piece[0], ",", piece[1])
+            used = []
             for i in range(4):
                 randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
-                    powerup = modifiers.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
-                    powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
+                x = randomPiece[0]
+                y = randomPiece[1]
+                square = (x,y)
+                
+                if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
+                    while square in used or self.board.chessArray[x][y].get_color() != self.board.mycolor:
+                    #lol bogo
+                        randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                        x = randomPiece[0]
+                        y = randomPiece[1]
+                        square = (x,y)
+
+                    used.append(square)
+                    print(used)
+
+                    powerup = modifiers.getPowerups(self.board.chessArray[x][y].get_name())
+                    powerupdescription = "Your " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x) + powerup.get_description()
                     #print("Power up ", i, " - " , powerupdescription)
-                    self.modifiers.append((randomPiece,powerup,powerupdescription))
+                    self.modifiers.append((randomPiece,powerup,powerupdescription,0))
                 else:
-                    debuff = modifiers.getDebuff()
-                    debuffdescription = "Your opponent's " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + debuff.get_description()
+                    while (self.board.chessArray[x][y].name == "p" or self.board.chessArray[x][y].name == "kn") or square in used or (self.board.chessArray[x][y].get_color() == self.board.mycolor):
+                    #lol bogo
+                        randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                        x = randomPiece[0]
+                        y = randomPiece[1]
+                        square = (x,y)
+
+                    used.append(square)
+                    print(used)
+
+                    idx = modifiers.getDebuff()
+                    debuff = modifiers.debuffs[0]
+                    debuffdescription = "Your opponent's " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x)+ debuff.get_description()
                     #print("Debuff ", i, " - " , debuffdescription)
-                    self.modifiers.append((randomPiece,debuff,debuffdescription))
-        # for i in range(2,6):
-        #     randomPiece,modifier,description = self.modifiers[i-2]
-        #     button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,None)
-        #     button.draw(self.screen)
-        # for i in range(2,7):
-        #     pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
+                    self.modifiers.append((randomPiece,debuff,debuffdescription,idx))
 
         offset = 10
         for i in range(4):
-            randomPiece,modifier,description = self.modifiers[i]
-            button = TextButton(color,(HEIGHT * 0.8 + 5 ),(offset*5 + HEIGHT * i * 0.125 + (i * offset) ),(HEIGHT * 0.2 - 10) ,(HEIGHT * 0.125), 15, description ,self.upgrade_callback)
+            randomPiece,modifier,description,idx = self.modifiers[i]
+            button = TextButton(color,(HEIGHT * 0.8 + 5 ),(offset*5 + HEIGHT * i * 0.125 + (i * offset) ),(HEIGHT * 0.2 - 10) ,(HEIGHT * 0.125), 15, description ,self.upgrade_callback, self.modifiers[i])
             button.draw(self.screen)
 
     def draw_valid(self):
@@ -372,32 +437,34 @@ class game:
                 debuffs += pieceObject.get_debuff_desc()
             else:
                 debuffs += "None"
-            button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.8),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,upgrades,None)
+            button = TextButton((255,255,255),0,(HEIGHT * 0.8),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,upgrades,None)
+            button.hover = False
             button.draw(self.screen)
-            button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.9),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,debuffs,None)
+            button = TextButton((255,255,255),0,(HEIGHT * 0.9),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,debuffs,None)
+            button.hover = False
             button.draw(self.screen)
 
     def draw_grid(self):
         font = pygame.font.Font(None, 25) 
-        if (self.board.mycolor == "white"):
-            for i in range (8):
-                text_surf = font.render(str(i), True, "black")
-                rect = text_surf.get_rect(center=(WIDTH*.8 - 10, HEIGHT*.1 * i + (HEIGHT*0.015)))
+        #if (self.board.mycolor == "white"):
+        for i in range (8):
+            if self.board.mycolor == "black":
+                text_surf = font.render(str(1 + i), True, "black")
+                rect = text_surf.get_rect(center=(10, HEIGHT*.1 * i + (HEIGHT*0.015)))
                 self.screen.blit(text_surf, rect)
 
-                rect = text_surf.get_rect(center=(WIDTH*.1 * i + (WIDTH*0.015),HEIGHT*.8 - 7))
+                text_surf = font.render(str(chr(ord("h") - i)), True, "black")
+                rect = text_surf.get_rect(center=(WIDTH*.1 * i - 10+ WIDTH*.1,HEIGHT*.8 - 10))
                 self.screen.blit(text_surf, rect)
-                #button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * i),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 15, "(" + str(i) + ",y)",None)
-                #button.draw(self.screen)
-                #button = TextButton((255,255,255),(HEIGHT * 0.1 * i),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
-                #button.draw(self.screen)
-        #elif (self.board.mycolor == "black"):
-            #for i in range (8):
-            #    button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(" + str(i) + ",y)",None)
-            #    button.draw(self.screen)
-            #    button = TextButton((255,255,255),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
-            #    button.draw(self.screen)
+            if self.board.mycolor == "white":
+                text_surf = font.render(str(8 - i), True, "black")
+                rect = text_surf.get_rect(center=(10, HEIGHT*.1 * i + (HEIGHT*0.015)))
+                self.screen.blit(text_surf, rect)
 
+                text_surf = font.render(str(chr(ord("a") + i)), True, "black")
+                rect = text_surf.get_rect(center=(WIDTH*.1 * i - 10+ WIDTH*.1,HEIGHT*.8 - 10))
+                self.screen.blit(text_surf, rect)
+ 
     def draw_captured(self):
         pass
     def draw_pieces(self):
@@ -450,7 +517,13 @@ class game:
                 pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
             else:
                 pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-            pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
+            button = TextButton((255,255,255),0,(HEIGHT * 0.8),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,"",None)
+            button.hover = False
+            button.draw(self.screen)
+            button = TextButton((255,255,255),0,(HEIGHT * 0.9),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,"",None)
+            button.hover = False
+            button.draw(self.screen)
+            #pygame.draw.rect(self.screen, 'white', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
             #pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
             #pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
             status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
@@ -488,18 +561,20 @@ class game:
         self.execute_instruction()
 
     def draw_promotion_options(self):
+    
         i = self.move_data["x0"]
         j = self.move_data["y0"]
 
+        offset = 10
+
         font = pygame.font.Font(None, 36) 
-        text_surf = font.render("choose what to promote to", True, "black")
-        rect = text_surf.get_rect(center=(WIDTH*.4, HEIGHT*.9))
-        self.screen.blit(text_surf, rect)
         if (self.board.mycolor == "black"):
             options = ["resources/Chess_ndt60.png", "resources/Chess_rdt60.png", "resources/Chess_bdt60.png", "resources/Chess_qdt60.png"]
             n = ["kn", "r", "b", "q"]
             for k in range(2,6):
-                piece_promote = ImageButton((HEIGHT * 0.8) , (HEIGHT * k * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
+                piece_background = TextButton((150,150,150),(HEIGHT * 0.85) , (HEIGHT * k * 0.1 + offset * k),(HEIGHT * 0.1),(HEIGHT * 0.1) ,0, "",None)
+                piece_background.draw(self.screen)
+                piece_promote = ImageButton((HEIGHT * 0.85) , (HEIGHT * k * 0.1 + offset * k),(HEIGHT * 0.1) ,(HEIGHT * 0.1), options[k-2],1, self.promote, i,j,n[k-2])
                 piece_promote.draw(self.screen)
         if (self.board.mycolor == "white"):
             options = ["resources/Chess_nlt60.png", "resources/Chess_rlt60.png", "resources/Chess_blt60.png", "resources/Chess_qlt60.png"]
@@ -517,80 +592,31 @@ class game:
                     self.running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.endgame == "":
                     if (event.pos[0] < 0.8 * WIDTH and event.pos[1] < 0.8 * WIDTH):
                         if (self.board.mycolor == "white"):
                             self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
                         else:
                             self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
 
-                    #(HEIGHT * i * 0.2)
-                    elif (event.pos[0] <= 0.8 * WIDTH and event.pos[1] >= 0.9 * WIDTH and self.offermodifiers):
-                        #print(event.pos[0], " x ", event.pos[1])
-                        #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
-                        randomPiece, modifier,description = self.modifiers[int(event.pos[0]) // (WIDTH // 5)]
-                        
-                        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
-                        #TODO: remove this but i legit have no idea why the other callback isnt working
-                        self.upgrade_callback()
-
-                        #This means you are buffing one of your pieces
-                        #print("Buffing ", randomPiece[0], randomPiece[1])
-
-                        x0 = self.move_data["x0"]
-                        y0 = self.move_data["y0"]
-
-                        x = randomPiece[0]
-                        y = randomPiece[1]
-
-                        if (x == self.move_data["x0"] and y == self.move_data["y0"]):
-                            x = self.move_data["x1"]
-                            y = self.move_data["y1"]
-
-                        self.move_data["mpiece"] = self.board.chessArray[x][y].name
-                        self.move_data["mx"] = x
-                        self.move_data["my"] = y
-                        if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
-                            self.board.chessArray[x][y].upgrades = [modifier.get_capture(),modifier.get_move()]
-                            self.board.chessArray[x][y].set_upgrade(modifier)
-                            self.board.chessArray[x][y].findMoves(x,y)
-                            legalMoves = self.board.getLegalMoves(x, y)
-                            self.board.chessArray[x][y].updateLegalMoves(legalMoves)
-                            #piece bring upgraded
-                            #upgrade index = 0 since theres only 1 upgrade for every piece right now
-                            self.move_data["upgrade"] = 0
-
-                        # self.move_data["mpiece"] = self.board.chessArray[randomPiece[0]][randomPiece[1]].name
-                        # self.move_data["mx"] = randomPiece[0]
-                        # self.move_data["my"] = randomPiece[1]
-                        # if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
-                        #     self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
-                        #     self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
-                        #     self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
-                        #     legalMoves = self.board.getLegalMoves(randomPiece[0], randomPiece[1])
-                        #     self.board.chessArray[randomPiece[0]][randomPiece[1]].updateLegalMoves(legalMoves)
-                        #     #piece bring upgraded
-                        #     #upgrade index = 0 since theres only 1 upgrade for every piece right now
-                        #     self.move_data["upgrade"] = 0
-
-                        #This means you are debuffing one of your opponent's pieces
-                        else:
-                            #print("debuffing opponent's piece!")
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
-                            #TODO: this is temp
-                            self.move_data["debuff"] = 0
-                        self.offermodifiers = False
-                        self.modifiers = []
-                    # else:
-                    #     print("What are you clicking on!!!!!!")
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()
-            self.draw_modifiers()
+            if self.offermodifiers:
+                self.draw_modifiers()
+            else:
+                self.modifiers = []
+
             self.draw_grid()
             self.draw_selected_info()
             if not self.offermodifiers and self.offerpromotion:
                 self.draw_promotion_options()
+            if self.endgame != "":
+                color = (105, 194, 250)
+                button = TextButton(color,(HEIGHT * 0.2),(HEIGHT * 0.3) ,(HEIGHT * 0.4), (HEIGHT * 0.2),50,self.endgame,None)
+                button.hover = False
+                button.draw(self.screen)
+
             #self.draw_promotion_options()
             #print("Offering modifiers is ", self.offermodifiers, " because ", self.turnCount)
             pygame.display.flip()

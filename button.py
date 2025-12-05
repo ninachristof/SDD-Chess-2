@@ -40,6 +40,7 @@ class TextButton(Button):
     def __init__(self,color,x,y,width, height, font_size, text, callback, *args, **kwargs):
         pygame.font.init()
         self.font = pygame.font.SysFont("arial", font_size)
+        #self.font = pygame.font.Font("resources/Coolvetica Rg.otf", font_size)
         self.color = color
         self.box = pygame.Rect(x,y,width,height)
         self.width = width
@@ -52,20 +53,22 @@ class TextButton(Button):
         self.kwargs = kwargs
 
     def draw(self,screen):
-        pygame.draw.rect(screen, self.color, self.box)
+        outline = pygame.Rect(self.x-1,self.y-1,self.width+1,self.height+1)
+
+        pygame.draw.rect(screen, self.color, self.box,width = 0, border_radius = 2)
+        pygame.draw.rect(screen, "black",outline,2,3)
         text_words = self.text.split()
         text_lines = []
         curr_line = ""
         for word in text_words:
 
-            if curr_line == "" :
-                curr_line += word
-            elif self.font.size(curr_line + " " + word)[0] <= self.width:
+            #if curr_line == "" :
+            #    curr_line += word
+            if self.font.size(curr_line + " " + word)[0] <= self.width:
                 curr_line += " " + word
             else:
                 text_lines.append(curr_line)
-                curr_line = ""
-                curr_line += word
+                curr_line = " " + word
         if curr_line != "":
             text_lines.append(curr_line)
         text_surface = []

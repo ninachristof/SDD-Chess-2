@@ -155,8 +155,12 @@ class game:
 
         if (self.board.isKinginCheck("white")):
             self.whitekinginCheck = True
+        else: 
+            self.whitekinginCheck = False
         if (self.board.isKinginCheck("black")):
             self.blackkinginCheck = True
+        else: 
+            self.blackkinginCheck = False
 
         if (whiteMoves == 0):
             if (self.whitekinginCheck):

@@ -399,14 +399,15 @@ class game:
 
     def draw_grid(self):
         font = pygame.font.Font(None, 25) 
-        if (self.board.mycolor == "white"):
-            for i in range (8):
-                text_surf = font.render(str(i), True, "black")
-                rect = text_surf.get_rect(center=(WIDTH*.8 - 10, HEIGHT*.1 * i + (HEIGHT*0.015)))
-                self.screen.blit(text_surf, rect)
+        #if (self.board.mycolor == "white"):
+        for i in range (8):
+            text_surf = font.render(str(1 + i), True, "black")
+            rect = text_surf.get_rect(center=(10, HEIGHT*.1 * i + (HEIGHT*0.015)))
+            self.screen.blit(text_surf, rect)
 
-                rect = text_surf.get_rect(center=(WIDTH*.1 * i + (WIDTH*0.015),HEIGHT*.8 - 7))
-                self.screen.blit(text_surf, rect)
+            text_surf = font.render(str(chr(ord("h") - i)), True, "black")
+            rect = text_surf.get_rect(center=(WIDTH*.1 * i - 10+ WIDTH*.1,HEIGHT*.8 - 10))
+            self.screen.blit(text_surf, rect)
                 #button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * i),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 15, "(" + str(i) + ",y)",None)
                 #button.draw(self.screen)
                 #button = TextButton((255,255,255),(HEIGHT * 0.1 * i),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)

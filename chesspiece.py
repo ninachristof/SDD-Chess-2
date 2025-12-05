@@ -33,6 +33,9 @@ class chesspiece:
     
     def get_isDebuffed(self):
         return not(self.debuff == None)
+
+    #def get_upgrades(self):
+    #    return upgrades
     
     def set_upgrade(self,upgrade):
         self.upgrade = upgrade

@@ -23,10 +23,10 @@ class Button():
 
     def handle_click(self):
         pos = pygame.mouse.get_pos()
-
         if self.box.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1:
                 if self.callback != None:
+                    #print("CALLBACK:",self.callback)
                     self.callback(*self.args, **self.kwargs)
                 return 1 
         return 0

@@ -43,6 +43,8 @@ class game:
     whitekinginCheck = False
     blackkinginCheck = False
     offerpromotion = False
+    endgame = ""
+
 
 
 
@@ -157,15 +159,15 @@ class game:
             self.blackkinginCheck = True
 
         if (whiteMoves == 0):
-            if (self.blackkinginCheck):
-                print("Checkmate! Black Wins")
+            if (self.whitekinginCheck):
+                self.endgame = "Checkmate! Black Wins"
             else:
-                print("Stalemate! White has no valid moves")
+                self.endgame = "Stalemate!"
         if (blackMoves == 0):
             if (self.blackkinginCheck):
-                print("Checkmate! White Wins")
+                self.endgame = "Checkmate! White Wins"
             else:
-                print("Stalemate! Black has no valid moves")
+                self.endgame = "Stalemate!"
         self.currentSquare = None
 
         #print ("The white king is at ", self.board.getKingLocation("white"))
@@ -559,7 +561,7 @@ class game:
                     self.running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.endgame == "":
                     if (event.pos[0] < 0.8 * WIDTH and event.pos[1] < 0.8 * WIDTH):
                         if (self.board.mycolor == "white"):
                             self.selectsquare(event.pos[1] // (WIDTH // 10), event.pos[0] // (WIDTH // 10))
@@ -578,6 +580,12 @@ class game:
             self.draw_selected_info()
             if not self.offermodifiers and self.offerpromotion:
                 self.draw_promotion_options()
+            if self.endgame != "":
+                color = (105, 194, 250)
+                button = TextButton(color,(HEIGHT * 0.2),(HEIGHT * 0.3) ,(HEIGHT * 0.4), (HEIGHT * 0.2),50,self.endgame,None)
+                button.hover = False
+                button.draw(self.screen)
+
             #self.draw_promotion_options()
             #print("Offering modifiers is ", self.offermodifiers, " because ", self.turnCount)
             pygame.display.flip()

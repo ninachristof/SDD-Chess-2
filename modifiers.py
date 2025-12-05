@@ -47,7 +47,7 @@ def apply_debuff(x,y,moveset,id):
     new_moveset = []
     if (id == 0):
         for move in moveset:
-            if (abs(x-move[0]) + abs(y-move[1]) <= 6):
+            if (abs(x-move[0]) + abs(y-move[1]) <= 5):
                 new_moveset.append(move)
             # else:
             #     print("Filtered out ", move)

@@ -283,7 +283,7 @@ class game:
         #print(self.offermodifiers, " because ", self.turnCount)
         if (not(self.offermodifiers)):
             return
-        red = (255,0,0)
+        color = (105, 194, 250)
 
         if (len(self.modifiers) == 0):
             pieces = self.board.whitePieces + self.board.blackPieces
@@ -311,12 +311,11 @@ class game:
         # for i in range(2,7):
         #     pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
 
+        offset = 10
         for i in range(4):
             randomPiece,modifier,description = self.modifiers[i]
-            button = TextButton((250,50,50),(HEIGHT * i * 0.2),(HEIGHT * 0.9),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,self.upgrade_callback)
+            button = TextButton(color,(HEIGHT * 0.8 + 5 ),(offset*5 + HEIGHT * i * 0.125 + (i * offset) ),(HEIGHT * 0.2 - 10) ,(HEIGHT * 0.125), 15, description ,self.upgrade_callback)
             button.draw(self.screen)
-        for i in range(1,5):
-            pygame.draw.line(self.screen, 'black', ((HEIGHT * i * 0.2),HEIGHT*0.9), ((HEIGHT * i * 0.2),HEIGHT), 2)
 
     def draw_valid(self):
         if(self.clickedSquare != None):
@@ -446,8 +445,8 @@ class game:
             else:
                 pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
             pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
-            pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
-            pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
+            #pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
+            #pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
             status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
                         'Black: Select a Piece to Move!', 'Black: Select a Destination!']
             self.draw_valid()

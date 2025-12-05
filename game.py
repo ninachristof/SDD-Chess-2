@@ -641,8 +641,8 @@ class game:
         scale = 5
         button_x_pos = (WIDTH// 2) - (57*scale // 2)
         height_offset = 50
-        host_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, None,"resources/create_game_button.png",57,9,scale)
-        join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset, None,"resources/join_game_button.png",57,9,scale)
+        host_button = ImageButton(button_x_pos,HEIGHT//2 - height_offset, 57,9, "resources/create_game_button.png",scale, None)
+        join_button =  ImageButton(button_x_pos,HEIGHT//2 + height_offset,57,9, "resources/join_game_button.png",scale, None)
         textbox_width = 350
         textbox_height = 50
 #for joining game menu

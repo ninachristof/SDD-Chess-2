@@ -341,26 +341,38 @@ class game:
                 print(piece , " at ", piece[0], ",", piece[1])
             used = []
             for i in range(4):
-                #randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                #x = randomPiece[0]
-                #y = randomPiece[1]
-                #square = (x,y)
-                #while self.board.chessArray[x][y].name == "p" or self.board.chessArray[x][y].name == "kn" :
-                ##lol bogo
-                #    randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                #    x = randomPiece[0]
-                #    y = randomPiece[1]
-                #    square = (x,y)
-                #used.append((x,y))
-                #print(used)
+                    randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                    x = randomPiece[0]
+                    y = randomPiece[1]
+                    square = (x,y)
                 
                 
                 if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
+                    while square in used:
+                    #lol bogo
+                        randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                        x = randomPiece[0]
+                        y = randomPiece[1]
+                        square = (x,y)
+
+                    used.append(square)
+                    print(used)
+
                     powerup = modifiers.getPowerups(self.board.chessArray[x][y].get_name())
                     powerupdescription = "Your " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x) + powerup.get_description()
                     #print("Power up ", i, " - " , powerupdescription)
                     self.modifiers.append((randomPiece,powerup,powerupdescription,0))
                 else:
+                    while (self.board.chessArray[x][y].name == "p" or self.board.chessArray[x][y].name == "kn") or square in used:
+                    #lol bogo
+                        randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                        x = randomPiece[0]
+                        y = randomPiece[1]
+                        square = (x,y)
+
+                    used.append(square)
+                    print(used)
+
                     idx = modifiers.getDebuff()
                     debuff = modifiers.debuffs[idx]
                     debuffdescription = "Your opponent's " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x)+ debuff.get_description()

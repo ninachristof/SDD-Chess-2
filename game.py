@@ -109,6 +109,17 @@ class game:
         
         self.clickedSquare = None
         self.board.movePiece(x1,y1,x0,y0,self.turn)
+        print("ddf",self.board.chessArray[x0][y0])
+        print("ddf",self.board.chessArray[x1][y1])
+
+        piece = self.move_data["promote"] 
+        if piece != "":
+            self.board.chessArray[x1][y1] = None
+            if self.turn =="white":
+                self.board.whitePieces.remove((x1,y1))
+            if self.turn =="black":
+                self.board.blackPieces.remove((x1,y1))
+            self.board.addPiece(x1,y1,piece, self.turn)
 
         if (self.turn == "black"):
             self.turnCount += 1
@@ -217,7 +228,7 @@ class game:
                     "x1" : i,
                     "y1" : j,
                     "color" : self.board.mycolor,
-                    "piece" : "",
+                    "promote" : "",
                     "upgrades" : ""
                 }
 
@@ -230,7 +241,6 @@ class game:
                     self.offermodifiers = False
 
                 if pieceObject.name == "p" and i == 7 and pieceObject.color == "black":
-                    print("TRUE")
                     self.offerpromotion = True
                 if pieceObject.name == "p" and i == 0 and pieceObject.color == "white":
                     self.offerpromotion = True
@@ -444,11 +454,10 @@ class game:
         self.board.chessArray[x][y] = None
         if self.board.mycolor =="white":
             self.board.whitePieces.remove((x,y))
-        else:
-            print(self.board.blackPieces)
-            print(x,y)
+        if self.board.mycolor =="black":
             self.board.blackPieces.remove((x,y))
         self.board.addPiece(x,y,piece, self.board.mycolor)
+        self.move_data["promote"] = piece
         self.offerpromotion = False
         self.moved = True
         self.execute_instruction()

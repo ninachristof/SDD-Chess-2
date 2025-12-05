@@ -112,6 +112,7 @@ class game:
         print("ddf",self.board.chessArray[x0][y0])
         print("ddf",self.board.chessArray[x1][y1])
 
+    #PIECE PROMOTIONN
         piece = self.move_data["promote"] 
         if piece != "":
             self.board.chessArray[x1][y1] = None
@@ -120,6 +121,23 @@ class game:
             if self.turn =="black":
                 self.board.blackPieces.remove((x1,y1))
             self.board.addPiece(x1,y1,piece, self.turn)
+
+        #UPGRADE YUH
+        mx = self.move_data["mx"]
+        my = self.move_data["my"]
+        mpiece = self.move_data["mpiece"]
+        upgrade = self.move_data["upgrade"]
+        debuff  = self.move_data["debuff"]
+        if upgrade != "" and mpiece != "":
+            modifier = modifiers.lookup[mpiece][upgrade]
+            self.board.chessArray[mx][my].upgrades = [modifier.get_capture(),modifier.get_move()]
+            self.board.chessArray[mx][my].set_upgrade(modifier)
+            self.board.chessArray[mx][my].findMoves(mx,my)
+        if debuff != "" and mpiece != "":
+            modifier = modifiers.debuff_map[0]
+            self.board.chessArray[mx][my].set_debuff(modifier)
+
+
 
         if (self.turn == "black"):
             self.turnCount += 1
@@ -229,7 +247,11 @@ class game:
                     "y1" : j,
                     "color" : self.board.mycolor,
                     "promote" : "",
-                    "upgrades" : ""
+                    "mpiece" : "",
+                    "upgrade" : "",
+                    "debuff" : "",
+                    "mx" : "", #since the modifier can be on any piece
+                    "my" : ""
                 }
 
                 #this is so stupid idk why i still keep this AND USE IT 
@@ -257,14 +279,10 @@ class game:
                 return
 
     def upgrade_callback(self):
-        print("FUCKKKK")
-        print("OFFER PROMOTON", self.offerpromotion)
         if not self.offerpromotion:
             self.execute_instruction()
             self.moved = True
             self.offermodifiers = False
-
-            
 
     def draw_modifiers(self):
         #print(self.offermodifiers, " because ", self.turnCount)
@@ -504,19 +522,28 @@ class game:
                         print(event.pos[0], " x ", event.pos[1])
                         #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
                         randomPiece, modifier,description = self.modifiers[int(event.pos[0]) // (WIDTH // 5)]
+                        
                         print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
                         #TODO: remove this but i legit have no idea why the other callback isnt working
                         self.upgrade_callback()
 
                         #This means you are buffing one of your pieces
+                        self.move_data["mpiece"] = self.board.chessArray[randomPiece[0]][randomPiece[1]].name
+                        self.move_data["mx"] = randomPiece[0]
+                        self.move_data["my"] = randomPiece[1]
                         if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
+                            #piece bring upgraded
+                            #upgrade index = 0 since theres only 1 upgrade for every piece right now
+                            self.move_data["upgrade"] = 0
                         #This means you are debuffing one of your opponent's pieces
                         else:
                             #print("debuffing opponent's piece!")
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
+                            #TODO: this is temp
+                            self.move_data["debuff"] = 0
                         self.offermodifiers = False
                         self.modifiers = []
                     else:

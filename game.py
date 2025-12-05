@@ -276,8 +276,8 @@ class game:
                 #print("Invalid move")
                 return
 
-    def upgrade_callback(self,modifierObject):
-        randomPiece, modifier,description = modifierObject
+    def upgrade_callback(self,modifierData):
+        randomPiece, modifier,description, idx= modifierData
         print("--R", randomPiece)
         print("--M",modifier)
         print("--D",description)
@@ -315,7 +315,7 @@ class game:
             #print("debuffing opponent's piece!")
             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
             #TODO: this is temp
-            self.move_data["debuff"] = 0
+            self.move_data["debuff"] = idx
         self.offermodifiers = False
         time.sleep(0.1)
         #self.modifiers = []
@@ -329,31 +329,47 @@ class game:
             # if (self.board.mycolor == "black"):
             #     my_pieces = self.board.blackPieces
             for piece in pieces.copy():
+                pass
                 # if (self.board.chessArray[piece[0]][piece[1]].get_name() == "k"):
                 #     pieces.remove(piece)
-                if (not (self.board.chessArray[piece[0]][piece[1]].get_name() == "q")):
-                    pieces.remove(piece)
+                #if (not (self.board.chessArray[piece[0]][piece[1]].get_name() == "q")):
+                #    pieces.remove(piece)
             
+
+            print("======================================")
             for piece in pieces:
                 print(piece , " at ", piece[0], ",", piece[1])
+            used = []
             for i in range(4):
-                randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                x = randomPiece[0]
-                y = randomPiece[1]
+                #randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                #x = randomPiece[0]
+                #y = randomPiece[1]
+                #square = (x,y)
+                #while self.board.chessArray[x][y].name == "p" or self.board.chessArray[x][y].name == "kn" :
+                ##lol bogo
+                #    randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                #    x = randomPiece[0]
+                #    y = randomPiece[1]
+                #    square = (x,y)
+                #used.append((x,y))
+                #print(used)
+                
+                
                 if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
                     powerup = modifiers.getPowerups(self.board.chessArray[x][y].get_name())
                     powerupdescription = "Your " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x) + powerup.get_description()
                     #print("Power up ", i, " - " , powerupdescription)
-                    self.modifiers.append((randomPiece,powerup,powerupdescription))
+                    self.modifiers.append((randomPiece,powerup,powerupdescription,0))
                 else:
-                    debuff = modifiers.getDebuff()
+                    idx = modifiers.getDebuff()
+                    debuff = modifiers.debuffs[idx]
                     debuffdescription = "Your opponent's " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x)+ debuff.get_description()
                     #print("Debuff ", i, " - " , debuffdescription)
-                    self.modifiers.append((randomPiece,debuff,debuffdescription))
+                    self.modifiers.append((randomPiece,debuff,debuffdescription,idx))
 
         offset = 10
         for i in range(4):
-            randomPiece,modifier,description = self.modifiers[i]
+            randomPiece,modifier,description,idx = self.modifiers[i]
             button = TextButton(color,(HEIGHT * 0.8 + 5 ),(offset*5 + HEIGHT * i * 0.125 + (i * offset) ),(HEIGHT * 0.2 - 10) ,(HEIGHT * 0.125), 15, description ,self.upgrade_callback, self.modifiers[i])
             button.draw(self.screen)
 

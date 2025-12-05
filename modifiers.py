@@ -64,4 +64,5 @@ def getPowerups(piecename):
 
 def getDebuff():
     #print("Debuffing!")
-    return debuffs[random.randint(0,len(debuffs)-1)]
+    num = random.randint(0,len(debuffs)-1)
+    return num

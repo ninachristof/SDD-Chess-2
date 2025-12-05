@@ -53,9 +53,14 @@ class TextButton(Button):
         self.kwargs = kwargs
 
     def draw(self,screen):
+        pos = pygame.mouse.get_pos()
         outline = pygame.Rect(self.x-1,self.y-1,self.width+1,self.height+1)
+        if not self.box.collidepoint(pos):
+            pygame.draw.rect(screen, self.color, self.box,width = 0, border_radius = 2)
+        else:
+            darker_color = (max(self.color[0]-20,0),max(self.color[1]-20,0),max(self.color[2]-20,0))
+            pygame.draw.rect(screen,darker_color, self.box,width = 0, border_radius = 2)
 
-        pygame.draw.rect(screen, self.color, self.box,width = 0, border_radius = 2)
         pygame.draw.rect(screen, "black",outline,2,3)
         text_words = self.text.split()
         text_lines = []

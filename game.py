@@ -273,16 +273,42 @@ class game:
                 #print("Invalid move")
                 return
 
-    def upgrade_callback(self):
+    def upgrade_callback(self,modifierObject):
+        randomPiece, modifier,description = modifierObject
+        print("--R", randomPiece)
+        print("--M",modifier)
+        print("--D",description)
+        
+        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
+
         if not self.offerpromotion:
             self.execute_instruction()
             self.moved = True
-            self.offermodifiers = False
+
+        #This means you are buffing one of your pieces
+        self.move_data["mpiece"] = self.board.chessArray[randomPiece[0]][randomPiece[1]].name
+        self.move_data["mx"] = randomPiece[0]
+        self.move_data["my"] = randomPiece[1]
+        if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
+            self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
+            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
+            self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
+            legalMoves = self.board.getLegalMoves(randomPiece[0], randomPiece[1])
+            self.board.chessArray[randomPiece[0]][randomPiece[1]].updateLegalMoves(legalMoves)
+            #piece bring upgraded
+            #upgrade index = 0 since theres only 1 upgrade for every piece right now
+            self.move_data["upgrade"] = 0
+        #This means you are debuffing one of your opponent's pieces
+        else:
+            #print("debuffing opponent's piece!")
+            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
+            #TODO: this is temp
+            self.move_data["debuff"] = 0
+        self.offermodifiers = False
+        #self.modifiers = []
+
 
     def draw_modifiers(self):
-        #print(self.offermodifiers, " because ", self.turnCount)
-        if (not(self.offermodifiers)):
-            return
         color = (105, 194, 250)
 
         if (len(self.modifiers) == 0):
@@ -314,7 +340,7 @@ class game:
         offset = 10
         for i in range(4):
             randomPiece,modifier,description = self.modifiers[i]
-            button = TextButton(color,(HEIGHT * 0.8 + 5 ),(offset*5 + HEIGHT * i * 0.125 + (i * offset) ),(HEIGHT * 0.2 - 10) ,(HEIGHT * 0.125), 15, description ,self.upgrade_callback)
+            button = TextButton(color,(HEIGHT * 0.8 + 5 ),(offset*5 + HEIGHT * i * 0.125 + (i * offset) ),(HEIGHT * 0.2 - 10) ,(HEIGHT * 0.125), 15, description ,self.upgrade_callback, self.modifiers[i])
             button.draw(self.screen)
 
     def draw_valid(self):
@@ -366,9 +392,9 @@ class game:
                 debuffs += pieceObject.get_debuff_desc()
             else:
                 debuffs += "None"
-            button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.8),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,upgrades,None)
+            button = TextButton((255,255,255),0,(HEIGHT * 0.8),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,upgrades,None)
             button.draw(self.screen)
-            button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.9),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15,debuffs,None)
+            button = TextButton((255,255,255),0,(HEIGHT * 0.9),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,debuffs,None)
             button.draw(self.screen)
 
     def draw_grid(self):
@@ -444,7 +470,11 @@ class game:
                 pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.6) - (column * (HEIGHT * 0.2) ), row * (HEIGHT * 0.1),(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
             else:
                 pygame.draw.rect(self.screen, color, [ (HEIGHT * 0.7) - (column * (HEIGHT * 0.2)), row *(HEIGHT * 0.1) ,(HEIGHT * 0.1) ,(HEIGHT * 0.1) ])
-            pygame.draw.rect(self.screen, 'black', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
+            button = TextButton((255,255,255),0,(HEIGHT * 0.8),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,"",None)
+            button.draw(self.screen)
+            button = TextButton((255,255,255),0,(HEIGHT * 0.9),(HEIGHT * 0.8) ,(HEIGHT * 0.1), 15,"",None)
+            button.draw(self.screen)
+            #pygame.draw.rect(self.screen, 'white', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)])
             #pygame.draw.rect(self.screen, 'gray', [0, (HEIGHT * 0.8), WIDTH, (HEIGHT * 0.2)], 5)
             #pygame.draw.rect(self.screen, 'gold', [(HEIGHT * 0.8), 0, (HEIGHT * 0.8), (HEIGHT * 0.8)], 5)
             status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
@@ -518,43 +548,14 @@ class game:
                         else:
                             self.selectsquare(7 - event.pos[1] // (WIDTH // 10),7 - event.pos[0] // (WIDTH // 10))
 
-                    #(HEIGHT * i * 0.2)
-                    elif (event.pos[0] <= 0.8 * WIDTH and event.pos[1] >= 0.9 * WIDTH and self.offermodifiers):
-                        #print(event.pos[0], " x ", event.pos[1])
-                        #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
-                        randomPiece, modifier,description = self.modifiers[int(event.pos[0]) // (WIDTH // 5)]
-                        
-                        print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
-                        #TODO: remove this but i legit have no idea why the other callback isnt working
-                        self.upgrade_callback()
-
-                        #This means you are buffing one of your pieces
-                        self.move_data["mpiece"] = self.board.chessArray[randomPiece[0]][randomPiece[1]].name
-                        self.move_data["mx"] = randomPiece[0]
-                        self.move_data["my"] = randomPiece[1]
-                        if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
-                            legalMoves = self.board.getLegalMoves(randomPiece[0], randomPiece[1])
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].updateLegalMoves(legalMoves)
-                            #piece bring upgraded
-                            #upgrade index = 0 since theres only 1 upgrade for every piece right now
-                            self.move_data["upgrade"] = 0
-                        #This means you are debuffing one of your opponent's pieces
-                        else:
-                            #print("debuffing opponent's piece!")
-                            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
-                            #TODO: this is temp
-                            self.move_data["debuff"] = 0
-                        self.offermodifiers = False
-                        self.modifiers = []
-                    # else:
-                    #     print("What are you clicking on!!!!!!")
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()
-            self.draw_modifiers()
+            if self.offermodifiers:
+                self.draw_modifiers()
+            else:
+                self.modifiers = []
+
             self.draw_grid()
             self.draw_selected_info()
             if not self.offermodifiers and self.offerpromotion:

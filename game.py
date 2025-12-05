@@ -60,6 +60,7 @@ class game:
         self.clickedSquare = None
         self.whitekinginCheck = False
         self.blackkinginCheck = False
+        self.move_data = None
 
     def setup_game(self):
         if(self.conn_type == "connect"):
@@ -180,8 +181,8 @@ class game:
             self.clickedSquare = (i,j)
             piece = self.board.chessArray[i][j]
             print("Starting info for ", i , ",", j)
-            print("Capture: ", piece.possible_Capture)
-            print("Noncapture: ", piece.possible_NonCapture)
+            #print("Capture: ", piece.possible_Capture)
+            #print("Noncapture: ", piece.possible_NonCapture)
             #print(piece.upgrade)
             #print(piece.upgrades)
             print("object.legal ", piece.getlegalMoves())
@@ -285,20 +286,29 @@ class game:
             self.execute_instruction()
             self.moved = True
 
+        x0 = self.move_data["x0"]
+        y0 = self.move_data["y0"]
+
+        x = randomPiece[0]
+        y = randomPiece[1]
+
+        if (x == self.move_data["x0"] and y == self.move_data["y0"]):
+            x = self.move_data["x1"]
+            y = self.move_data["y1"]
+
         #This means you are buffing one of your pieces
-        self.move_data["mpiece"] = self.board.chessArray[randomPiece[0]][randomPiece[1]].name
-        self.move_data["mx"] = randomPiece[0]
-        self.move_data["my"] = randomPiece[1]
-        if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
-            self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
-            self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
-            self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
-            legalMoves = self.board.getLegalMoves(randomPiece[0], randomPiece[1])
-            self.board.chessArray[randomPiece[0]][randomPiece[1]].updateLegalMoves(legalMoves)
+        self.move_data["mpiece"] = self.board.chessArray[x][y].name
+        self.move_data["mx"] = x
+        self.move_data["my"] = y
+        if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
+            self.board.chessArray[x][y].upgrades = [modifier.get_capture(),modifier.get_move()]
+            self.board.chessArray[x][y].set_upgrade(modifier)
+            self.board.chessArray[x][y].findMoves(x,y)
+            legalMoves = self.board.getLegalMoves(x, y)
+            self.board.chessArray[x][y].updateLegalMoves(legalMoves)
             #piece bring upgraded
             #upgrade index = 0 since theres only 1 upgrade for every piece right now
             self.move_data["upgrade"] = 0
-        #This means you are debuffing one of your opponent's pieces
         else:
             #print("debuffing opponent's piece!")
             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
@@ -315,9 +325,14 @@ class game:
             pieces = self.board.whitePieces + self.board.blackPieces
             # if (self.board.mycolor == "black"):
             #     my_pieces = self.board.blackPieces
-            for piece in pieces:
-                if (self.board.chessArray[piece[0]][piece[1]].get_name() == "k"):
+            for piece in pieces.copy():
+                # if (self.board.chessArray[piece[0]][piece[1]].get_name() == "k"):
+                #     pieces.remove(piece)
+                if (not (self.board.chessArray[piece[0]][piece[1]].get_name() == "q")):
                     pieces.remove(piece)
+            
+            for piece in pieces:
+                print(piece , " at ", piece[0], ",", piece[1])
             for i in range(4):
                 randomPiece = pieces[rand.randint(0,len(pieces)-1)]
                 if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):

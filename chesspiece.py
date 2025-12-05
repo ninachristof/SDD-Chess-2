@@ -43,7 +43,12 @@ class chesspiece:
     def set_debuff(self,debuff):
         self.debuff = debuff
 
+    def update_coordinates(self,x,y):
+        self.x = x
+        self.y = y
+
     def apply_debuff(self,moveset):
+        print("Applying debuffs for ", self.x, self.y)
         return modifiers.apply_debuff(self.x,self.y,moveset,self.debuff.get_id())
 
     def get_upgrade_desc(self):
@@ -403,10 +408,10 @@ class queen(bishop, rook):
         r1, r2 = rook.findMoves(rook(x, y, self.color), x, y)
 
         possibleNoncapture.extend(powerupMove)
-        possibleCapture.extend(powerupCapture)
         possibleNoncapture.extend(b1)
         possibleNoncapture.extend(r1)
 
+        possibleCapture.extend(powerupCapture)
         possibleCapture.extend(b2)
         possibleCapture.extend(r2)
 

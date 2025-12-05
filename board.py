@@ -163,14 +163,19 @@ class board:
         #print(self.chessArray[x][y].get_color()," ", self.chessArray[x][y].get_name(), " at ", x, "," , y)
         noncaptureMoves = self.chessArray[x][y].getPossibleNoncapture()
         captureMoves = self.chessArray[x][y].getPossibleCapture()
-        #print("Noncapture moves: ", noncaptureMoves)
-        #print("Capture moves: ", captureMoves)
+
+        # if (self.chessArray[x][y].get_name() == "q"):
+        #     print (self.chessArray[x][y].get_color(), " ", self.chessArray[x][y].get_name())
+        #     print("Noncapture moves: ", noncaptureMoves)
+        #     print("Capture moves: ", captureMoves)
         # Line of sight check, stop if you hit a piece 
         for direction in noncaptureMoves:
             for lineofsight in direction:
                 if (self.chessArray[lineofsight[0]][lineofsight[1]] != None):
                     break
                 possibleMoves2.append(lineofsight)
+
+        #print("PossibleMoves up to this point are ", possibleMoves2)
                 
         for direction in captureMoves:
             pieceFound = False
@@ -184,6 +189,9 @@ class board:
                 temp.append(lineofsight)
             if (not self.chessArray[x][y].get_captureOnlyWithPiece() or pieceFound):
                 possibleMoves2.extend(temp)
+
+        # if (self.chessArray[x][y].get_name() == "q"):
+        #     print("Now after debuffs ", possibleMoves2)
 
         if (self.chessArray[x][y].get_isDebuffed()):
             possibleMoves2 = self.chessArray[x][y].apply_debuff(possibleMoves2)
@@ -286,6 +294,7 @@ class board:
                 self.whitePieces.remove((newx,newy))
             self.blackPieces.append((newx,newy))
         self.chessArray[newx][newy] = self.chessArray[oldx][oldy]
+        self.chessArray[newx][newy].update_coordinates(newx,newy)
         self.chessArray[oldx][oldy] = None
         self.chessArray[newx][newy].findMoves(newx,newy)
 

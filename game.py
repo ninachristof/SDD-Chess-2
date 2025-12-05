@@ -336,22 +336,18 @@ class game:
                 print(piece , " at ", piece[0], ",", piece[1])
             for i in range(4):
                 randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                if (self.board.chessArray[randomPiece[0]][randomPiece[1]].get_color() == self.board.mycolor):
-                    powerup = modifiers.getPowerups(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name())
-                    powerupdescription = "Your " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + powerup.get_description()
+                x = randomPiece[0]
+                y = randomPiece[1]
+                if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
+                    powerup = modifiers.getPowerups(self.board.chessArray[x][y].get_name())
+                    powerupdescription = "Your " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x) + powerup.get_description()
                     #print("Power up ", i, " - " , powerupdescription)
                     self.modifiers.append((randomPiece,powerup,powerupdescription))
                 else:
                     debuff = modifiers.getDebuff()
-                    debuffdescription = "Your opponent's " + self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name() + " at " + str(randomPiece) + debuff.get_description()
+                    debuffdescription = "Your opponent's " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x)+ debuff.get_description()
                     #print("Debuff ", i, " - " , debuffdescription)
                     self.modifiers.append((randomPiece,debuff,debuffdescription))
-        # for i in range(2,6):
-        #     randomPiece,modifier,description = self.modifiers[i-2]
-        #     button = TextButton((250,50,50), (HEIGHT * 0.8) , (HEIGHT * i * 0.1),(HEIGHT * 0.2) ,(HEIGHT * 0.1), 15, description ,None)
-        #     button.draw(self.screen)
-        # for i in range(2,7):
-        #     pygame.draw.line(self.screen, 'black', (HEIGHT*0.8,(HEIGHT * 0.1)  * i), ((HEIGHT),(HEIGHT * 0.1) * i), 2)
 
         offset = 10
         for i in range(4):
@@ -419,24 +415,23 @@ class game:
         font = pygame.font.Font(None, 25) 
         #if (self.board.mycolor == "white"):
         for i in range (8):
-            text_surf = font.render(str(1 + i), True, "black")
-            rect = text_surf.get_rect(center=(10, HEIGHT*.1 * i + (HEIGHT*0.015)))
-            self.screen.blit(text_surf, rect)
+            if self.board.mycolor == "black":
+                text_surf = font.render(str(1 + i), True, "black")
+                rect = text_surf.get_rect(center=(10, HEIGHT*.1 * i + (HEIGHT*0.015)))
+                self.screen.blit(text_surf, rect)
 
-            text_surf = font.render(str(chr(ord("h") - i)), True, "black")
-            rect = text_surf.get_rect(center=(WIDTH*.1 * i - 10+ WIDTH*.1,HEIGHT*.8 - 10))
-            self.screen.blit(text_surf, rect)
-                #button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * i),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 15, "(" + str(i) + ",y)",None)
-                #button.draw(self.screen)
-                #button = TextButton((255,255,255),(HEIGHT * 0.1 * i),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
-                #button.draw(self.screen)
-        #elif (self.board.mycolor == "black"):
-            #for i in range (8):
-            #    button = TextButton((255,255,255),(HEIGHT * 0.8),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(" + str(i) + ",y)",None)
-            #    button.draw(self.screen)
-            #    button = TextButton((255,255,255),(HEIGHT * 0.1 * (7-i)),(HEIGHT * 0.8),(HEIGHT * 0.1) ,(HEIGHT * 0.1), 30, "(x," + str(i) + ")",None)
-            #    button.draw(self.screen)
+                text_surf = font.render(str(chr(ord("h") - i)), True, "black")
+                rect = text_surf.get_rect(center=(WIDTH*.1 * i - 10+ WIDTH*.1,HEIGHT*.8 - 10))
+                self.screen.blit(text_surf, rect)
+            if self.board.mycolor == "white":
+                text_surf = font.render(str(8 - i), True, "black")
+                rect = text_surf.get_rect(center=(10, HEIGHT*.1 * i + (HEIGHT*0.015)))
+                self.screen.blit(text_surf, rect)
 
+                text_surf = font.render(str(chr(ord("a") + i)), True, "black")
+                rect = text_surf.get_rect(center=(WIDTH*.1 * i - 10+ WIDTH*.1,HEIGHT*.8 - 10))
+                self.screen.blit(text_surf, rect)
+ 
     def draw_captured(self):
         pass
     def draw_pieces(self):

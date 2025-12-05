@@ -39,6 +39,8 @@ class game:
     moved = False
     offermodifiers = False #Do we offer modifiers this round?
     modifiers = []
+    whitekinginCheck = False
+    blackkinginCheck = False
 
 #running this function on a separate thread
     def run_socket(self):
@@ -80,6 +82,8 @@ class game:
         #TODO:somwhere to join or force join this thread
 
         self.clickedSquare = None
+        self.whitekinginCheck = False
+        self.blackkinginCheck = False
 
     def setup_game(self):
         if(self.conn_type == "connect"):
@@ -105,20 +109,26 @@ class game:
         whiteMoves = self.board.updateLegal("white")
         blackMoves = self.board.updateLegal("black")
 
+
+        if (self.board.isKinginCheck("white")):
+            self.whitekinginCheck = True
+        if (self.board.isKinginCheck("black")):
+            self.blackkinginCheck = True
+
         if (whiteMoves == 0):
-            if (self.board.isKinginCheck("white")):
+            if (self.blackkinginCheck):
                 print("Checkmate! Black Wins")
             else:
                 print("Stalemate! White has no valid moves")
         if (blackMoves == 0):
-            if (self.board.isKinginCheck("black")):
+            if (self.blackkinginCheck):
                 print("Checkmate! White Wins")
             else:
                 print("Stalemate! Black has no valid moves")
         self.currentSquare = None
 
-        print ("The white king is at ", self.board.getKingLocation("white"))
-        print ("The black king is at ", self.board.getKingLocation("black"))
+        #print ("The white king is at ", self.board.getKingLocation("white"))
+        #print ("The black king is at ", self.board.getKingLocation("black"))
         if (self.turn == "white"):
             self.turn = "black"
         else:
@@ -385,13 +395,13 @@ class game:
                     pygame.draw.line(self.screen, 'black', (0,(HEIGHT * 0.1)  * i), ((HEIGHT * 0.8),(HEIGHT * 0.1) * i), 2)
                     pygame.draw.line(self.screen, 'black', ((HEIGHT * 0.1)* i, 0), ((HEIGHT * 0.1)* i, (HEIGHT * 0.8)), 2)
             red = (255,0,0)
-            if (self.board.isKinginCheck("white")):
+            if (self.whitekinginCheck):
                 x,y = self.board.getKingLocation("white")
                 if (self.board.mycolor == "white"):
                     pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
                 if (self.board.mycolor == "black"):
                     pygame.draw.circle(self.screen,red,[(((7-y) * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),(7-x) * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
-            if (self.board.isKinginCheck("black")):
+            if (self.blackkinginCheck):
                 x,y = self.board.getKingLocation("black")
                 if (self.board.mycolor == "white"):
                     pygame.draw.circle(self.screen,red,[((y * (HEIGHT * 0.1)) + (HEIGHT * 0.1)/2),x * (HEIGHT * 0.1) +  (HEIGHT * 0.1)/2],30)
@@ -414,7 +424,7 @@ class game:
 
                     #(HEIGHT * i * 0.2)
                     elif (event.pos[0] <= 0.8 * WIDTH and event.pos[1] >= 0.9 * WIDTH and self.offermodifiers):
-                        print(event.pos[0], " x ", event.pos[1])
+                        #print(event.pos[0], " x ", event.pos[1])
                         #print("Chose powerup ", (event.pos[1] - HEIGHT * 0.2) // (WIDTH // 10))
                         randomPiece, modifier,description = self.modifiers[int(event.pos[0]) // (WIDTH // 5)]
                         print(self.board.chessArray[randomPiece[0]][randomPiece[1]].get_name(), " at ", randomPiece[0], ",", randomPiece[1], " is getting modified")
@@ -424,14 +434,16 @@ class game:
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].upgrades = [modifier.get_capture(),modifier.get_move()]
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_upgrade(modifier)
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].findMoves(randomPiece[0],randomPiece[1])
+                            legalMoves = self.board.getLegalMoves(randomPiece[0], randomPiece[1])
+                            self.board.chessArray[randomPiece[0]][randomPiece[1]].updateLegalMoves(legalMoves)
                         #This means you are debuffing one of your opponent's pieces
                         else:
                             #print("debuffing opponent's piece!")
                             self.board.chessArray[randomPiece[0]][randomPiece[1]].set_debuff(modifier)
                         self.offermodifiers = False
                         self.modifiers = []
-                    else:
-                        print("What are you clicking on!!!!!!")
+                    # else:
+                    #     print("What are you clicking on!!!!!!")
             self.screen.fill((105,146,62))
             self.draw_board()
             self.draw_pieces()

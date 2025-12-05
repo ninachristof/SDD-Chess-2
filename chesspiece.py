@@ -141,24 +141,24 @@ class pawn(chesspiece):
         possibleCapture = []
         # Forwards movement
         if (self.color == "white"):
-            if (x != 0):
+            if (x > 0):
                 possibleNoncapture.append((x - 1, y))
                 if (x != 1 and self.firstMove):
                     possibleNoncapture.append((x - 2, y))
             # Capture Movement
-            if (x != 0 and y != 0):
+            if (x > 0 and y > 0):
                 possibleCapture.append([(x - 1, y - 1)])
-            if (x != 0 and y != 7):
+            if (x > 0 and y < 7):
                 possibleCapture.append([(x - 1, y + 1)])
         else:
-            if (x != 7):
+            if (x < 7):
                 possibleNoncapture.append((x + 1, y))
-                if (x != 6 and self.firstMove):
+                if (x < 6 and self.firstMove):
                     possibleNoncapture.append((x + 2, y))
             # Capture Movement
-            if (x != 7 and y != 0):
+            if (x < 7 and y > 0):
                 possibleCapture.append([(x + 1, y - 1)])
-            if (x != 6 and y != 7): 
+            if (x < 7 and y < 7): 
                 possibleCapture.append([(x + 1, y + 1)])
         # possibleCapture = [possibleCapture]
         possibleNoncapture = [possibleNoncapture]

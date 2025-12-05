@@ -321,7 +321,8 @@ class game:
             #TODO: this is temp
             self.move_data["debuff"] = idx
         self.offermodifiers = False
-        time.sleep(0.1)
+        if self.offerpromotion:
+            time.sleep(0.5)
         #self.modifiers = []
 
 

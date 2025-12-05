@@ -341,14 +341,13 @@ class game:
                 print(piece , " at ", piece[0], ",", piece[1])
             used = []
             for i in range(4):
-                    randomPiece = pieces[rand.randint(0,len(pieces)-1)]
-                    x = randomPiece[0]
-                    y = randomPiece[1]
-                    square = (x,y)
-                
+                randomPiece = pieces[rand.randint(0,len(pieces)-1)]
+                x = randomPiece[0]
+                y = randomPiece[1]
+                square = (x,y)
                 
                 if (self.board.chessArray[x][y].get_color() == self.board.mycolor):
-                    while square in used:
+                    while square in used or self.board.chessArray[x][y].get_color() != self.board.mycolor:
                     #lol bogo
                         randomPiece = pieces[rand.randint(0,len(pieces)-1)]
                         x = randomPiece[0]
@@ -363,7 +362,7 @@ class game:
                     #print("Power up ", i, " - " , powerupdescription)
                     self.modifiers.append((randomPiece,powerup,powerupdescription,0))
                 else:
-                    while (self.board.chessArray[x][y].name == "p" or self.board.chessArray[x][y].name == "kn") or square in used:
+                    while (self.board.chessArray[x][y].name == "p" or self.board.chessArray[x][y].name == "kn") or square in used or (self.board.chessArray[x][y].get_color() == self.board.mycolor):
                     #lol bogo
                         randomPiece = pieces[rand.randint(0,len(pieces)-1)]
                         x = randomPiece[0]
@@ -374,7 +373,7 @@ class game:
                     print(used)
 
                     idx = modifiers.getDebuff()
-                    debuff = modifiers.debuffs[idx]
+                    debuff = modifiers.debuffs[0]
                     debuffdescription = "Your opponent's " + self.board.chessArray[x][y].get_name() + " at " + chr(ord("a") + y)+ str(8 - x)+ debuff.get_description()
                     #print("Debuff ", i, " - " , debuffdescription)
                     self.modifiers.append((randomPiece,debuff,debuffdescription,idx))

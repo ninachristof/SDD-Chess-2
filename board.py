@@ -22,7 +22,7 @@ class board:
         # Automatically initialize start state
         if initialize: 
             #print("Loading tester.txt")
-            self.loadPosition("test_positions/black_castling_queenside.txt")
+            self.loadPosition("test_positions/start_state.txt")
             self.updateAllLegal()
             
 

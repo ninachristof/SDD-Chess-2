@@ -1,6 +1,0 @@
-#/bin/sh
-python3 main.py -H &
-
-sleep 1
-
-python3 main.py -c

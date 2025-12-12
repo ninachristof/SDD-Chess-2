@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Get script directory and change to it
+cd "$(dirname "$0")"
+
+# Check if virtual environment exists
+if [ ! -d "venv" ]; then
+    echo "❌ Virtual environment not found!"
+    echo "Please run ./setup.sh first"
+    exit 1
+fi
+
+# Check if virtual environment is activated
+if [ -z "$VIRTUAL_ENV" ]; then
+    echo "Activating virtual environment..."
+    
+    # Try macOS/Linux activation
+    if [ -f "venv/bin/activate" ]; then
+        source venv/bin/activate
+    # Try Windows (Git Bash) activation
+    elif [ -f "venv/Scripts/activate" ]; then
+        source venv/Scripts/activate
+    else
+        echo "❌ Could not find activation script"
+        exit 1
+    fi
+    
+    echo "✓ Virtual environment activated"
+else
+    echo "✓ Virtual environment already activated"
+fi
+
+# Find Python in virtual environment
+if command -v python &> /dev/null; then
+    PYTHON="python"
+else
+    echo "❌ Python not found in virtual environment"
+    exit 1
+fi
+
+# Run the game
+echo ""
+echo "Starting Chess Game..."
+echo ""
+
+$PYTHON main.py -m &
+sleep 1
+$PYTHON main.py -m

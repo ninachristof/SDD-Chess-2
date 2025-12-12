@@ -1,7 +1,8 @@
 import pygame
 
+
 class Textbox():
-    
+
     text = ""
     color = None
     box = None
@@ -13,11 +14,11 @@ class Textbox():
     font = None
     default_text = ""
 
-    def __init__(self, color, x, y, width, height, font_size, default_text = ""):
+    def __init__(self, color, x, y, width, height, font_size, default_text=""):
         pygame.font.init()
         self.font = pygame.font.SysFont("arial", font_size)
         self.color = color
-        self.box = pygame.Rect(x,y,width,height)
+        self.box = pygame.Rect(x, y, width, height)
         self.width = width
         self.height = height
         self.x = x
@@ -44,14 +45,11 @@ class Textbox():
                         self.text += event.unicode
         if self.active == 0 and self.text == "" and self.default_text != "":
             pygame.draw.rect(screen, self.color, self.box)
-            text_surface = self.font.render(self.default_text, False, (100,100,100))
+            text_surface = self.font.render(
+                self.default_text, False, (100, 100, 100))
             screen.blit(text_surface, (self.x, self.y))
             return ""
         pygame.draw.rect(screen, self.color, self.box)
-        text_surface = self.font.render(self.text, False, (0,0,0))
+        text_surface = self.font.render(self.text, False, (0, 0, 0))
         screen.blit(text_surface, (self.x, self.y))
         return self.text
-
-
-
-

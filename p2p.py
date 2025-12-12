@@ -6,16 +6,16 @@ import global_vars
 ERROR = 1
 SUCCESS = 0
 PKT_HDR = b"C2PKT"
-PKT_HDR_SIZE = 12 #len(PKT_HDR) + 7 #idk why 
-#can have different packet types to define different actions easily
-#also probably a sent and response packet
-#maybe dont want to close socket if there is a disconnect and or handle the disconnect to 
-#be able to allow a reconnect
-#reconnecting needs to update board correctly so the whole board will need to be sent in that case as well as the turn
+PKT_HDR_SIZE = 12  # len(PKT_HDR) + 7 #idk why
+# can have different packet types to define different actions easily
+# also probably a sent and response packet
+# maybe dont want to close socket if there is a disconnect and or handle the disconnect to
+# be able to allow a reconnect
+# reconnecting needs to update board correctly so the whole board will need to be sent in that case as well as the turn
 
 
 class p2p:
-#return arguments for valid instruction, else return None
+    # return arguments for valid instruction, else return None
     conn_type = None
     sock = None
     conn = None
@@ -26,10 +26,10 @@ class p2p:
     def __init__(self, conn_type, ip, port):
         self.conn_type = conn_type
         self.ip = ip
-        if(conn_type == "host"):
+        if (conn_type == "host"):
             self.ip = ""
         self.port = port
-        
+
     def close_all(self):
         if self.sock:
             try:
@@ -94,13 +94,13 @@ class p2p:
         return instruction
 
     def send_instruction(self, current_instruction):
-            print(f"sending {current_instruction}")
-            hdr = pack("5si", PKT_HDR, len(current_instruction))
-            bytes_sent = self.conn.sendall(hdr)
-                
-            self.conn.sendall(current_instruction)
+        print(f"sending {current_instruction}")
+        hdr = pack("5si", PKT_HDR, len(current_instruction))
+        bytes_sent = self.conn.sendall(hdr)
 
-    #host is host ip probably 0.0.0.0 so that it listens to inconming traffic
+        self.conn.sendall(current_instruction)
+
+    # host is host ip probably 0.0.0.0 so that it listens to inconming traffic
     def host_game(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -111,25 +111,24 @@ class p2p:
         self.conn.setblocking(True)
         self.conn.settimeout(None)
         print("HOST ACCEPTED")
-        #TODO: how ot handle disconnections/ bad wifi?
-        #TODO: how are the timers going to be synced up? 
-        #todo: if error on receiving end, send a request to resend mesage
-        #TODO: timestamp
+        # TODO: how ot handle disconnections/ bad wifi?
+        # TODO: how are the timers going to be synced up?
+        # todo: if error on receiving end, send a request to resend mesage
+        # TODO: timestamp
 
     def connect_to_game(self):
-        #TODO: try to connect, if it cant then call close socket because itll leave an open socket
-        #TODO: have a loop of connection retries
+        # TODO: try to connect, if it cant then call close socket because itll leave an open socket
+        # TODO: have a loop of connection retries
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.connect((self.ip,self.port))
+        self.sock.connect((self.ip, self.port))
         self.conn = self.sock
         print("CLIENT CONNECTED")
 
     def init_p2p(self):
-        if(self.conn_type == "host"):
+        if (self.conn_type == "host"):
             print("hosting")
             self.host_game()
         else:
             print("connecting")
             self.connect_to_game()
-    

@@ -6,12 +6,13 @@ def is_num(num):
             return False
     return True
 
+
 def is_valid_ip(ip):
     j = 0
     count = 0
     for i in range(len(ip)):
         if ip[i] == ".":
-            count +=1
+            count += 1
             if not is_num(ip[j:i]):
                 return False
             j = i+1
@@ -20,4 +21,3 @@ def is_valid_ip(ip):
     if count != 3:
         return False
     return True
-

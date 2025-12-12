@@ -43,4 +43,6 @@ echo ""
 echo "Starting Chess Game..."
 echo ""
 
+$PYTHON main.py -m &
+sleep 1
 $PYTHON main.py -m

@@ -10,11 +10,11 @@ warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 
 def main_menu():
     global_vars.init_vars() 
-    newgame = game.game(0,0,0)
-    conn_thread = newgame.get_conn_thread()
-    newgame.main_loop_menu()
-    if(newgame.new_p2p):
-        newgame.new_p2p.closeAll()
+    new_game = game.game(0,0,0)
+    conn_thread = new_game.get_conn_thread()
+    new_game.main_loop_menu()
+    if(new_game.new_p2p):
+        new_game.new_p2p.close_all()
         conn_thread.join()
 
 def main():
@@ -43,14 +43,14 @@ def main():
 
     global_vars.init_vars() 
 
-    newgame = game.game(conn_type, ip, port)
-    newgame.setup_game()
-    newgame.conn_thread.start()
-    conn_thread = newgame.get_conn_thread()
+    new_game = game.game(conn_type, ip, port)
+    new_game.setup_game()
+    new_game.conn_thread.start()
+    conn_thread = new_game.get_conn_thread()
 
-    newgame.main_loop()
-    if(newgame.new_p2p):
-        newgame.new_p2p.closeAll()
+    new_game.main_loop()
+    if(new_game.new_p2p):
+        new_game.new_p2p.close_all()
         conn_thread.join()
 
 main()

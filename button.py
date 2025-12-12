@@ -31,7 +31,7 @@ class Button():
                 return 1 
         return 0
 
-class TextButton(Button):
+class text_button(Button):
 
     font = None
     text = ""
@@ -84,7 +84,7 @@ class TextButton(Button):
             screen.blit(text_surface, (self.x, self.y + (i * self.font.get_height())))
         return self.handle_click()
 
-class ImageButton(Button):
+class image_button(Button):
 
     callback = None
     sprite = None

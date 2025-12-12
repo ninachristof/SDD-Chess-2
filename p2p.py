@@ -30,7 +30,7 @@ class p2p:
             self.ip = ""
         self.port = port
         
-    def closeAll(self):
+    def close_all(self):
         if self.sock:
             try:
                 self.sock.shutdown(socket.SHUT_WR)
@@ -50,7 +50,7 @@ class p2p:
 
             self.conn = None
 
-    def recvInstruction(self):
+    def recv_instruction(self):
         print("host:", self.conn)
         self.waiting = True
 
@@ -93,7 +93,7 @@ class p2p:
 
         return instruction
 
-    def sendInstruction(self, current_instruction):
+    def send_instruction(self, current_instruction):
             print(f"sending {current_instruction}")
             hdr = pack("5si", PKT_HDR, len(current_instruction))
             bytes_sent = self.conn.sendall(hdr)
@@ -101,7 +101,7 @@ class p2p:
             self.conn.sendall(current_instruction)
 
     #host is host ip probably 0.0.0.0 so that it listens to inconming traffic
-    def hostGame(self):
+    def host_game(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.ip, self.port))
@@ -116,7 +116,7 @@ class p2p:
         #todo: if error on receiving end, send a request to resend mesage
         #TODO: timestamp
 
-    def connectToGame(self):
+    def connect_to_game(self):
         #TODO: try to connect, if it cant then call close socket because itll leave an open socket
         #TODO: have a loop of connection retries
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -125,11 +125,11 @@ class p2p:
         self.conn = self.sock
         print("CLIENT CONNECTED")
 
-    def initP2p(self):
+    def init_p2p(self):
         if(self.conn_type == "host"):
             print("hosting")
-            self.hostGame()
+            self.host_game()
         else:
             print("connecting")
-            self.connectToGame()
+            self.connect_to_game()
     

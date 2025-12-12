@@ -2,34 +2,34 @@ from powerup import *
 from debuff import *
 import random
 
-pawnPowerUps= [
+pawn_power_ups= [
     powerup(" can move backwards one square",[],[[(-1,0)],[(1,0)]])
 ]
-knightPowerUps = [
+knight_power_ups = [
     powerup(" can move one square along a row or column", [],[[(-1,0)],[(1,0)],[(0,1)],[(0,-1)]])
 ]
 
-bishopPowerUps = [
+bishop_power_ups = [
     powerup(" can move one square along a row or column", [],[[(-1,0)],[(1,0)],[(0,1)],[(0,-1)]])
 ]
-rookPowerUps = [
+rook_power_ups = [
     powerup(" can move one square diagonally", [],[[(-1,-1)],[(1,1)],[(-1,1)],[(1,-1)]])
 ]
-queenPowerUps = [
+queen_power_ups = [
     powerup(" can move like a knight", [], [[(-2,-1)],[(2,1)],[(-2,1)],[(2,-1)],[(-1,-2)],[(1,2)],[(-1,2)],[(1,-2)]])
 ]
 
-kingPowerUps = [
+king_power_ups = [
     powerup(" can capture pieces two squares away along a row or column #WIP", [[(-1,0),(-2,0)],[(1,0),(2,0)],[(0,1),(0,2)],[(0,-1),(0,-2)]], [])
 ]
 
 lookup = {
-    "p":pawnPowerUps,
-    "kn":knightPowerUps,
-    "b":bishopPowerUps,
-    "r":rookPowerUps,
-    "q":queenPowerUps,
-    "k":kingPowerUps
+    "p":pawn_power_ups,
+    "kn":knight_power_ups,
+    "b":bishop_power_ups,
+    "r":rook_power_ups,
+    "q":queen_power_ups,
+    "k":king_power_ups
 }
 
 debuffs = [
@@ -59,10 +59,10 @@ def apply_debuff(x,y,moveset,id):
             #     print("Filtered out ", move)
     return new_moveset
 
-def getPowerups(piecename):
+def get_powerups(piecename):
     return lookup[piecename][0]
 
-def getDebuff():
+def get_debuff():
     #print("Debuffing!")
     num = random.randint(0,len(debuffs)-1)
     return num

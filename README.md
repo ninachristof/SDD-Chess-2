@@ -27,8 +27,8 @@ To run the program, type "python main.py" to host. For example, one player will 
 
 ## Code standards
 
-We chose for everything in this program to be in snake_case. 
+We chose for everything in this program to be in snake_case as is standard with python. 
 
-python files were formatted using autopep8 to keep consistent spacing and whitespace as well.
+Our python files were formatted using autopep8 to keep consistent spacing and whitespace as well.
 
-Our files are organized in 3 areas, the repo folder holds the source code, test_positions for testing as well as initializing the board and resources for rendering data.
+We decied to organize our files are organized in 3 areas, the repo folder holds the source code, test_positions for testing as well as initializing the board and resources for rendering data.

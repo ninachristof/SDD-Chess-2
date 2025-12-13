@@ -24,3 +24,11 @@ To run the program, type "python main.py" to host. For example, one player will 
 
 1. follow the same rules above but run `Chess-2`. one player will create and one player will join
 2. player 2 types in the ip of the host and the port is `2020`
+
+## Code standards
+
+We chose for everything in this program to be in snake_case. 
+
+python files were formatted using autopep8 to keep consistent spacing and whitespace as well.
+
+Our files are organized in 3 areas, the repo folder holds the source code, test_positions for testing as well as initializing the board and resources for rendering data.

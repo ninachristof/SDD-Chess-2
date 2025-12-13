@@ -27,7 +27,7 @@ To run the program, type "python main.py" to host. For example, one player will 
 
 ## Code standards
 
-We chose for everything in this program to be in snake_case as is standard with python. 
+We chose for everything in this program to be in snake_case for simplicity of naming and usage. 
 
 Our python files were formatted using autopep8 to keep consistent spacing and whitespace as well.
 
